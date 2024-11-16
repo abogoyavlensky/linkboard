@@ -1,11 +1,11 @@
 {:linkboard.db/db {:jdbc-url #profile {:default "jdbc:sqlite:db.sqlite"
                                        :test "jdbc:sqlite::memory:"}}
 
- :linkboard.server/server {:config {:port #profile {:default 8000
-                                                    :prod 80
-                                                    :test #free-port true}
-                                    :auto-reload? #profile {:default false
-                                                            :dev true}
-                                    :cache-assets? #profile {:default false
-                                                             :prod true}}
+ :linkboard.server/server {:options {:port #profile {:default 8000
+                                                     :prod 80
+                                                     :test #free-port true}
+                                     :auto-reload? #profile {:default false
+                                                             :dev true}
+                                     :cache-assets? #profile {:default false
+                                                              :prod true}}
                            :db #ig/ref :linkboard.db/db}}

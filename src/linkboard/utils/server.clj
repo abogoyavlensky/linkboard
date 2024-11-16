@@ -15,9 +15,8 @@
         (handler))))
 
 
-(defn wrap-reloading
-  "Reload ring handler on every request.
-  Useful in dev mode."
+(defn wrap-reload
+  "Reload ring handler on every request. Useful in dev mode."
   [f]
   ; Require reloader locally to exclude dev dependency from prod build
   (let [reload! ((requiring-resolve 'ring.middleware.reload/reloader) ["src"] true)]

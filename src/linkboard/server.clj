@@ -13,7 +13,8 @@
             [ring.middleware.gzip :as gzip]
             [ring.util.response :as response]
             [linkboard.utils.system :as system-utils]
-            [linkboard.utils.server :as server-utils]))
+            [linkboard.utils.server :as server-utils])
+  (:import com.zaxxer.hikari.HikariDataSource))
 
 (defn- handler
   "Return main application handler."
@@ -52,21 +53,25 @@
   (system-utils/validate-schema!
     {:data params
      :schema [:map
-              [:config
+              [:options
                [:map
                 [:port pos-int?]
                 [:auto-reload? boolean?]
                 [:cache-assets? boolean?]]]
-              [:db :some]]
+              [:db [:fn
+                    {:error/message "Wrong db datasource type"}
+                    #(instance? HikariDataSource %)]]]
      :error-message "Invalid server params"}))
 
 
 (defmethod ig/init-key ::server
-  [_ {:keys [config db] :as context}]
+  [_ {:keys [options] :as context}]
   (log/info (str "[SERVER] Starting server..."))
-  (prn [:DB-COMP-TYPE (type db)])
-  (jetty/run-jetty (handler context) {:port (:port config)
-                                      :join? false}))
+  (let [ring-handler (if (:auto-reload? options)
+                       (server-utils/wrap-reload #(handler context))
+                       (handler context))]
+    (jetty/run-jetty ring-handler {:port (:port options)
+                                   :join? false})))
 
 
 (defmethod ig/halt-key! ::server
