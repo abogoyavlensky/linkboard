@@ -1,0 +1,11 @@
+[tools]
+java = "temurin-21.0.2+13.0.LTS"
+clojure = "1.12.0.1479"
+clj-kondo = "2024.09.27"
+cljfmt = "0.13.0"
+babashka = "1.12.194"
+lefthook = "1.8.2"
+ruby = "3.3.0"
+
+[plugins]
+cljfmt = "https://github.com/b-social/asdf-cljfmt"
