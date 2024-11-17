@@ -4,6 +4,8 @@
             [integrant.core :as ig]
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
+            [ragtime.next-jdbc :as ragtime-jdbc]
+            [ragtime.repl :as ragtime-repl]
             [linkboard.utils.system :as system-utils]))
 
 (defmethod ig/assert-key ::db
@@ -17,7 +19,11 @@
 (defmethod ig/init-key ::db
   [_ options]
   (log/info (str "[DB] Starting database connection pool..."))
-  (cp/make-datasource options))
+  (let [datasource (cp/make-datasource options)]
+    (ragtime-repl/migrate
+      {:datastore (ragtime-jdbc/sql-database datasource)
+       :migrations (ragtime-jdbc/load-resources "migrations")})
+    datasource))
 
 
 (defmethod ig/halt-key! ::db

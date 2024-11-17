@@ -28,6 +28,8 @@
       {:exception pretty/exception
        :data {:muuntaja muuntaja-core/instance
               :coercion coercion-malli/coercion
+              ; TODO: improve middlewares with
+              ; https://github.com/ring-clojure/ring-defaults/blob/master/src/ring/middleware/defaults.clj
               :middleware [gzip/wrap-gzip
                            ; add handler options to request
                            [server-utils/wrap-context context]

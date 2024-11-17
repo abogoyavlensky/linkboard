@@ -45,4 +45,4 @@
 
   ; Example of add-lib dynamically:
   (repl-deps/sync-deps)
-  (repl-deps/add-lib 'org.clojure/tools.cli {:mvn/version "1.1.230"}))
+  (repl-deps/add-lib 'dev.weavejester/ragtime {:mvn/version "0.10.1"}))
