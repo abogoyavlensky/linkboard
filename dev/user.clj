@@ -1,7 +1,9 @@
 (ns user
   (:require [clojure.tools.namespace.repl :as repl]
+            [clojure.repl.deps :as repl-deps]
             [clojure.test :as test]
             [integrant.repl :as ig-repl]
+            [integrant.repl.state :as state]
             [linkboard.utils.system :as system-utils]))
 
 
@@ -33,3 +35,14 @@
   []
   (repl/refresh)
   (test/run-all-tests #"linkboard.*-test"))
+
+(comment
+  ; Manage system
+  (reset)
+  (keys state/system)
+  (stop)
+  (run-all-tests)
+
+  ; Example of add-lib dynamically:
+  (repl-deps/sync-deps)
+  (repl-deps/add-lib 'org.clojure/tools.cli {:mvn/version "1.1.230"}))
