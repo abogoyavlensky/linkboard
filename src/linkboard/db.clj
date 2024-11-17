@@ -6,14 +6,13 @@
             [next.jdbc.date-time]
             [linkboard.utils.system :as system-utils]))
 
-
 (defmethod ig/assert-key ::db
   [_ params]
   (system-utils/validate-schema!
     {:data params
      :schema [:map
               [:jdbc-url string?]]
-     :error-message "Invalid db options"}))
+     :error-message (format "Invalid %s component config" ::db)}))
 
 (defmethod ig/init-key ::db
   [_ options]

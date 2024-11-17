@@ -45,6 +45,7 @@
         {:path "/assets/"
          :cached? (:cache-assets? options)})
       (ring/redirect-trailing-slash-handler)
+      ; TODO: add error pages
       (ring/create-default-handler))))
 
 
@@ -61,7 +62,7 @@
               [:db [:fn
                     {:error/message "Wrong db datasource type"}
                     #(instance? HikariDataSource %)]]]
-     :error-message "Invalid server params"}))
+     :error-message (format "Invalid %s component config" ::server)}))
 
 
 (defmethod ig/init-key ::server

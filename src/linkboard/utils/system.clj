@@ -3,6 +3,7 @@
             [clojure.tools.logging :as log]
             [malli.core :as m]
             [malli.error :as me]
+            [malli.util :as mu]
             [aero.core :as aero]
             [integrant.core :as ig])
   (:import (clojure.lang IFn)
@@ -32,9 +33,12 @@
 
 
 (defn validate-schema!
-  "Validate data against schema and throw an error if data is not valid."
+  "Validate data against schema and throw a humanized error if data is not valid."
   [{:keys [schema data error-message]}]
-  (some-> (m/explain schema data)
+  (some-> schema
+    (mu/closed-schema)
+    (m/explain data)
+    (me/with-spell-checking)
     (me/humanize)
     (#(throw (Exception. (str error-message ": " %))))))
 

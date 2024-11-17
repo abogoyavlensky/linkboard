@@ -8,6 +8,10 @@
 
     <logger name="api" level="INFO"/>
 
+    <logger name="com.zaxxer.hikari">
+        <level value="error"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
