@@ -9,11 +9,17 @@
     [:html
      [:head
       [:meta {:charset "UTF-8"}
-       [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]]
-      [:script {:type "text/javascript" :src "/assets/js/tailwindcss.3.4.15.min.js"}]
-      [:link {:rel "icon" :href "/assets/images/favicon128x128.ico"}]
+       [:meta {:name "viewport"
+               :content "width=device-width, initial-scale=1.0"}]]
+      [:script {:type "text/javascript"
+                :src "/assets/js/tailwindcss.3.4.15.min.js"}]
+      [:link {:rel "icon"
+              :href "/assets/images/favicon128x128.ico"}]
       [:title "Linkboard"]]
      [:body
       content
-      [:script {:type "text/javascript" :src "/assets/js/htmx.2.0.3.min.js"}]
-      [:script {:type "text/javascript" :src "/assets/js/alpinejs.3.14.3.min.js" :defer true}]]]))
+      [:script {:type "text/javascript"
+                :src "/assets/js/htmx.2.0.3.min.js"}]
+      [:script {:type "text/javascript"
+                :src "/assets/js/alpinejs.3.14.3.min.js"
+                :defer true}]]]))

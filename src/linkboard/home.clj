@@ -1,7 +1,6 @@
 (ns linkboard.home
-  (:require [linkboard.utils.server :as server-utils]
-            [linkboard.components :as components]))
-
+  (:require [linkboard.components :as components]
+            [linkboard.utils.server :as server-utils]))
 
 (defn home-view
   []

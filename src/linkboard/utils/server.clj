@@ -1,9 +1,9 @@
 (ns linkboard.utils.server
   "Useful router middlewares."
-  (:require [ring.util.response :as response]
+  (:require [hiccup2.core :as h]
             [reitit.ring :as ring]
             [ring.middleware.gzip :as gzip]
-            [hiccup2.core :as h]))
+            [ring.util.response :as response]))
 
 ; Middlewares
 
@@ -12,9 +12,8 @@
   [handler context]
   (fn [request]
     (-> request
-        (assoc :context context)
-        (handler))))
-
+      (assoc :context context)
+      (handler))))
 
 (defn wrap-reload
   "Reload ring handler on every request. Useful in dev mode."
@@ -38,19 +37,18 @@
    (resource-response-cached path {}))
   ([path options]
    (-> (response/resource-response path options)
-       (response/header "Cache-Control" cache-30d))))
-
+     (response/header "Cache-Control" cache-30d))))
 
 (defn create-resource-handler-cached
   "Return resource handler with optional Cache-Control header."
-  [{:keys [cached?] :as opts}]
+  [{:keys [cached?]
+    :as opts}]
   (let [response-fn (if cached?
                       resource-response-cached
                       response/resource-response)]
     (-> response-fn
-        (ring/-create-file-or-resource-handler opts)
-        (gzip/wrap-gzip))))
-
+      (ring/-create-file-or-resource-handler opts)
+      (gzip/wrap-gzip))))
 
 (defn render-html
   [content]

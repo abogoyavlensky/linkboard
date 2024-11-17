@@ -1,24 +1,25 @@
 (ns linkboard.server
   (:require [clojure.tools.logging :as log]
             [integrant.core :as ig]
-            [ring.adapter.jetty :as jetty]
+            [linkboard.home :as home]
+            [linkboard.utils.server :as server-utils]
+            [linkboard.utils.system :as system-utils]
+            [muuntaja.core :as muuntaja-core]
+            [reitit.coercion.malli :as coercion-malli]
             [reitit.dev.pretty :as pretty]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as ring-coercion]
+            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as parameters]
-            [reitit.ring.middleware.exception :as exception]
-            [reitit.coercion.malli :as coercion-malli]
-            [muuntaja.core :as muuntaja-core]
-            [ring.util.response :as response]
-            [linkboard.utils.system :as system-utils]
-            [linkboard.utils.server :as server-utils]
-            [linkboard.home :as home])
+            [ring.adapter.jetty :as jetty]
+            [ring.util.response :as response])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defn- handler
   "Return main application handler."
-  [{:keys [options] :as context}]
+  [{:keys [options]
+    :as context}]
   (ring/ring-handler
     (ring/router
       [["/" {:name ::home-page
@@ -49,7 +50,6 @@
       ; TODO: add error pages
       (ring/create-default-handler))))
 
-
 (defmethod ig/assert-key ::server
   [_ params]
   (system-utils/validate-schema!
@@ -65,16 +65,15 @@
                     #(instance? HikariDataSource %)]]]
      :error-message (format "Invalid %s component config" ::server)}))
 
-
 (defmethod ig/init-key ::server
-  [_ {:keys [options] :as context}]
+  [_ {:keys [options]
+      :as context}]
   (log/info (str "[SERVER] Starting server..."))
   (let [ring-handler (if (:auto-reload? options)
                        (server-utils/wrap-reload #(handler context))
                        (handler context))]
     (jetty/run-jetty ring-handler {:port (:port options)
                                    :join? false})))
-
 
 (defmethod ig/halt-key! ::server
   [_ server]

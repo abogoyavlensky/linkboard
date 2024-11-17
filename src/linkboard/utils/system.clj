@@ -1,14 +1,13 @@
 (ns linkboard.utils.system
-  (:require [clojure.java.io :as io]
+  (:require [aero.core :as aero]
+            [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [integrant.core :as ig]
             [malli.core :as m]
             [malli.error :as me]
-            [malli.util :as mu]
-            [aero.core :as aero]
-            [integrant.core :as ig])
+            [malli.util :as mu])
   (:import (clojure.lang IFn)
            (java.net ServerSocket)))
-
 
 (def ^:private SYSTEM-CONFIG-PATH "system.edn")
 
@@ -17,20 +16,17 @@
   [_ _ value]
   (ig/ref value))
 
-
 (defmethod aero/reader 'free-port
   [_ _ _value]
   (with-open [socket (ServerSocket. 0)]
     (.getLocalPort socket)))
-
 
 (defn config
   "Return edn config with all variables set."
   [profile]
   {:pre [(contains? #{:dev :test :prod} profile)]}
   (-> (io/resource SYSTEM-CONFIG-PATH)
-      (aero/read-config {:profile profile})))
-
+    (aero/read-config {:profile profile})))
 
 (defn validate-schema!
   "Validate data against schema and throw a humanized error if data is not valid."
@@ -42,14 +38,13 @@
     (me/humanize)
     (#(throw (Exception. (str error-message ": " %))))))
 
-
 (defn at-shutdown
   "Add hook for shutdown system on sigterm."
   [system]
   (-> (Runtime/getRuntime)
-      (.addShutdownHook
-        (Thread. ^IFn (bound-fn []
-                        (log/info "[SYSTEM] System is stopping...")
-                        (ig/halt! system)
-                        (shutdown-agents)
-                        (log/info "[SYSTEM] System has been stopped."))))))
+    (.addShutdownHook
+      (Thread. ^IFn (bound-fn []
+                      (log/info "[SYSTEM] System is stopping...")
+                      (ig/halt! system)
+                      (shutdown-agents)
+                      (log/info "[SYSTEM] System has been stopped."))))))

@@ -3,4 +3,10 @@
         :task (clojure "-P -X:dev:test:outdated")}
 
   outdated {:doc "Upgrade outdated Clojure deps versions"
-            :task (clojure "-M:outdated --upgrade --force")}}}
+            :task (clojure "-M:outdated --upgrade --force")}
+
+  fmt:check {:doc "Check code formatting"
+             :task (shell "cljfmt" "check")}
+
+  fmt {:doc "Check code formatting"
+       :task (shell "cljfmt" "fix")}}}

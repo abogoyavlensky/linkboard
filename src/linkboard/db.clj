@@ -2,11 +2,11 @@
   (:require [clojure.tools.logging :as log]
             [hikari-cp.core :as cp]
             [integrant.core :as ig]
+            [linkboard.utils.system :as system-utils]
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
             [ragtime.next-jdbc :as ragtime-jdbc]
-            [ragtime.repl :as ragtime-repl]
-            [linkboard.utils.system :as system-utils]))
+            [ragtime.repl :as ragtime-repl]))
 
 (defmethod ig/assert-key ::db
   [_ params]
@@ -24,7 +24,6 @@
       {:datastore (ragtime-jdbc/sql-database datasource)
        :migrations (ragtime-jdbc/load-resources "migrations")})
     datasource))
-
 
 (defmethod ig/halt-key! ::db
   [_ datasource]
