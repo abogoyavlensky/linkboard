@@ -13,7 +13,8 @@
             [ring.middleware.gzip :as gzip]
             [ring.util.response :as response]
             [linkboard.utils.system :as system-utils]
-            [linkboard.utils.server :as server-utils])
+            [linkboard.utils.server :as server-utils]
+            [linkboard.home :as home])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defn- handler
@@ -22,7 +23,7 @@
   (ring/ring-handler
     (ring/router
       [["/" {:name ::home-page
-             :get {:handler (fn [_] (response/response "<h1>OK</h1>"))}}]
+             :get {:handler home/home-handler}}]
        ["/health" {:name ::health-check
                    :get {:handler (fn [_] (response/response "OK"))}}]]
       {:exception pretty/exception

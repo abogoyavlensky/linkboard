@@ -45,4 +45,4 @@
 
   ; Example of add-lib dynamically:
   (repl-deps/sync-deps)
-  (repl-deps/add-lib 'dev.weavejester/ragtime {:mvn/version "0.10.1"}))
+  (repl-deps/add-lib 'hiccup/hiccup {:mvn/version "2.0.0-RC3"}))

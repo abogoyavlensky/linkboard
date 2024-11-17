@@ -2,7 +2,8 @@
   "Useful router middlewares."
   (:require [ring.util.response :as response]
             [reitit.ring :as ring]
-            [ring.middleware.gzip :as gzip]))
+            [ring.middleware.gzip :as gzip]
+            [hiccup2.core :as h]))
 
 ; Middlewares
 
@@ -50,3 +51,8 @@
         (ring/-create-file-or-resource-handler opts)
         ; TODO: check if it's needed here and not in handler middlewares vector
         (gzip/wrap-gzip))))
+
+
+(defn render-html
+  [content]
+  (-> content h/html str response/response))
