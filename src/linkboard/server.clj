@@ -10,7 +10,6 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.coercion.malli :as coercion-malli]
             [muuntaja.core :as muuntaja-core]
-            [ring.middleware.gzip :as gzip]
             [ring.util.response :as response]
             [linkboard.utils.system :as system-utils]
             [linkboard.utils.server :as server-utils]
@@ -31,8 +30,7 @@
               :coercion coercion-malli/coercion
               ; TODO: improve middlewares with
               ; https://github.com/ring-clojure/ring-defaults/blob/master/src/ring/middleware/defaults.clj
-              :middleware [gzip/wrap-gzip
-                           ; add handler options to request
+              :middleware [; add handler options to request
                            [server-utils/wrap-context context]
                            ; parse any request parameters
                            parameters/parameters-middleware

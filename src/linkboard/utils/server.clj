@@ -49,10 +49,13 @@
                       response/resource-response)]
     (-> response-fn
         (ring/-create-file-or-resource-handler opts)
-        ; TODO: check if it's needed here and not in handler middlewares vector
         (gzip/wrap-gzip))))
 
 
 (defn render-html
   [content]
-  (-> content h/html str response/response))
+  (-> content
+    (h/html)
+    (str)
+    (response/response)
+    (response/header "Content-Type" "text/html")))
