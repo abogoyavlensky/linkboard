@@ -1,5 +1,8 @@
 {:tasks
- {deps {:doc "Install all dev deps"
+ {:init (do
+          (def input-css-file "resources/public/css/input.css")
+          (def output-css-file "resources/public/css/output.css"))
+  deps {:doc "Install all dev deps"
         :task (clojure "-P -X:dev:test:outdated")}
 
   outdated {:doc "Upgrade outdated Clojure deps versions"
@@ -8,5 +11,15 @@
   fmt:check {:doc "Check code formatting"
              :task (shell "cljfmt" "check")}
 
-  fmt {:doc "Check code formatting"
-       :task (shell "cljfmt" "fix")}}}
+  fmt {:doc "Fix code formatting"
+       :task (shell "cljfmt" "fix")}
+
+  lint:init {:doc "Linting project's classpath"
+             :task (let [output (shell {} "clojure" "-Spath")]
+                    (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs" "--lint src,test"))}
+
+  css:build {:doc "Build minified css"
+             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
+
+  css:watch {:doc "Rebuild css on file change"
+             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}}}

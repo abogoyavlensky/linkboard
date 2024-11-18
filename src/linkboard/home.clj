@@ -5,7 +5,9 @@
 (defn home-view
   []
   (components/base
-    [:h1.text-xl.font-bold "Hello world!"]))
+    [:div
+     [:h1.text-xl.font-bold "Hello world!"]
+     [:p.text-md "Some description"]]))
 
 (defn home-handler
   [_request]

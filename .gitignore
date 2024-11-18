@@ -20,3 +20,4 @@ lsp/
 .env
 .env.local
 *.sqlite
+resources/public/css/output.css
