@@ -16,5 +16,5 @@
 
 (defn -main
   "Run application system in production env."
-  [& args]
+  [_]
   (run-system :prod))

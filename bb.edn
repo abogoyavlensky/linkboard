@@ -15,8 +15,11 @@
        :task (shell "cljfmt" "fix")}
 
   lint:init {:doc "Linting project's classpath"
-             :task (let [output (shell {} "clojure" "-Spath")]
-                    (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs" "--lint src,test"))}
+             :task (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs"
+                     "--lint" (with-out-str (clojure "-Spath")))}
+
+  lint {:doc "Linting project's code"
+        :task (shell "clj-kondo" "--parallel" "--lint" "src" "test")}
 
   css:build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
