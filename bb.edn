@@ -1,4 +1,6 @@
-{:tasks
+{:paths ["scripts"]
+ :deps {org.clj-commons/digest {:mvn/version "1.4.100"}}
+ :tasks
  {:init (do
           (def input-css-file "resources/public/css/input.css")
           (def output-css-file "resources/public/css/output.css"))
@@ -25,4 +27,9 @@
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
   css:watch {:doc "Rebuild css on file change"
-             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}}}
+             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
+
+  build {:doc "Build application jar"
+         :requires ([assets :as a])
+         :task (a/hash-css! {:asset-file output-css-file
+                             :target-file "src/linkboard/components.clj"})}}}
