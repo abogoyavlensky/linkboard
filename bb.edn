@@ -29,6 +29,9 @@
   css:watch {:doc "Rebuild css on file change"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
 
+  test {:doc "Run tests"
+        :task (clojure "-X:test")}
+
   build {:doc "Build application jar"
          :requires ([assets :as a])
          :task (do

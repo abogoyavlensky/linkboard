@@ -1,0 +1,44 @@
+name: Checks
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_call:
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        env:
+          MISE_DISABLE_TOOLS: ruby,lefthook,clj-kondo,java,clojure,tailwindcss
+      - name: Fmt
+        run: bb fmt:check
+
+#  lint:
+#    runs-on: ubuntu-latest
+#    needs: [ deps ]
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./.github/actions/restore-deps
+#      - name: Lint
+#        run: task lint-init && task lint
+#
+#  outdated:
+#    runs-on: ubuntu-latest
+#    needs: [ deps ]
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./.github/actions/restore-deps
+#      - name: Outdated deps
+#        run: task outdated-check
+#
+#  tests:
+#    runs-on: ubuntu-latest
+#    needs: [ deps ]
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./.github/actions/restore-deps
+#      - name: Run tests
+#        run: task test
