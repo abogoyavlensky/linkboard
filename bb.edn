@@ -31,5 +31,8 @@
 
   build {:doc "Build application jar"
          :requires ([assets :as a])
-         :task (a/hash-css! {:asset-file output-css-file
-                             :target-file "src/linkboard/components.clj"})}}}
+         :task (do
+                 (run 'css:build)
+                 (a/hash-css! {:asset-file output-css-file
+                               :target-file "src/linkboard/components.clj"})
+                 (clojure "-T:build build"))}}}
