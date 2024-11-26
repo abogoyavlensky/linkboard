@@ -31,16 +31,16 @@
   css:build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
-  css:watch {:doc "Rebuild css on file change"
+  css:watch {:doc "Rebuild css on file change in watch mode"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
 
   test {:doc "Run tests"
         :task (clojure "-X:test")}
 
-  build {:doc "Build application jar"
-         :requires ([assets :as a])
+  build {:doc "Build application uberjar"
+         :requires ([assets :as assets])
          :task (do
                  (run 'css:build)
-                 (a/hash-css! {:asset-file output-css-file
-                               :target-file "src/linkboard/components.clj"})
+                 (assets/hash-css! {:asset-file output-css-file
+                                    :target-file "src/linkboard/components.clj"})
                  (clojure "-T:build build"))}}}
