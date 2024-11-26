@@ -2,4 +2,4 @@
   (:require [clojure.test :refer :all]))
 
 (deftest test-example
-  (is (= 3 (+ 1 1))))
+  (is (= 2 (+ 1 1))))
