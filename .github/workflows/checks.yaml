@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-        env:
-          MISE_DISABLE_TOOLS: ruby,lefthook,clj-kondo,java,clojure,tailwindcss
+        with:
+          install_args: "babashka cljfmt"
       - name: Fmt
         run: bb fmt:check
 
