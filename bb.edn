@@ -4,6 +4,8 @@
  {:init (do
           (def input-css-file "resources/public/css/input.css")
           (def output-css-file "resources/public/css/output.css"))
+  :enter (println "Running task:" (:name (current-task)))
+
   deps {:doc "Install all dev deps"
         :task (clojure "-P -X:dev:test:outdated")}
 
