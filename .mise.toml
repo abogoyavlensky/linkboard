@@ -8,6 +8,6 @@ tailwindcss = "3.4.15"
 lefthook = "1.8.2"
 ruby = "3.3.0"
 
-[plugins]
-cljfmt = "https://github.com/b-social/asdf-cljfmt"
-tailwindcss = "https://github.com/virtualstaticvoid/asdf-tailwindcss"
+[alias]
+cljfmt = "asdf:https://github.com/b-social/asdf-cljfmt"
+tailwindcss = "asdf:https://github.com/virtualstaticvoid/asdf-tailwindcss"

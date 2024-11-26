@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   workflow_call:
 
+env:
+  MISE_VERSION: 2024.11.29
+
 jobs:
   fmt:
     runs-on: ubuntu-latest
@@ -13,6 +16,7 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install_args: "babashka cljfmt"
+          version: ${{ env.MISE_VERSION }}
       - name: Fmt
         run: bb fmt:check
 
@@ -24,6 +28,7 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install_args: "babashka clj-kondo java clojure"
+          version: ${{ env.MISE_VERSION }}
       - name: Lint
         run: bb deps && bb lint:init && bb lint
 
