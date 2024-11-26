@@ -3,6 +3,7 @@
             [linkboard.utils.server :as server-utils]))
 
 (defn home-view
+  {:malli/schema [:=> [:cat] [:sequential :any]]}
   []
   (components/base
     [:div
@@ -10,5 +11,6 @@
      [:p.text-md "Some description"]]))
 
 (defn home-handler
+  {:malli/schema [:=> [:cat :map] :map]}
   [_request]
   (server-utils/render-html (home-view)))

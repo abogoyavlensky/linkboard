@@ -1,6 +1,7 @@
 (ns user
   (:require [clojure.tools.namespace.repl :as repl]
             [clojure.repl.deps :as repl-deps]
+            [malli.dev :as malli-dev]
             [eftest.runner :as eftest]
             [eftest.report.pretty :as eftest-report]
             [integrant.repl :as ig-repl]
@@ -10,7 +11,8 @@
 
 (repl/set-refresh-dirs "dev" "src" "test")
 
-; TODO: add malli instrumentation!
+; Malli schema instrumentation
+(malli-dev/start!)
 
 (defn- dev-config
   [& _]

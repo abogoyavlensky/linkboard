@@ -3,6 +3,7 @@
 
 (defn base
   "Base component for html page."
+  {:malli/schema [:=> [:cat [:vector :any]] [:sequential :any]]}
   [content]
   (list
     (h/raw "<!DOCTYPE html>")
