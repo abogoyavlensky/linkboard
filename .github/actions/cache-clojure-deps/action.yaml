@@ -3,7 +3,7 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@v4
-    - name: Cache Clojure dev deps
+    - name: Cache Clojure deps
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository
