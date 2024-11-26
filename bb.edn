@@ -9,12 +9,6 @@
   deps {:doc "Install all dev deps"
         :task (clojure "-P -X:dev:test:outdated")}
 
-  outdated:check {:doc "Check outdated Clojure deps versions"
-                  :task (clojure "-M:outdated")}
-
-  outdated {:doc "Upgrade outdated Clojure deps versions"
-            :task (clojure "-M:outdated --upgrade --force")}
-
   fmt:check {:doc "Check code formatting"
              :task (shell "cljfmt" "check")}
 
@@ -28,14 +22,23 @@
   lint {:doc "Linting project's code"
         :task (shell "clj-kondo" "--parallel" "--lint" "src" "test")}
 
+  outdated:check {:doc "Check outdated Clojure deps versions"
+                  :task (clojure "-M:outdated")}
+
+  outdated {:doc "Upgrade outdated Clojure deps versions"
+            :task (clojure "-M:outdated --upgrade --force")}
+
+  test {:doc "Run tests"
+        :task (clojure "-X:test")}
+
+  check {:doc "Run all code checks and tests"
+         :depends [fmt lint test]}
+
   css:build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
   css:watch {:doc "Rebuild css on file change in watch mode"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
-
-  test {:doc "Run tests"
-        :task (clojure "-X:test")}
 
   build {:doc "Build application uberjar"
          :requires ([assets :as assets])
