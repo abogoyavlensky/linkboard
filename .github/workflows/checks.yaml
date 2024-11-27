@@ -1,0 +1,57 @@
+name: Checks
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_call:
+
+env:
+  MISE_VERSION: 2024.11.29
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: "babashka cljfmt"
+          version: ${{ env.MISE_VERSION }}
+      - name: Fmt
+        run: bb fmt:check
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cache-clojure-deps
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: "babashka clj-kondo java clojure"
+          version: ${{ env.MISE_VERSION }}
+      - name: Lint
+        run: bb deps && bb lint:init && bb lint
+
+  outdated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cache-clojure-deps
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: "babashka java clojure"
+          version: ${{ env.MISE_VERSION }}
+      - name: Outdated deps
+        run: bb deps && bb outdated:check
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cache-clojure-deps
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: "babashka java clojure"
+          version: ${{ env.MISE_VERSION }}
+      - name: Run tests
+        run: bb deps && bb test
