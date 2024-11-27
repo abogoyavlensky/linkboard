@@ -4,9 +4,6 @@ on:
   push:
     branches: [ master ]
 
-env:
-  MISE_VERSION: 2024.11.29
-
 jobs:
   checks:
     uses: ./.github/workflows/checks.yaml
@@ -23,7 +20,6 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install_args: "ruby"
-          version: ${{ env.MISE_VERSION }}
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
