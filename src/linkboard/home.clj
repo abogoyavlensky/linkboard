@@ -7,7 +7,7 @@
   []
   (components/base
     [:div
-     [:h1.text-xl.font-bold "Hello world!"]
+     [:h1.text-xl.font-bold "Hello world!?:"]
      [:p.text-md "Some description"]]))
 
 (defn home-handler
