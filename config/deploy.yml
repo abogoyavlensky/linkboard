@@ -8,8 +8,6 @@ servers:
 proxy:
   ssl: true
   host: <%= ENV['APP_DOMAIN'] %>
-  healthcheck:
-    path: /health
 
 registry:
   server: ghcr.io

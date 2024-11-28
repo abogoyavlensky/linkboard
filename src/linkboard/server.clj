@@ -1,7 +1,7 @@
 (ns linkboard.server
   (:require [clojure.tools.logging :as log]
             [integrant.core :as ig]
-            [linkboard.home :as home]
+            [linkboard.routes :as app-routes]
             [linkboard.utils.server :as server-utils]
             [linkboard.utils.system :as system-utils]
             [muuntaja.core :as muuntaja-core]
@@ -12,8 +12,7 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as parameters]
-            [ring.adapter.jetty :as jetty]
-            [ring.util.response :as response])
+            [ring.adapter.jetty :as jetty])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defn- handler
@@ -22,10 +21,7 @@
     :as context}]
   (ring/ring-handler
     (ring/router
-      [["/" {:name ::home-page
-             :get {:handler home/home-handler}}]
-       ["/health" {:name ::health-check
-                   :get {:handler (fn [_] (response/response "OK"))}}]]
+      app-routes/routes
       {:exception pretty/exception
        :data {:muuntaja muuntaja-core/instance
               :coercion coercion-malli/coercion

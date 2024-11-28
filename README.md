@@ -1,6 +1,6 @@
 # Linkboard
 
-Personal bookmark manager.
+Self-hosted personal bookmark manager.
 
 ## Features
 - [x] Clojure + SQLite + HTMX + AlpineJS + TailwindCSS
@@ -19,16 +19,18 @@ then to install system deps run:
 mise install
 ```
 
-Optionally you could initiate `lefthook` tool to perform git-hook before every commit:
-
-```
-lefthook install
-```
-
 Check all available commands:
 
 ```shell
 bb tasks 
+```
+
+### Notes
+
+Optionally you could initiate `lefthook` tool to perform git-hook before every commit:
+
+```
+lefthook install
 ```
 
 ## Deploy from local machine
