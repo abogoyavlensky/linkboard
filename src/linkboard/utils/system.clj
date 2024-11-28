@@ -25,7 +25,8 @@
   "Return edn config with all variables set."
   [profile]
   {:pre [(contains? #{:dev :test :prod} profile)]}
-  (-> (io/resource SYSTEM-CONFIG-PATH)
+  (-> SYSTEM-CONFIG-PATH
+    (io/resource)
     (aero/read-config {:profile profile})))
 
 (defn validate-schema!
