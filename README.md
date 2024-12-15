@@ -81,3 +81,8 @@ To generate SSH keys, run:
 ```shell
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
+
+
+## TODO
+
+- [ ] Setup SQLite: `PRAGMA journal_mode=WAL` 
