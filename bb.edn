@@ -32,7 +32,7 @@
         :task (clojure "-X:test")}
 
   check {:doc "Run all code checks and tests"
-         :depends [fmt lint test]}
+         :depends [fmt lint outdated test]}
 
   css:build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}

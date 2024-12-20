@@ -85,4 +85,4 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 
 ## TODO
 
-- [ ] Setup SQLite: `PRAGMA journal_mode=WAL` https://til.simonwillison.net/sqlite/enabling-wal-mode 
+- [x] Setup SQLite: `PRAGMA journal_mode=WAL` https://til.simonwillison.net/sqlite/enabling-wal-mode 
