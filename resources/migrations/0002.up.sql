@@ -1,7 +1,7 @@
 -- Create the user table
 CREATE TABLE "user" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sync_code VARCHAR NOT NULL UNIQUE
+    sync_code VARCHAR NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
