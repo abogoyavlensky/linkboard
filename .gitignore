@@ -19,6 +19,6 @@ lsp/
 .portal/
 .env
 .env.local
-*.sqlite
+*.sqlite*
 resources/public/css/output.*
 .aider*
