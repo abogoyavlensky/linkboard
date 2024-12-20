@@ -21,3 +21,4 @@ lsp/
 .env.local
 *.sqlite
 resources/public/css/output.*
+.aider*
