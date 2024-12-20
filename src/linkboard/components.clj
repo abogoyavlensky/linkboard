@@ -18,7 +18,7 @@
       [:link {:rel "icon"
               :href "/assets/images/favicon128x128.ico"}]
       [:title "Linkboard"]]
-     [:body
+     [:body.bg-gray-50
       content
       [:script {:type "text/javascript"
                 :src "/assets/js/htmx.2.0.3.min.js"}]

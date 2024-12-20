@@ -1,12 +1,33 @@
 (ns linkboard.db
   (:require [clojure.tools.logging :as log]
             [hikari-cp.core :as cp]
+            [honey.sql :as honey]
             [integrant.core :as ig]
             [linkboard.utils.system :as system-utils]
+            [next.jdbc :as jdbc]
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
+            [next.jdbc.result-set :as jdbc-rs]
             [ragtime.next-jdbc :as ragtime-jdbc]
             [ragtime.repl :as ragtime-repl]))
+
+; Common functions
+
+(defn exec!
+  "Send query to db and return vector of result items."
+  [db query]
+  (let [query-sql (honey/format query)]
+    (jdbc/execute! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
+                                 :return-keys [:id]})))
+
+(defn exec-one!
+  "Send query to db and return single result item."
+  [db query]
+  (let [query-sql (honey/format query)]
+    (jdbc/execute-one! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
+                                     :return-keys true})))
+
+; Component
 
 (defmethod ig/assert-key ::db
   [_ params]

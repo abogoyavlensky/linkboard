@@ -1,32 +1,85 @@
 (ns linkboard.home
   (:require [linkboard.components :as components]
+            [linkboard.db :as db]
             [linkboard.utils.server :as server-utils]))
 
-(def sidebar
-  [:div.flex.h-screen.flex-col.border-e.bg-white.max-w-xs
-   [:div.inset-x-0.bottom-0.border-b.border-gray-100
-    [:a.flex.items-center.gap-2.bg-white.p-4.hover:bg-gray-50 {:href "#"}
-     [:img.size-10.rounded-full.object-cover {:alt ""
-                                              :src "https://images.unsplash.com/photo-1600486913747-55e5470d6f40?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"}]
-     [:div
-      [:p.text-xs
-       [:strong.block.font-medium "Eric Frusciante"]]]]]
-   [:div.px-4.py-6
-    [:div.flex.justify-between.mb-8
-     [:span.grid.h-10.w-32.place-content-center.rounded-lg.bg-gray-100.text-xs.text-gray-600 "All"]
-     [:span.grid.h-10.w-32.place-content-center.rounded-lg.bg-gray-100.text-xs.text-gray-600 "Unsorted"]]
-    [:h3.text-xs.text-gray-400 "Boards"]
-    [:ul.mt-2.space-y-1
-     [:li
-      [:a.block.rounded-lg.bg-gray-100.px-4.py-2.text-sm.font-medium.text-gray-700 {:href "#"} "General"]]]]])
+; TODO: change to authenticated user
+(def USER_ID 1)
+(def USER_CODE "USER12345")
+
+(defn list-item
+  [board]
+  [:a.w-full.bg-white.rounded-xl.p-4.flex.items-center.justify-between.shadow-sm.mt-2 {:href "#"}
+   [:div.flex.items-center.gap-3
+    [:svg.w-6.h-6.text-blue-500 {:viewBox "0 0 24 24"
+                                 :fill "none"
+                                 :stroke "currentColor"}
+     [:path {:d "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+             :stroke-width "2"}]]
+    [:span.text-lg (:title board)]]
+   [:div.flex.items-center.gap-2
+    [:span.text-gray-500 (:link-count board)]
+    [:svg.w-5.h-5.text-gray-400.rotate-180 {:viewBox "0 0 24 24"
+                                            :fill "none"
+                                            :stroke "currentColor"}
+     [:path {:d "M15 18l-6-6 6-6"
+             :stroke-width "2"}]]]])
+
+(defn sidebar
+  [{:keys [boards all-links-count]}]
+  [:div.h-screen.flex.flex-col.max-w-md.md:max-w-4xl.mx-auto
+   [:div.px-4.pt-2.pb-4.flex.justify-between.items-center
+    [:h1.text-3xl.font-bold "Linkboard"]
+    [:a.text-blue-500.text-lg {:href "#"} "Sync boards"]]
+   [:div.flex-1.px-4
+    [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm {:href "#"}
+     [:div.flex.items-center.gap-3
+      [:svg.w-6.h-6.text-blue-500 {:viewBox "0 0 24 24"
+                                   :fill "none"
+                                   :stroke "currentColor"}
+       [:path {:d "M12 2v20M2 12h20"
+               :stroke-width "2"}]]
+      [:span.text-lg "All Links"]]
+     [:div.flex.items-center.gap-2
+      [:span.text-gray-500 all-links-count]
+      [:svg.w-5.h-5.text-gray-400.rotate-180 {:viewBox "0 0 24 24"
+                                              :fill "none"
+                                              :stroke "currentColor"}
+       [:path {:d "M15 18l-6-6 6-6"
+               :stroke-width "2"}]]]]
+    [:div.mt-6
+     [:div.flex.justify-between
+      [:h2.text-gray-500.text-sm.mb-4 "MY BOARDS"]
+      [:div
+       [:button.text-blue-500
+        [:svg.w-6.h-6 {:viewBox "0 0 24 24"
+                       :fill "none"
+                       :stroke "currentColor"}
+         [:path {:d "M12 5v14M5 12h14"
+                 :stroke-width "2"}]]]]]
+     (for [board boards]
+       (list-item board))]]])
 
 (defn home-view
   {:malli/schema [:=> [:cat] [:sequential :any]]}
-  []
-  (components/base
-    sidebar))
+  [params]
+  (components/base (sidebar params)))
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [_request]
-  (server-utils/render-html (home-view)))
+  [{{:keys [db]} :context}]
+  (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
+                              :from [[:board :b]]
+                              :join [[:link :l] [:= :b.id :l.board-id]]
+                              :where [:= :b.user-id USER_ID]}
+                          (db/exec-one! db)
+                          :links-count)
+        ; TODO: add pagination
+        boards (db/exec! db {:select [:b.*
+                                      [[:count :l.id] :link-count]]
+                             :from [[:board :b]]
+                             :left-join [[:link :l] [:= :b.id :l.board-id]]
+                             :where [:= :b.user-id USER_ID]
+                             :group-by [:b.id :b.title]})]
+    (server-utils/render-html (home-view {:boards boards
+                                          :all-links-count all-links-count}))))

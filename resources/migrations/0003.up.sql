@@ -1,0 +1,24 @@
+BEGIN TRANSACTION;
+--;;
+-- Insert a user
+INSERT INTO "user" (sync_code) VALUES ('USER12345');
+--;;
+-- Insert boards for the user
+INSERT INTO "board" (title, user_id) VALUES ('Work', 1);
+--;;
+INSERT INTO "board" (title, user_id) VALUES ('Personal', 1);
+--;;
+-- Insert links for the Work board
+INSERT INTO "link" (url, title, icon, board_id) VALUES
+('https://example.com/work-docs', 'Work Docs', NULL, 1),
+('https://example.com/project-management', 'Project Management', NULL, 1),
+('https://example.com/work-calendar', 'Work Calendar', NULL, 1),
+('https://example.com/team-chat', 'Team Chat', NULL, 1),
+('https://example.com/analytics', 'Analytics Dashboard', NULL, 1);
+--;;
+-- Insert links for the Personal board
+INSERT INTO "link" (url, title, icon, board_id) VALUES
+('https://example.com/personal-blog', 'Personal Blog', NULL, 2),
+('https://example.com/shopping', 'Shopping', NULL, 2);
+--;;
+COMMIT;

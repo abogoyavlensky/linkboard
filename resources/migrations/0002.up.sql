@@ -21,7 +21,7 @@ CREATE TABLE "board" (
 CREATE TABLE "link" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT NOT NULL,
-    title TEXT NOT NULL,
+    title TEXT,
     icon TEXT,
     board_id INTEGER NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
