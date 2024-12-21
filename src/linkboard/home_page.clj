@@ -12,6 +12,7 @@
   [board]
   ; TODO: make this component common
   [:a.w-full.bg-white.rounded-xl.p-4.flex.items-center.justify-between.shadow-sm.mt-4.cursor-pointer
+   ; TODO: replace with get-route
    {:hx-get (format "/boards/%s" (:id board))
     :hx-target "#content"
     :hx-push-url "true"}
@@ -44,7 +45,9 @@
    [:div.mt-6
     [:div.flex.justify-between.mb-4
      [:h2.text-gray-500.text-sm "MY BOARDS"]
-     icons/plus]
+     [:div (components/modal
+             {:open-btn-text icons/plus
+              :title "Create board"})]]
     (for [board boards]
       (list-item board))]])
 
