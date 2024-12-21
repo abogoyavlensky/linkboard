@@ -14,10 +14,11 @@
        :hx-target "#content"
        :hx-push-url "true"}
       icons/chevron-left]
-     [:h2.text-2xl.font-bold (:title board)]]
+     [:h2.text-2xl.font-bold (:title board)]
+     [:a {:href "#"} (icons/edit {:color "text-blue-500"})]]
     [:div.flex.items-center.gap-2
-     [:a {:href "#"} (icons/edit {:color "text-blue-500"})]
-     (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add link"]})]]
+     [:a {:href "#"} icons/open-all]
+     (components/button {:text [:div.flex.items-center.gap-1 icons/plus]})]]
 
    ; Search bar
    [:div.pb-4
