@@ -18,7 +18,7 @@
      [:a {:href "#"} (icons/edit {:color "text-blue-500"})]]
     [:div.flex.items-center.gap-2
      [:a {:href "#"} icons/open-all]
-     (components/button {:text [:div.flex.items-center.gap-1 icons/plus]})]]
+     (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add link"]})]]
 
    ; Search bar
    [:div.pb-4

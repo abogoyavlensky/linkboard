@@ -40,8 +40,8 @@
            :hx-target "#content"
            :hx-push-url "true"}
           [:h1.text-3xl.font-bold.cursor-pointer "Linkboard"]]
-         [:div.text-gray-400.truncate.w-full.sm:w-48.lg:w-96.flex.items-center.gap-2
-          "Personal bookmark manager"
+         [:div.text-gray-400.flex.items-center.gap-2
+          [:p "Personal bookmark manager"]
           [:a
            {:href PROJECT-GITHUB-LINK
             :target "_blank"}
