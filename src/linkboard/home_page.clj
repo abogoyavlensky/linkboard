@@ -32,11 +32,7 @@
    ; TODO: replace with list-item
    [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm {:href "#"}
     [:div.flex.items-center.gap-3
-     [:svg.w-6.h-6.text-blue-500 {:viewBox "0 0 24 24"
-                                  :fill "none"
-                                  :stroke "currentColor"}
-      [:path {:d "M12 2v20M2 12h20"
-              :stroke-width "2"}]]
+     icons/queue-list
      [:span.text-lg "All Links"]]
     [:div.flex.items-center.gap-2
      [:span.text-gray-500 all-links-count]
