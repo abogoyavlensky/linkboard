@@ -6,6 +6,7 @@
 (defn- board-view
   [{:keys [board]}]
   [:div.flex-1.px-4
+   ; Title, back button and add link button
    [:div.flex.justify-between.items-center.mb-4
     [:div.flex.items-center.gap-2
      [:a.text-blue-500.hover:text-blue-600
@@ -17,6 +18,15 @@
     [:div.flex.items-center.gap-2
      [:a {:href "#"} (icons/edit {:color "text-blue-500"})]
      (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add link"]})]]
+
+   ; Search bar
+   [:div.pb-4
+    [:div.bg-gray-200.rounded-lg.flex.items-center.px-4.py-2
+     [:div.mr-2 icons/search]
+     [:input.bg-transparent.flex-1.outline-none.text-gray-700 {:type "text"
+                                                               :placeholder "Search"}]]]
+
+   ; Links
    [:div.flex-1
     (for [link (:links board)]
       [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm

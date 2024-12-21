@@ -44,7 +44,7 @@
    [:div.mt-6
     [:div.flex.justify-between.mb-4
      [:h2.text-gray-500.text-sm "MY BOARDS"]
-     (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add board"]})]
+     icons/plus]
     (for [board boards]
       (list-item board))]])
 

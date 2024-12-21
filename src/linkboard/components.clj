@@ -1,5 +1,8 @@
 (ns linkboard.components
-  (:require [hiccup2.core :as h]))
+  (:require [hiccup2.core :as h]
+            [linkboard.icons :as icons]))
+
+(def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
 (defn hx-request?
   [{:keys [headers]}]
@@ -31,12 +34,20 @@
      [:body.bg-gray-50
       [:div.h-screen.flex.flex-col.max-w-4xl.mx-auto
        [:div.px-4.pt-2.pb-4.mb-4.flex.justify-between.items-center
-        [:a
-         {:hx-get "/"
-          :hx-target "#content"
-          :hx-push-url "true"}
-         [:h1.text-3xl.font-bold.cursor-pointer "Linkboard"]]
-        [:a.text-blue-500.text-lg {:href "#"} "Sync"]]
+        [:div
+         [:a
+          {:hx-get "/"
+           :hx-target "#content"
+           :hx-push-url "true"}
+          [:h1.text-3xl.font-bold.cursor-pointer "Linkboard"]]
+         [:div.text-gray-400.truncate.w-full.sm:w-48.lg:w-96.flex.items-center.gap-2
+          "Personal bookmark manager"
+          [:a
+           {:href PROJECT-GITHUB-LINK
+            :target "_blank"}
+           icons/github]]]
+        [:div.flex.gap-4
+         [:a.text-blue-500.text-lg {:href "#"} "Sync"]]]
        [:div#content content]]
       [:script {:type "text/javascript"
                 :src "/assets/js/htmx.2.0.3.min.js"}]
