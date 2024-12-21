@@ -5,6 +5,12 @@
   [{:keys [headers]}]
   (= "true" (get headers "hx-request")))
 
+(defn button
+  [{:keys [text]}]
+  [:button.inline-flex.items-center.justify-center.px-4.py-2.text-sm.font-medium.tracking-wide.text-blue-500.transition-colors.duration-100.rounded-md.focus:ring-2.focus:ring-offset-2.focus:ring-blue-100.bg-blue-50.hover:text-blue-600.hover:bg-blue-100
+   {:type "button"}
+   text])
+
 (defn base
   "Base component for html page."
   {:malli/schema [:=> [:cat [:vector :any]] [:sequential :any]]}
@@ -23,11 +29,13 @@
               :href "/assets/images/favicon128x128.ico"}]
       [:title "Linkboard"]]
      [:body.bg-gray-50
-      [:div.h-screen.flex.flex-col.max-w-md.md:max-w-4xl.mx-auto
+      [:div.h-screen.flex.flex-col.max-w-4xl.mx-auto
        [:div.px-4.pt-2.pb-4.mb-4.flex.justify-between.items-center
         [:a
-         {:href "/"}
-         [:h1.text-3xl.font-bold "Linkboard"]]
+         {:hx-get "/"
+          :hx-target "#content"
+          :hx-push-url "true"}
+         [:h1.text-3xl.font-bold.cursor-pointer "Linkboard"]]
         [:a.text-blue-500.text-lg {:href "#"} "Sync"]]
        [:div#content content]]
       [:script {:type "text/javascript"

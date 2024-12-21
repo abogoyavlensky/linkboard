@@ -1,6 +1,7 @@
 (ns linkboard.home-page
   (:require [linkboard.components :as components]
             [linkboard.db :as db]
+            [linkboard.icons :as icons]
             [linkboard.utils.server :as server-utils]))
 
 ; TODO: change to authenticated user
@@ -10,16 +11,12 @@
 (defn- list-item
   [board]
   ; TODO: make this component common
-  [:a.w-full.bg-white.rounded-xl.p-4.flex.items-center.justify-between.shadow-sm.mt-2.cursor-pointer
+  [:a.w-full.bg-white.rounded-xl.p-4.flex.items-center.justify-between.shadow-sm.mt-4.cursor-pointer
    {:hx-get (format "/boards/%s" (:id board))
     :hx-target "#content"
     :hx-push-url "true"}
    [:div.flex.items-center.gap-3
-    [:svg.w-6.h-6.text-blue-500 {:viewBox "0 0 24 24"
-                                 :fill "none"
-                                 :stroke "currentColor"}
-     [:path {:d "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-             :stroke-width "2"}]]
+    icons/folder
     [:span.text-lg (:title board)]]
    [:div.flex.items-center.gap-2
     [:span.text-gray-500 (:link-count board)]
@@ -49,16 +46,16 @@
       [:path {:d "M15 18l-6-6 6-6"
               :stroke-width "2"}]]]]
    [:div.mt-6
-    [:div.flex.justify-between
-     [:h2.text-gray-500.text-sm.mb-4 "MY BOARDS"]
-     [:div
-      [:button.text-blue-500 "Add board"]]]
+    [:div.flex.justify-between.mb-4
+     [:h2.text-gray-500.text-sm "MY BOARDS"]
+     (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add board"]})]
     (for [board boards]
       (list-item board))]])
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context}]
+  [{{:keys [db]} :context
+    :as request}]
   (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
                               :join [[:link :l] [:= :b.id :l.board-id]]
@@ -72,8 +69,8 @@
                              :left-join [[:link :l] [:= :b.id :l.board-id]]
                              :where [:= :b.user-id USER_ID]
                              :group-by [:b.id :b.title]})]
-    (-> {:boards boards
-         :all-links-count all-links-count}
-      (boards-view)
-      (components/base)
-      (server-utils/render-html))))
+
+    (cond-> (boards-view {:boards boards
+                          :all-links-count all-links-count})
+      (not (components/hx-request? request)) components/base
+      true server-utils/render-html)))
