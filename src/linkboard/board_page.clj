@@ -1,10 +1,14 @@
 (ns linkboard.board-page
   (:require [linkboard.components :as components]
+            [linkboard.db :as db]
             [linkboard.icons :as icons]
             [linkboard.utils.server :as server-utils]))
 
+; TODO: change to authenticated user
+(def USER_ID 1)
+
 (defn- board-view
-  [{:keys [board]}]
+  [{:keys [board links]}]
   [:div.flex-1.px-4
    ; Title, back button and add link button
    [:div.flex.justify-between.items-center.mb-4
@@ -29,7 +33,7 @@
 
    ; Links
    [:div.flex-1
-    (for [link (:links board)]
+    (for [link links]
       [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm
        {:href (:url link)
         :target "_blank"}
@@ -45,14 +49,24 @@
 
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [_db]} :context
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
     :as request}]
-  (let [board {:title "My board"
-               :link-count 10
-               :links [{:title "Link 1"
-                        :url "http://example.com"}
-                       {:title "Link 2"
-                        :url "http://example.com"}]}]
-    (cond-> (board-view {:board board})
+  (let [board (->> {:select [:*]
+                    :from [:board]
+                    :where [:and
+                            [:= :id (:id path)]
+                            [:= :user-id USER_ID]]}
+                (db/exec-one! db))
+        ; TODO: add pagination
+        links (->> {:select [:l.*]
+                    :from [[:link :l]]
+                    :join [[:board :b] [:= :l.board-id :b.id]]
+                    :where [:and
+                            [:= :b.user-id USER_ID]
+                            [:= :b.id (:id path)]]}
+                (db/exec! db))]
+    (cond-> (board-view {:board board
+                         :links links})
       (not (components/hx-request? request)) components/base
       true server-utils/render-html)))
