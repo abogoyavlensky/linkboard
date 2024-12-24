@@ -18,10 +18,8 @@
        :hx-target "#content"
        :hx-push-url "true"}
       icons/chevron-left]
-     [:h2.text-2xl.font-bold (:title board)]
-     [:a {:href "#"} (icons/edit {:color "text-blue-500"})]]
+     [:h2.text-2xl.font-bold (:title board)]]
     [:div.flex.items-center.gap-2
-     [:a {:href "#"} icons/open-all]
      (components/button {:content [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]})]]
 
    (if (seq links)
