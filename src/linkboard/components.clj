@@ -9,10 +9,10 @@
   (= "true" (get headers "hx-request")))
 
 (defn button
-  [{:keys [text]}]
-  [:button.inline-flex.items-center.justify-center.px-4.py-2.text-sm.font-medium.tracking-wide.text-blue-500.transition-colors.duration-100.rounded-md.focus:ring-2.focus:ring-offset-2.focus:ring-blue-100.bg-blue-50.hover:text-blue-600.hover:bg-blue-100
+  [{:keys [content]}]
+  [:button.inline-flex.items-center.px-4.py-2.bg-blue-600.text-white.rounded-lg.hover:bg-blue-700.transition-colors
    {:type "button"}
-   text])
+   content])
 
 (defn base
   "Base component for html page."
@@ -79,8 +79,10 @@
        :x-transition:leave-start "opacity-100"
        :x-transition:leave-end "opacity-0"
        :x-on:click "modalOpen=false"}]
-     [:div.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.sm:max-w-lg.sm:rounded-lg
-      {:x-show "modalOpen"
+     [:form.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.sm:max-w-md.sm:rounded-lg
+      {:hx-post "/boards"
+       :hx-target "#content"
+       :x-show "modalOpen"
        :x-trap.inert.noscroll "modalOpen"
        :x-transition:enter "ease-out duration-300"
        :x-transition:enter-start "opacity-0 -translate-y-2 sm:scale-95"
@@ -104,12 +106,15 @@
        [:div.w-full.max-w-xs.mx-auto
         [:input.flex.w-full.h-10.px-3.py-2.text-sm.bg-white.border.rounded-md.border-neutral-300.ring-offset-background.placeholder:text-neutral-500.focus:border-neutral-300.focus:outline-none.focus:ring-2.focus:ring-offset-2.focus:ring-neutral-400.disabled:cursor-not-allowed.disabled:opacity-50
          {:type "text"
-          :placeholder "Board name"}]]]
+          :name "title"
+          :minlength 1
+          :autofocus true
+          :placeholder "Enter board name"}]]]
       [:div.flex.flex-col-reverse.sm:flex-row.sm:justify-end.sm:space-x-2
        [:button.inline-flex.items-center.justify-center.h-10.px-4.py-2.text-sm.font-medium.transition-colors.border.rounded-md.focus:outline-none.focus:ring-2.focus:ring-neutral-100.focus:ring-offset-2
         {:x-on:click "modalOpen=false"
          :type "button"} "Cancel"]
-       [:button.inline-flex.items-center.justify-center.h-10.px-4.py-2.text-sm.font-medium.text-white.transition-colors.border.border-transparent.rounded-md.focus:outline-none.focus:ring-2.focus:ring-neutral-900.focus:ring-offset-2.bg-neutral-950.hover:bg-neutral-900
+       [:button.inline-flex.items-center.px-4.py-2.bg-blue-600.text-white.rounded-lg.hover:bg-blue-700.transition-colors
         {:x-on:click "modalOpen=false"
-         :type "button"}
+         :type "submit"}
         "Save"]]]]]])

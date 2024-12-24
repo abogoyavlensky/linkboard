@@ -1,7 +1,10 @@
 (ns linkboard.utils.server
   "Useful router middlewares."
-  (:require [hiccup2.core :as h]
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]
+            [hiccup2.core :as h]
             [reitit.ring :as ring]
+            [reitit.ring.middleware.exception :as exception]
             [ring.middleware.gzip :as gzip]
             [ring.util.response :as response]))
 
@@ -57,3 +60,34 @@
     (str)
     (response/response)
     (response/header "Content-Type" "text/html")))
+
+; Exceptions
+(defn- get-error-path
+  [exception]
+  (mapv
+    (comp #(str/join ":" %) :at)
+    (:via (Throwable->map exception))))
+
+(defn- default-error-handler
+  [error-type exception _request]
+  {:status 500
+   :body {:type error-type
+          :path (get-error-path exception)
+          :error (ex-data exception)
+          :details (ex-message exception)}})
+
+(defn- wrap-exception
+  [handler e request]
+  (log/error (pr-str (:request-method request) (:uri request)) (ex-message e))
+  (handler e request))
+
+(def exception-middleware
+  "Common exception middleware to handle all errors."
+  (exception/create-exception-middleware
+    (merge
+      exception/default-handlers
+      {; override the default handler
+       ::exception/default (partial default-error-handler "UnexpectedError")
+
+       ; print stack-traces for all exceptions
+       ::exception/wrap wrap-exception})))

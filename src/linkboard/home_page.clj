@@ -5,8 +5,7 @@
             [linkboard.utils.server :as server-utils]))
 
 ; TODO: change to authenticated user
-(def USER_ID 1)
-(def USER_CODE "USER12345")
+(def USER-ID 1)
 
 (defn- list-item
   [board]
@@ -58,7 +57,7 @@
   (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
                               :join [[:link :l] [:= :b.id :l.board-id]]
-                              :where [:= :b.user-id USER_ID]}
+                              :where [:= :b.user-id USER-ID]}
                           (db/exec-one! db)
                           :links-count)
         ; TODO: add pagination
@@ -66,10 +65,22 @@
                                       [[:count :l.id] :link-count]]
                              :from [[:board :b]]
                              :left-join [[:link :l] [:= :b.id :l.board-id]]
-                             :where [:= :b.user-id USER_ID]
-                             :group-by [:b.id :b.title]})]
+                             :where [:= :b.user-id USER-ID]
+                             :group-by [:b.id :b.title]
+                             :order-by [[:b.created_at :desc]]})]
 
     (cond-> (boards-view {:boards boards
                           :all-links-count all-links-count})
       (not (components/hx-request? request)) components/base
       true server-utils/render-html)))
+
+(defn create-board-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [form]} :parameters
+    :as request}]
+  (->> {:insert-into :board
+        :values [{:title (:title form)
+                  :user-id USER-ID}]}
+    (db/exec-one! db))
+  (home-handler request))

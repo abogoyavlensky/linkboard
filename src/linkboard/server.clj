@@ -9,7 +9,6 @@
             [reitit.dev.pretty :as pretty]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as ring-coercion]
-            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty])
@@ -34,7 +33,8 @@
                            ; negotiate request and response
                            muuntaja/format-middleware
                            ; handle exceptions
-                           exception/exception-middleware
+                           ;exception/exception-middleware
+                           server-utils/exception-middleware
                            ; coerce request and response to spec
                            ring-coercion/coerce-request-middleware
                            ring-coercion/coerce-response-middleware]}})

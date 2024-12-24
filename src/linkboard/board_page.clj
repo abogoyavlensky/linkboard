@@ -22,30 +22,36 @@
      [:a {:href "#"} (icons/edit {:color "text-blue-500"})]]
     [:div.flex.items-center.gap-2
      [:a {:href "#"} icons/open-all]
-     (components/button {:text [:div.flex.items-center.gap-1 icons/plus "Add link"]})]]
+     (components/button {:content [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]})]]
 
-   ; Search bar
-   [:div.pb-4
-    [:div.bg-gray-200.rounded-lg.flex.items-center.px-4.py-2
-     [:div.mr-2 icons/search]
-     [:input.bg-transparent.flex-1.outline-none.text-gray-700 {:type "text"
-                                                               :placeholder "Search"}]]]
+   (if (seq links)
+     (list
+       ; Search bar
+       [:div.pb-4
+        [:div.bg-gray-200.rounded-lg.flex.items-center.px-4.py-2
+         [:div.mr-2 icons/search]
+         [:input.bg-transparent.flex-1.outline-none.text-gray-700 {:type "text"
+                                                                   :placeholder "Search"}]]]
 
-   ; Links
-   [:div.flex-1
-    (for [link links]
-      [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm
-       {:href (:url link)
-        :target "_blank"}
-       [:div.flex.items-center.gap-3
-        ; TODO: try to fetch actual icon from the link
-        icons/link
-        [:div
-         [:span.text-l.truncate.w-full.sm:w-48.lg:w-96 (:title link)]
-         [:p.text-gray-400.truncate.w-full.sm:w-48.lg:w-96 (:url link)]]]
-       [:div.flex.items-center.gap-2
-        (icons/edit)
-        icons/bin]])]])
+       ; Links
+       [:div.flex-1
+        (for [link links]
+          [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm
+           {:href (:url link)
+            :target "_blank"}
+           [:div.flex.items-center.gap-3
+            ; TODO: try to fetch actual icon from the link
+            icons/link
+            [:div
+             [:span.text-l.truncate.w-full.sm:w-48.lg:w-96 (:title link)]
+             [:p.text-gray-400.truncate.w-full.sm:w-48.lg:w-96 (:url link)]]]
+           [:div.flex.items-center.gap-2
+            (icons/edit)
+            icons/bin]])])
+     ; Empty state
+     [:div.text-center.mx-auto.mt-16
+      [:h2.text-2xl.font-semibold.text-gray-900.mb-3 "No bookmarks yet"]
+      [:p.text-gray-600.mb-8 "Start building your collection by adding your first link"]])])
 
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
