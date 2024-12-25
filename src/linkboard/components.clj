@@ -79,7 +79,7 @@
        :x-transition:leave-start "opacity-100"
        :x-transition:leave-end "opacity-0"
        :x-on:click "modalOpen=false"}]
-     [:form.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.sm:max-w-md.sm:rounded-lg
+     [:form.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.max-w-xs.md:max-w-md.rounded-lg
       {:hx-post "/boards"
        :hx-target "#content"
        :x-show "modalOpen"
@@ -110,11 +110,11 @@
           :minlength 1
           :autofocus true
           :placeholder "Enter board name"}]]]
-      [:div.flex.flex-col-reverse.sm:flex-row.sm:justify-end.sm:space-x-2
+      [:div.flex.flex-row.justify-end.space-x-2
        [:button.inline-flex.items-center.justify-center.h-10.px-4.py-2.text-sm.font-medium.transition-colors.border.rounded-md.focus:outline-none.focus:ring-2.focus:ring-neutral-100.focus:ring-offset-2
         {:x-on:click "modalOpen=false"
          :type "button"} "Cancel"]
-       [:button.inline-flex.items-center.px-4.py-2.bg-blue-600.text-white.rounded-lg.hover:bg-blue-700.transition-colors
+       [:button.inline-flex.items-center.justify-center.px-4.py-2.bg-blue-600.text-white.rounded-lg.hover:bg-blue-700.transition-colors
         {:x-on:click "modalOpen=false"
          :type "submit"}
         "Save"]]]]]])
