@@ -1,6 +1,7 @@
 (ns linkboard.components
   (:require [hiccup2.core :as h]
-            [linkboard.icons :as icons]))
+            [linkboard.icons :as icons]
+            [ring.middleware.anti-forgery :as anti-forgery]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
@@ -55,6 +56,13 @@
                 :src "/assets/js/alpinejs.3.14.3.min.js"
                 :defer true}]]]))
 
+(defn csrf-token
+  []
+  [:input {:type "hidden"
+           :name "__anti-forgery-token"
+           :id "__anti-forgery-token"
+           :value (force anti-forgery/*anti-forgery-token*)}])
+
 (defn modal
   [{:keys [title open-btn-text]}]
   [:div.relative.w-auto.h-auto
@@ -81,7 +89,7 @@
        :x-on:click "modalOpen=false"}]
      [:form.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.max-w-xs.md:max-w-md.rounded-lg
       {:hx-post "/boards"
-       :hx-target "#content"
+       :hx-target "#board-list"
        :x-show "modalOpen"
        :x-trap.inert.noscroll "modalOpen"
        :x-transition:enter "ease-out duration-300"
@@ -109,7 +117,8 @@
           :name "title"
           :minlength 1
           :autofocus true
-          :placeholder "Enter board name"}]]]
+          :placeholder "Enter board name"}]
+        (csrf-token)]]
       [:div.flex.flex-row.justify-end.space-x-2
        [:button.inline-flex.items-center.justify-center.h-10.px-4.py-2.text-sm.font-medium.transition-colors.border.rounded-md.focus:outline-none.focus:ring-2.focus:ring-neutral-100.focus:ring-offset-2
         {:x-on:click "modalOpen=false"

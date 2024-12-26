@@ -41,6 +41,7 @@ jobs:
           REGISTRY_USERNAME: ${{ github.repository_owner }}
           REGISTRY_PASSWORD: ${{ github.token }}
           APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
+          SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
         run: kamal deploy --version=${{ github.sha }}
 
       - name: Kamal Release

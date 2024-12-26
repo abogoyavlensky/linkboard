@@ -9,9 +9,14 @@
             [reitit.dev.pretty :as pretty]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as ring-coercion]
+            [reitit.ring.middleware.multipart :as ring-multipart]
             [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.ring.middleware.parameters :as parameters]
-            [ring.adapter.jetty :as jetty])
+            [reitit.ring.middleware.parameters :as ring-parameters]
+            [ring.adapter.jetty :as jetty]
+            [ring.middleware.anti-forgery :as ring-anti-forgery]
+            [ring.middleware.cookies :as ring-cookies]
+            [ring.middleware.session :as ring-session]
+            [ring.middleware.session.cookie :as ring-session-cookie])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defn- handler
@@ -24,16 +29,25 @@
       {:exception pretty/exception
        :data {:muuntaja muuntaja-core/instance
               :coercion coercion-malli/coercion
-              ; TODO: improve middlewares with
-              ; https://github.com/ring-clojure/ring-defaults/blob/master/src/ring/middleware/defaults.clj
-              :middleware [; add handler options to request
+              :middleware [ring-cookies/wrap-cookies
+                           [ring-session/wrap-session
+                            {:cookie-attrs {:secure true
+                                            :http-only true}
+                             :store (ring-session-cookie/cookie-store
+                                      {:key (-> options
+                                              :session-secret-key
+                                              server-utils/string->16-byte-array)})}]
+                           ; add handler options to request
                            [server-utils/wrap-context context]
                            ; parse any request parameters
-                           parameters/parameters-middleware
+                           ring-parameters/parameters-middleware
+                           ; send files
+                           ring-multipart/multipart-middleware
                            ; negotiate request and response
                            muuntaja/format-middleware
+                           ; Check CSRF token
+                           ring-anti-forgery/wrap-anti-forgery
                            ; handle exceptions
-                           ;exception/exception-middleware
                            server-utils/exception-middleware
                            ; coerce request and response to spec
                            ring-coercion/coerce-request-middleware
@@ -54,6 +68,7 @@
               [:options
                [:map
                 [:port pos-int?]
+                [:session-secret-key string?]
                 [:auto-reload? boolean?]
                 [:cache-assets? boolean?]]]
               [:db [:fn

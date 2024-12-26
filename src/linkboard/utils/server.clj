@@ -6,7 +6,8 @@
             [reitit.ring :as ring]
             [reitit.ring.middleware.exception :as exception]
             [ring.middleware.gzip :as gzip]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import [java.security MessageDigest]))
 
 ; Middlewares
 
@@ -30,6 +31,10 @@
       ([request respond raise]
        (reload!)
        ((f) request respond raise)))))
+
+(defn string->16-byte-array [s]
+  (let [digest (MessageDigest/getInstance "MD5")]
+    (.digest digest (.getBytes s "UTF-8"))))
 
 ; Handlers
 

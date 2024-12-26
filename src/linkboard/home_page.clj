@@ -27,6 +27,11 @@
      [:path {:d "M15 18l-6-6 6-6"
              :stroke-width "2"}]]]])
 
+(defn- board-list
+  [{:keys [boards]}]
+  (list (for [board boards]
+          (list-item board))))
+
 (defn- boards-view
   [{:keys [boards all-links-count]}]
   [:div.flex-1.px-4
@@ -48,8 +53,8 @@
      [:div (components/modal
              {:open-btn-text icons/plus
               :title "Create board"})]]
-    (for [board boards]
-      (list-item board))]])
+    [:div#board-list
+     (board-list {:boards boards})]]])
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -78,10 +83,20 @@
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    :as request}]
+    {:keys [form]} :parameters}]
+  ; Create a new board
   (->> {:insert-into :board
         :values [{:title (:title form)
                   :user-id USER-ID}]}
     (db/exec-one! db))
-  (home-handler request))
+  ; Render home page with new board in the list
+  (let [boards (db/exec! db {:select [:b.*
+                                      [[:count :l.id] :link-count]]
+                             :from [[:board :b]]
+                             :left-join [[:link :l] [:= :b.id :l.board-id]]
+                             :where [:= :b.user-id USER-ID]
+                             :group-by [:b.id :b.title]
+                             :order-by [[:b.created_at :desc]]})]
+    (-> {:boards boards}
+      (board-list)
+      (server-utils/render-html))))

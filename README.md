@@ -41,6 +41,7 @@ SERVER_IP=192.168.0.1
 REGISTRY_USERNAME=your-github-username
 REGISTRY_PASSWORD=personal-github-token
 APP_DOMAIN=app.domain.com
+SESSION_SECRET_KEY=secret-key
 ```
 
 Install ruby and kamal:
