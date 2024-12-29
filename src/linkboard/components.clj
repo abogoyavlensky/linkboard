@@ -25,7 +25,7 @@
      [:head
       [:meta {:charset "UTF-8"}
        [:meta {:name "viewport"
-               :content "width=device-width, initial-scale=1.0"}]]
+               :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]]
       [:link {:type "text/css"
               :href "/assets/css/output.css"
               :rel "stylesheet"}]
@@ -55,6 +55,9 @@
         content]]
       [:script {:type "text/javascript"
                 :src "/assets/js/htmx.2.0.3.min.js"}]
+      [:script {:type "text/javascript"
+                :src "/assets/js/alpinejs.focus.3.14.3.min.js"
+                :defer true}]
       [:script {:type "text/javascript"
                 :src "/assets/js/alpinejs.3.14.3.min.js"
                 :defer true}]]]))
