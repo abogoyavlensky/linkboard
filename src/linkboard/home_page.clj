@@ -52,7 +52,22 @@
      [:h2.text-gray-500.text-sm "MY BOARDS"]
      [:div (components/modal
              {:open-btn-text icons/plus
-              :title "Create board"})]]
+              :title "Create board"
+              :hx-post "/boards"
+              :hx-target "#board-list"
+              :form-fields (list
+                             [:input
+                              {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                                       "ring-offset-background" "placeholder:text-neutral-500"
+                                       "focus:border-neutral-300" "focus:outline-none"
+                                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                               :type "text"
+                               :name "title"
+                               :minlength 1
+                               :autofocus true
+                               :placeholder "Enter board name"}])})]]
     [:div#board-list
      (board-list {:boards boards})]]])
 

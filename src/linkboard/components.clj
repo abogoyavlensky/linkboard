@@ -70,7 +70,7 @@
            :value (force anti-forgery/*anti-forgery-token*)}])
 
 (defn modal
-  [{:keys [title open-btn-text]}]
+  [{:keys [title open-btn-text hx-post hx-target form-fields]}]
   [:div.relative.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
     :x-on:keydown.escape.window "modalOpen = false"
@@ -93,8 +93,8 @@
       :x-transition:leave-end "opacity-0"
       :x-on:click "modalOpen=false"}]
     [:form.relative.w-full.py-6.bg-white.border.shadow-lg.px-7.border-neutral-200.max-w-xs.md:max-w-md.rounded-lg
-     {:hx-post "/boards"
-      :hx-target "#board-list"
+     {:hx-post hx-post
+      :hx-target hx-target
       :x-show "modalOpen"
       :x-trap.inert.noscroll "modalOpen"
       :x-transition:enter "ease-out duration-300"
@@ -117,13 +117,8 @@
                 :d "M6 18L18 6M6 6l12 12"}]]]]
      [:div.relative.w-auto.pb-8
       [:div.w-full.max-w-xs.mx-auto
-       [:input.flex.w-full.h-10.px-3.py-2.text-sm.bg-white.border.rounded-md.border-neutral-300.ring-offset-background.placeholder:text-neutral-500.focus:border-neutral-300.focus:outline-none.focus:ring-2.focus:ring-offset-2.focus:ring-neutral-400.disabled:cursor-not-allowed.disabled:opacity-50
-        {:type "text"
-         :name "title"
-         :minlength 1
-         :autofocus true
-         :placeholder "Enter board name"}]
-       (csrf-token)]]
+       (csrf-token)
+       form-fields]]
      [:div.flex.flex-row.justify-end.space-x-2
       [:button.inline-flex.items-center.justify-center.h-10.px-4.py-2.text-sm.font-medium.transition-colors.border.rounded-md.focus:outline-none.focus:ring-2.focus:ring-neutral-100.focus:ring-offset-2
        {:x-on:click "modalOpen=false"

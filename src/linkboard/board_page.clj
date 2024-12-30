@@ -74,3 +74,18 @@
                          :links links})
       (not (components/hx-request? request)) components/base
       true server-utils/render-html)))
+
+(defn add-link-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
+    {:keys [form]} :parameters
+    :as request}]
+  ; TODO: add validation for url!
+  ; Add a link to board
+  (->> {:insert-into :link
+        :values [{:url (:url form)
+                  :board-id (:id path)}]}
+    (db/exec-one! db))
+  ; Render board content
+  (board-handler request))
