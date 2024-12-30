@@ -39,7 +39,7 @@
             :target "_blank"}
            [:div.flex.items-center.gap-3
             ; TODO: try to fetch actual icon from the link
-            icons/link
+            icons/bookmark
             [:div
              [:span.text-l.truncate.w-full.sm:w-48.lg:w-96 (:title link)]
              [:p.text-gray-400.truncate.w-full.sm:w-48.lg:w-96 (:url link)]]]

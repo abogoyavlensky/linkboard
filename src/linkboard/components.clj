@@ -34,7 +34,7 @@
       [:title "Linkboard"]]
      [:body.bg-gray-50
       [:div.h-screen.flex.flex-col.max-w-4xl.mx-auto
-       [:div.px-4.pt-2.pb-4.mb-4.flex.justify-between.items-center
+       [:div.px-4.pt-2.pb-4.mb-12.flex.justify-between.items-center
         [:div
          [:a
           {:hx-get "/"
