@@ -20,7 +20,25 @@
       icons/chevron-left]
      [:h2.text-2xl.font-bold (:title board)]]
     [:div.flex.items-center.gap-2
-     (components/button {:content [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]})]]
+     ;(components/button {:content [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]})
+     (components/modal
+       {:open-btn-text [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]
+        :title "Add link"
+        :hx-post (format "/boards/%s/links" (:id board))
+        :hx-target "#content"
+        :form-fields (list
+                       [:input
+                        {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                                 "bg-white" "border" "rounded-md" "border-neutral-300"
+                                 "ring-offset-background" "placeholder:text-neutral-500"
+                                 "focus:border-neutral-300" "focus:outline-none"
+                                 "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                                 "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                         :type "text"
+                         :name "url"
+                         :minlength 1
+                         :autofocus true
+                         :placeholder "Enter link url"}])})]]
 
    (if (seq links)
      (list
@@ -68,7 +86,8 @@
                     :join [[:board :b] [:= :l.board-id :b.id]]
                     :where [:and
                             [:= :b.user-id USER_ID]
-                            [:= :b.id (:id path)]]}
+                            [:= :b.id (:id path)]]
+                    :order-by [[:l.created-at :desc]]}
                 (db/exec! db))]
     (cond-> (board-view {:board board
                          :links links})
@@ -78,14 +97,15 @@
 (defn add-link-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
-    {:keys [path]} :parameters
     {:keys [form]} :parameters
+    :keys [path-params]
     :as request}]
   ; TODO: add validation for url!
   ; Add a link to board
-  (->> {:insert-into :link
-        :values [{:url (:url form)
-                  :board-id (:id path)}]}
-    (db/exec-one! db))
-  ; Render board content
-  (board-handler request))
+  (let [board-id (-> path-params :id parse-long)]
+    (->> {:insert-into :link
+          :values [{:url (:url form)
+                    :board-id board-id}]}
+      (db/exec-one! db))
+    ; Render board content
+    (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
