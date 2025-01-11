@@ -1,0 +1,12 @@
+{
+  "name": "Linkboard",
+  "short_name": "Linkboard",
+  "start_url": "/",
+  "id": "https://linkboard.bogoyavlensky.com/",
+  "display": "standalone",
+  "icons": [
+    { "src": "/assets/images/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/assets/images/icon-mask.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
+    { "src": "/assets/images/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

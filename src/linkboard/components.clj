@@ -26,11 +26,19 @@
       [:meta {:charset "UTF-8"}
        [:meta {:name "viewport"
                :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]]
+      [:link {:rel "manifest"
+              :href "/assets/manifest.json"}]
+      [:link {:rel "icon"
+              :href "/assets/images/favicon.ico"
+              :sizes "64x64"}]
+      [:link {:rel "icon"
+              :href "/assets/images/icon.svg"
+              :type "image/svg+xml"}]
+      [:link {:rel "apple-touch-icon"
+              :href "/assets/images/apple-touch-icon.png"}] ; 180x180
       [:link {:type "text/css"
               :href "/assets/css/output.css"
               :rel "stylesheet"}]
-      [:link {:rel "icon"
-              :href "/assets/images/favicon128x128.ico"}]
       [:title "Linkboard"]]
      [:body.bg-gray-50
       [:div.h-screen.flex.flex-col.max-w-4xl.mx-auto
