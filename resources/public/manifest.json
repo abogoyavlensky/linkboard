@@ -4,6 +4,7 @@
   "start_url": "/",
   "id": "https://linkboard.bogoyavlensky.com/",
   "display": "standalone",
+  "background_color": "#efefef",
   "icons": [
     { "src": "/assets/images/icon-192.png", "type": "image/png", "sizes": "192x192" },
     { "src": "/assets/images/icon-mask.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
