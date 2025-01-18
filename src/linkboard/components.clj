@@ -31,10 +31,10 @@
       [:link {:rel "manifest"
               :href "/assets/manifest.json"}]
       [:link {:rel "icon"
-              :href "/assets/images/favicon.png"}]
+              :href "/assets/images/favicon-1.png"}]
       [:link {:rel "apple-touch-icon"
               :sizes "180x180"
-              :href "/assets/images/apple-touch-icon.png"}]
+              :href "/assets/images/apple-touch-icon-1.png"}]
       [:link {:type "text/css"
               :href "/assets/css/output.css"
               :rel "stylesheet"}]
