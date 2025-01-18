@@ -23,19 +23,18 @@
     (h/raw "<!DOCTYPE html>")
     [:html
      [:head
-      [:meta {:charset "UTF-8"}
-       [:meta {:name "viewport"
-               :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]]
+      [:meta {:charset "UTF-8"}]
+      [:meta {:name "viewport"
+              :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
+      [:meta {:name "msapplication-TileColor"
+              :content "#efefef"}]
       [:link {:rel "manifest"
               :href "/assets/manifest.json"}]
       [:link {:rel "icon"
-              :href "/assets/images/favicon.ico"
-              :sizes "64x64"}]
-      [:link {:rel "icon"
-              :href "/assets/images/icon.svg"
-              :type "image/svg+xml"}]
+              :href "/assets/images/favicon.png"}]
       [:link {:rel "apple-touch-icon"
-              :href "/assets/images/apple-touch-icon.png"}] ; 180x180
+              :sizes "180x180"
+              :href "/assets/images/apple-touch-icon.png"}]
       [:link {:type "text/css"
               :href "/assets/css/output.css"
               :rel "stylesheet"}]
