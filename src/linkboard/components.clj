@@ -27,7 +27,7 @@
       [:meta {:name "viewport"
               :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
       [:meta {:name "msapplication-TileColor"
-              :content "#efefef"}]
+              :content "#f9fafb"}]
       [:link {:rel "manifest"
               :href "/assets/manifest.json"}]
       [:link {:rel "icon"
