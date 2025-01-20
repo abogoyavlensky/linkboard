@@ -31,7 +31,8 @@
                   :exec-fn cloverage.coverage/run-project
                   :exec-args {:test-ns-path ["test"]
                               :src-ns-path ["src"]
-                              :runner :eftest}}
+                              :runner :eftest
+                              :runner-opts {:multithread? false}}}
 
            :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "2.11.1264"}}
                       :main-opts ["-m" "antq.core" "--no-diff"]}
