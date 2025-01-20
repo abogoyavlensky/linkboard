@@ -56,7 +56,7 @@
            icons/github]]]
         [:div.flex.gap-4
          [:a.text-blue-500.text-lg {:href "#"} "Sync"]]]
-       [:div
+       [:div.pb-12
         {:id "content"
          :hx-history-elt true}
         content]]
