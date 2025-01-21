@@ -3,7 +3,7 @@
             [integrant.core :as ig]
             [etaoin.api :as etaoin]
             [clj-test-containers.core :as tc])
-  (:import [org.testcontainers.containers BrowserWebDriverContainer]
+  (:import [org.testcontainers.containers BrowserWebDriverContainer GenericContainer]
            [org.testcontainers Testcontainers]
            [org.openqa.selenium.chromium ChromiumOptions]))
 
@@ -13,20 +13,32 @@
   (let [port (.getLocalPort (first (.getConnectors server)))
         ; Expose port from local machine to container
         _ (Testcontainers/exposeHostPorts (int-array [port]))
+        ;container (doto (GenericContainer. "selenium/standalone-chromium:131.0")
+        ;            (.withExposedPorts (into-array Integer [4444]))
+        ;            ;(.withReuse true)
+        ;            (.start))]
         container (-> (tc/create {:image-name "selenium/standalone-chromium:131.0"
                                   :exposed-ports [4444]})
+                      (update :container #(.withReuse % true))
                       (tc/start!))]
+
     {:container container
+     ;:driver (etaoin/chrome-headless {:port (.getMappedPort container 4444)
+     ;                                 :host (.getHost container)
+     ;                                 :args ["--no-sandbox"]})}))
      :driver (etaoin/chrome-headless {:port (get (:mapped-ports container) 4444)
                                       :host (:host container)
                                       :args ["--no-sandbox"]})}))
 
 
+
 (defmethod ig/halt-key! ::webdriver
-  [_ {:keys [container driver]}]
+  [_ {:keys [driver]}]
   (log/info (str "[DB] Closing webdriver..."))
-  (etaoin/quit driver)
-  (tc/stop! container))
+  ; Do not stop the container to be able to reuse it
+  (etaoin/quit driver))
+  ;(tc/stop! container))
+  ;(.stop container))
 
 
 (comment
@@ -56,4 +68,3 @@
     (e/wait-visible d {:tag :h1
                        :fn/has-text "Linkboard"}
                   {:timeout 5})))
-

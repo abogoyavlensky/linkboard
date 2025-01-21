@@ -22,3 +22,4 @@ lsp/
 *.sqlite*
 resources/public/css/output.*
 .aider*
+.testcontainers.properties
