@@ -6,6 +6,7 @@
   "Testing system."
   nil)
 
+; TODO: add ability to exclude components from system!
 (defn with-system
   "Run the whole system before tests."
   [test-fn]
@@ -16,3 +17,11 @@
         (test-fn)
         (finally
           (ig/halt! *test-system*))))))
+
+(defn get-server-url
+  "Return full url from jetty server object."
+  [server]
+  (let [port (.getLocalPort (first (.getConnectors server)))]
+    ; TODO: update with unfied approach!
+    ;(str "http://localhost:" port)
+    (str "http://host.testcontainers.internal:" port)))

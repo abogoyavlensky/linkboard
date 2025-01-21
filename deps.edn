@@ -27,7 +27,16 @@
 
            :test {:extra-paths ["test"]
                   :extra-deps {eftest/eftest {:mvn/version "0.6.0"}
-                               cloverage/cloverage {:mvn/version "1.2.4"}}
+                               cloverage/cloverage {:mvn/version "1.2.4"}
+                               hato/hato {:mvn/version "0.9.0"}
+                               etaoin/etaoin {:mvn/version "1.1.42"}
+
+                               ; TODO: remove unused deps!
+                               clj-test-containers/clj-test-containers {:mvn/version "0.7.4"}
+
+                               org.testcontainers/testcontainers {:mvn/version "1.20.4"}
+                               org.testcontainers/selenium {:mvn/version "1.20.4"}
+                               org.seleniumhq.selenium/selenium-chrome-driver {:mvn/version "4.10.0"}}
                   :exec-fn cloverage.coverage/run-project
                   :exec-args {:test-ns-path ["test"]
                               :src-ns-path ["src"]
