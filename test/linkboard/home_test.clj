@@ -9,6 +9,7 @@
 (use-fixtures :each
   test-utils/with-system)
 
+; TODO: improve test
 (deftest test-home-page-list-boards-ok
   (let [db (::db/db test-utils/*test-system*)
         driver (get-in test-utils/*test-system* [::webdriver/webdriver :driver])

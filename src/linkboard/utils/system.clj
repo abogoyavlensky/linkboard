@@ -9,7 +9,7 @@
   (:import (clojure.lang IFn)
            (java.net ServerSocket)))
 
-(def ^:private SYSTEM-CONFIG-PATH "system.edn")
+(def ^:private SYSTEM-CONFIG-PATH "config.edn")
 
 ; Add #ig/ref tag for reading integrant config from aero.
 (defmethod aero/reader 'ig/ref
