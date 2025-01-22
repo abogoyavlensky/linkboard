@@ -2,13 +2,11 @@
   (:require [integrant.core :as ig]
             [linkboard.utils.system :as system-util]))
 
-(def ^:dynamic *test-system*
-  "Testing system."
-  nil)
+(def ^:dynamic *test-system* nil)
 
 ; TODO: add ability to exclude components from system!
 (defn with-system
-  "Run the whole system before tests."
+  "Run the system before tests."
   [test-fn]
   (let [test-config (system-util/config :test)]
     (ig/load-namespaces test-config)
@@ -23,5 +21,9 @@
   [server]
   (let [port (.getLocalPort (first (.getConnectors server)))]
     ; TODO: update with unfied approach!
-    ;(str "http://localhost:" port)
+    (str "http://localhost:" port)))
+
+(defn get-server-url-inside-testcontainer
+  [server]
+  (let [port (.getLocalPort (first (.getConnectors server)))]
     (str "http://host.testcontainers.internal:" port)))
