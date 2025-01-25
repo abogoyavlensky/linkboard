@@ -9,20 +9,20 @@
   deps {:doc "Install all dev deps"
         :task (clojure "-P -X:dev:test:outdated")}
 
-  fmt:check {:doc "Check code formatting"
+  fmt-check {:doc "Check code formatting"
              :task (shell "cljfmt" "check")}
 
   fmt {:doc "Fix code formatting"
        :task (shell "cljfmt" "fix")}
 
-  lint:init {:doc "Linting project's classpath"
+  lint-init {:doc "Linting project's classpath"
              :task (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs"
                      "--lint" (with-out-str (clojure "-Spath")))}
 
   lint {:doc "Linting project's code"
         :task (shell "clj-kondo" "--parallel" "--lint" "src" "test")}
 
-  outdated:check {:doc "Check outdated Clojure deps versions"
+  outdated-check {:doc "Check outdated Clojure deps versions"
                   :task (clojure "-M:outdated")}
 
   outdated {:doc "Upgrade outdated Clojure deps versions"
@@ -34,16 +34,16 @@
   check {:doc "Run all code checks and tests"
          :depends [fmt lint outdated test]}
 
-  css:build {:doc "Build minified css"
+  css-build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
-  css:watch {:doc "Rebuild css on file change in watch mode"
+  css-watch {:doc "Rebuild css on file change in watch mode"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
 
   build {:doc "Build application uberjar"
          :requires ([assets :as assets])
          :task (do
-                 (run 'css:build)
+                 (run 'css-build)
                  (assets/hash-css! {:asset-file output-css-file
                                     :target-file "src/linkboard/components.clj"})
                  (clojure "-T:build build"))}}}

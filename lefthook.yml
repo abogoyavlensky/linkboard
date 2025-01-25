@@ -6,4 +6,4 @@ pre-commit:
       run: bb lint
     fmt:
       glob: "*.{clj,edn}"
-      run: bb fmt:check
+      run: bb fmt-check
