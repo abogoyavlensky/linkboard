@@ -1,0 +1,2 @@
+#merge [#include "config.edn"
+        {:linkboard.webdriver/webdriver {:server #ig/ref :linkboard.server/server}}]

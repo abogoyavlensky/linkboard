@@ -23,11 +23,14 @@
 
 (defn config
   "Return edn config with all variables set."
-  [profile]
-  {:pre [(contains? #{:dev :test :prod} profile)]}
-  (-> SYSTEM-CONFIG-PATH
-    (io/resource)
-    (aero/read-config {:profile profile})))
+  ([profile]
+   (config profile nil))
+  ([profile config-path]
+   {:pre [(contains? #{:dev :test :prod} profile)]}
+   (-> (or config-path SYSTEM-CONFIG-PATH)
+     (io/resource)
+     (aero/read-config {:profile profile
+                        :resolver aero/resource-resolver}))))
 
 (defn validate-schema!
   "Validate data against schema and throw a humanized error if data is not valid."

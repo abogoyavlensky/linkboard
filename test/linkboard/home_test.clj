@@ -7,7 +7,7 @@
             [linkboard.webdriver :as-alias webdriver]))
 
 (use-fixtures :each
-  test-utils/with-system)
+  (test-utils/with-system "config.e2e.edn"))
 
 ; TODO: improve test
 (deftest test-home-page-list-boards-ok

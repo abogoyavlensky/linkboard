@@ -7,14 +7,18 @@
 ; TODO: add ability to exclude components from system!
 (defn with-system
   "Run the system before tests."
-  [test-fn]
-  (let [test-config (system-util/config :test)]
-    (ig/load-namespaces test-config)
-    (binding [*test-system* (ig/init test-config)]
-      (try
-        (test-fn)
-        (finally
-          (ig/halt! *test-system*))))))
+  ([]
+   (with-system nil))
+  ([config-path]
+   (fn
+     [test-fn]
+     (let [test-config (system-util/config :test config-path)]
+       (ig/load-namespaces test-config)
+       (binding [*test-system* (ig/init test-config)]
+         (try
+           (test-fn)
+           (finally
+             (ig/halt! *test-system*))))))))
 
 (defn get-server-url
   "Return full url from jetty server object."
