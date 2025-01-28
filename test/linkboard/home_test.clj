@@ -14,7 +14,7 @@
   (let [db (::db/db test-utils/*test-system*)
         driver (get-in test-utils/*test-system* [::webdriver/webdriver :driver])
         server (::server/server test-utils/*test-system*)
-        url (test-utils/get-server-url-inside-testcontainer server)]
+        url (test-utils/get-server-url server :container)]
 
     (->> {:insert-into :user
           :values [{:sync_code "test-sync-code"}]}

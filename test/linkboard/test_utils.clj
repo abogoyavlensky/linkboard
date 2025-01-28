@@ -5,7 +5,7 @@
 (def ^:dynamic *test-system* nil)
 
 (defn with-system
-  "Run the system before tests."
+  "Run the test system before tests."
   ([]
    (with-system nil))
   ([config-path]
@@ -20,12 +20,16 @@
              (ig/halt! *test-system*))))))))
 
 (defn get-server-url
-  "Return full url from jetty server object."
-  [server]
-  (let [port (.getLocalPort (first (.getConnectors server)))]
-    (str "http://localhost:" port)))
-
-(defn get-server-url-inside-testcontainer
-  [server]
-  (let [port (.getLocalPort (first (.getConnectors server)))]
-    (str "http://host.testcontainers.internal:" port)))
+  "Return full url from jetty server object.
+  * server - jetty server object
+  * env - :host or :container
+  :host - localhost
+  :container - testcontainers internal host"
+  ([server]
+   (get-server-url server :host))
+  ([server env]
+   (let [base-url (case env
+                    :host "http://localhost"
+                    :container "http://host.testcontainers.internal:")
+         port (.getLocalPort (first (.getConnectors server)))]
+     (str base-url port))))

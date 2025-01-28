@@ -59,8 +59,11 @@
         {:path "/assets/"
          :cached? (:cache-assets? options)})
       (ring/redirect-trailing-slash-handler)
-      ; TODO: add error pages
-      (ring/create-default-handler))))
+      (ring/create-default-handler
+        {:not-found (fn [_]
+                      {:status 404
+                       ; TODO: common html
+                       :body "Not found"})}))))
 
 (defmethod ig/assert-key ::server
   [_ params]
