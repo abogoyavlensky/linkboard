@@ -25,6 +25,6 @@ env:
     - SESSION_SECRET_KEY
 
 volumes:
-  - "/root/linkboard:/app/db.sqlite"
-  - "/root/linkboard:/app/db.sqlite-shm"
+  - "/root/linkboard/db.sqlite:/app/db.sqlite"
+  - "/root/linkboard/db.sqlite-shm:/app/db.sqlite-shm"
   - "/root/linkboard:/app/db.sqlite-wal"
