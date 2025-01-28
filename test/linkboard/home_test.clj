@@ -6,6 +6,7 @@
             [linkboard.test-utils :as test-utils]
             [linkboard.webdriver :as-alias webdriver]))
 
+; TODO: run system once
 (use-fixtures :each
   (test-utils/with-system "config.e2e.edn"))
 

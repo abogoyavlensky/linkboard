@@ -24,8 +24,7 @@ env:
   secret:
     - SESSION_SECRET_KEY
 
-# TODO: add volume for sqlite db
-# Use a persistent storage volume.
-#
-# volumes:
-#   - "app_storage:/app/storage"
+volumes:
+  - "/root/linkboard:/app/db.sqlite"
+  - "/root/linkboard:/app/db.sqlite-shm"
+  - "/root/linkboard:/app/db.sqlite-wal"
