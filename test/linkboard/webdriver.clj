@@ -1,11 +1,12 @@
 (ns linkboard.webdriver
-  (:require [clj-test-containers.core :as tc]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [etaoin.api :as etaoin]
             [integrant.core :as ig])
-  (:import [org.testcontainers Testcontainers]))
+  (:import [org.testcontainers Testcontainers]
+           [org.testcontainers.containers GenericContainer]))
 
 (def ^:private WEBDRIVER-PORT 4444)
+(def ^:private WEBDRIVER-IMAGE "selenium/standalone-chromium:131.0")
 
 (defmethod ig/init-key ::webdriver
   [_ {:keys [server]}]
@@ -13,15 +14,16 @@
   (let [server-port (.getLocalPort (first (.getConnectors server)))
         ; Expose port from local machine to container
         _ (Testcontainers/exposeHostPorts (int-array [server-port]))
-        container (-> (tc/create {:image-name "selenium/standalone-chromium:131.0"
-                                  :exposed-ports [WEBDRIVER-PORT]})
-                    (update :container #(.withReuse % true))
-                    (tc/start!))]
-
+        ; Start the webdriver container
+        container (doto (GenericContainer. WEBDRIVER-IMAGE)
+                    (.withExposedPorts (into-array Integer [(int WEBDRIVER-PORT)]))
+                    (.withReuse true)
+                    (.start))
+        driver (etaoin/chrome-headless {:port (.getMappedPort container 4444)
+                                        :host (.getHost container)
+                                        :args ["--no-sandbox"]})]
     {:container container
-     :driver (etaoin/chrome-headless {:port (get (:mapped-ports container) WEBDRIVER-PORT)
-                                      :host (:host container)
-                                      :args ["--no-sandbox"]})}))
+     :driver driver}))
 
 (defmethod ig/halt-key! ::webdriver
   [_ {:keys [driver]}]

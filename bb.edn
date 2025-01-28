@@ -34,11 +34,11 @@
   check {:doc "Run all code checks and tests"
          :depends [fmt lint outdated test]}
 
-  css-build {:doc "Build minified css"
-             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
-
   css-watch {:doc "Rebuild css on file change in watch mode"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
+
+  css-build {:doc "Build minified css"
+             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
   build {:doc "Build application uberjar"
          :requires ([assets :as assets])

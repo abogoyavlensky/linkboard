@@ -48,6 +48,8 @@
                            ; negotiate request and response
                            muuntaja/format-middleware
                            ; Check CSRF token
+                           ; add call (linkboard.components/csrf-token)
+                           ; to form with POST method
                            ring-anti-forgery/wrap-anti-forgery
                            ; handle exceptions
                            server-utils/exception-middleware
