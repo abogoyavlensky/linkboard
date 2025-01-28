@@ -67,6 +67,7 @@
     (response/header "Content-Type" "text/html")))
 
 ; Exceptions
+
 (defn- get-error-path
   [exception]
   (mapv

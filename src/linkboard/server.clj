@@ -29,7 +29,9 @@
       {:exception pretty/exception
        :data {:muuntaja muuntaja-core/instance
               :coercion coercion-malli/coercion
-              :middleware [ring-cookies/wrap-cookies
+              :middleware [; enable cookies
+                           ring-cookies/wrap-cookies
+                           ; store session in cookies
                            [ring-session/wrap-session
                             {:cookie-attrs {:secure true
                                             :http-only true}
