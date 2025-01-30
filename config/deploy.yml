@@ -21,7 +21,8 @@ builder:
   arch: amd64
 
 env:
-  SESSION_SECRET_KEY: <%= ENV['SESSION_SECRET_KEY'] %>
+  secret:
+    - SESSION_SECRET_KEY
 
 volumes:
   - "/root/linkboard-db:/app/db"
