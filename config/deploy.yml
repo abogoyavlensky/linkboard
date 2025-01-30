@@ -21,10 +21,7 @@ builder:
   arch: amd64
 
 env:
-  secret:
-    - SESSION_SECRET_KEY
+  SESSION_SECRET_KEY: <%= ENV['SESSION_SECRET_KEY'] %>
 
 volumes:
-  - "/root/linkboard/db.sqlite:/app/db.sqlite"
-  - "/root/linkboard/db.sqlite-shm:/app/db.sqlite-shm"
-  - "/root/linkboard:/app/db.sqlite-wal"
+  - "/root/linkboard-db:/app/db"

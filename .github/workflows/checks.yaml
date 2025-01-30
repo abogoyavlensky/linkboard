@@ -6,26 +6,16 @@ on:
   workflow_call:
 
 jobs:
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-        with:
-          install_args: "babashka cljfmt"
-      - name: Fmt
-        run: bb fmt-check
-
-  lint:
+  lint-fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/cache-clojure-deps
       - uses: jdx/mise-action@v2
         with:
-          install_args: "babashka clj-kondo java clojure"
-      - name: Lint
-        run: bb deps && bb lint-init && bb lint
+          install_args: "babashka cljfmt clj-kondo java clojure"
+      - name: Lint and format
+        run: bb fmt-check bb deps && bb lint-init && bb lint
 
   outdated:
     runs-on: ubuntu-latest
