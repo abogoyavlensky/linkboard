@@ -10,20 +10,20 @@
 (defn- list-item
   [board]
   ; TODO: make this component common
-  [:a.w-full.bg-white.rounded-xl.p-4.flex.items-center.justify-between.shadow-sm.mt-4.cursor-pointer
-   ; TODO: replace with get-route
-   {:hx-get (format "/boards/%s" (:id board))
-    :hx-target "#content"
-    :hx-push-url "true"}
-   [:div.flex.items-center.gap-3
+  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center" "justify-between" "shadow-sm" "mt-4" "cursor-pointer"]
+       :hx-get (format "/boards/%s" (:id board))
+       :hx-target "#content"
+       :hx-push-url "true"}
+   [:div {:class ["flex" "items-center" "gap-3"]}
     icons/folder
-    [:span.text-lg (:title board)]]
-   [:div.flex.items-center.gap-2
+    [:span {:class ["text-lg"]} (:title board)]]
+   [:div {:class ["flex" "items-center" "gap-2"]}
     [:div icons/menu]
-    [:span.text-gray-500 (:link-count board)]
-    [:svg.w-5.h-5.text-gray-400.rotate-180 {:viewBox "0 0 24 24"
-                                            :fill "none"
-                                            :stroke "currentColor"}
+    [:span {:class ["text-gray-500"]} (:link-count board)]
+    [:svg {:class ["w-5" "h-5" "text-gray-400" "rotate-180"]
+           :viewBox "0 0 24 24"
+           :fill "none"
+           :stroke "currentColor"}
      [:path {:d "M15 18l-6-6 6-6"
              :stroke-width "2"}]]]])
 
@@ -34,22 +34,24 @@
 
 (defn- boards-view
   [{:keys [boards all-links-count]}]
-  [:div.flex-1.px-4
+  [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
-   [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm {:href "#"}
-    [:div.flex.items-center.gap-3
+   [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-sm"]
+        :href "#"}
+    [:div {:class ["flex" "items-center" "gap-3"]}
      icons/queue-list
-     [:span.text-lg "All Links"]]
-    [:div.flex.items-center.gap-2
-     [:span.text-gray-500 all-links-count]
-     [:svg.w-5.h-5.text-gray-400.rotate-180 {:viewBox "0 0 24 24"
-                                             :fill "none"
-                                             :stroke "currentColor"}
+     [:span {:class ["text-lg"]} "All Links"]]
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     [:span {:class ["text-gray-500"]} all-links-count]
+     [:svg {:class ["w-5" "h-5" "text-gray-400" "rotate-180"]
+            :viewBox "0 0 24 24"
+            :fill "none"
+            :stroke "currentColor"}
       [:path {:d "M15 18l-6-6 6-6"
               :stroke-width "2"}]]]]
-   [:div.mt-6
-    [:div.flex.justify-between.mb-4
-     [:h2.text-gray-500.text-sm "MY BOARDS"]
+   [:div {:class ["mt-6"]}
+    [:div {:class ["flex" "justify-between" "mb-4"]}
+     [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
      [:div (components/modal
              {:open-btn-text icons/plus
               :title "Create board"
@@ -60,7 +62,7 @@
                               {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
                                        "bg-white" "border" "rounded-md" "border-neutral-300"
                                        "ring-offset-background" "placeholder:text-neutral-500"
-                                       "focus:border-neutral-300" "focus:outline-none"
+                                       "focus:border-neutral-300" "focus:outline-hidden"
                                        "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
                                        "disabled:cursor-not-allowed" "disabled:opacity-50"]
                                :type "text"

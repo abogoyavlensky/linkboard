@@ -9,20 +9,20 @@
 
 (defn- board-view
   [{:keys [board links]}]
-  [:div.flex-1.px-4
+  [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
-   [:div.flex.justify-between.items-center.mb-4
-    [:div.flex.items-center.gap-2
-     [:a.text-blue-500.hover:text-blue-600
-      {:hx-get "/"
-       :hx-target "#content"
-       :hx-push-url "true"}
+   [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     [:a {:class ["text-blue-500" "hover:text-blue-600"]
+          :hx-get "/"
+          :hx-target "#content"
+          :hx-push-url "true"}
       icons/chevron-left]
-     [:h2.text-2xl.font-bold (:title board)]]
-    [:div.flex.items-center.gap-2
-     ;(components/button {:content [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]})
+     [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     ;(components/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
      (components/modal
-       {:open-btn-text [:div.flex.items-center.gap-1 icons/plus-circle "Add link"]
+       {:open-btn-text [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]
         :title "Add link"
         :hx-post (format "/boards/%s/links" (:id board))
         :hx-target "#content"
@@ -31,7 +31,7 @@
                         {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
                                  "bg-white" "border" "rounded-md" "border-neutral-300"
                                  "ring-offset-background" "placeholder:text-neutral-500"
-                                 "focus:border-neutral-300" "focus:outline-none"
+                                 "focus:border-neutral-300" "focus:outline-hidden"
                                  "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
                                  "disabled:cursor-not-allowed" "disabled:opacity-50"]
                          :type "text"
@@ -43,31 +43,32 @@
    (if (seq links)
      (list
        ; Search bar
-       [:div.pb-4
-        [:div.bg-gray-200.rounded-lg.flex.items-center.px-4.py-2
-         [:div.mr-2 icons/search]
-         [:input.bg-transparent.flex-1.outline-none.text-gray-700 {:type "text"
-                                                                   :placeholder "Search"}]]]
+       [:div {:class ["pb-4"]}
+        [:div {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]}
+         [:div {:class ["mr-2"]} icons/search]
+         [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
+                  :type "text"
+                  :placeholder "Search"}]]]
 
        ; Links
-       [:div.flex-1
+       [:div {:class ["flex-1"]}
         (for [link links]
-          [:a.w-full.bg-white.rounded-xl.mb-4.p-4.flex.items-center.justify-between.shadow-sm
-           {:href (:url link)
-            :target "_blank"}
-           [:div.flex.items-center.gap-3
+          [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-sm"]
+               :href (:url link)
+               :target "_blank"}
+           [:div {:class ["flex" "items-center" "gap-3"]}
             ; TODO: try to fetch actual icon from the site by link
             icons/bookmark
             [:div
-             [:span.text-l.truncate.w-full.sm:w-48.lg:w-96 (:title link)]
-             [:p.text-gray-400.truncate.w-full.sm:w-48.lg:w-96 (:url link)]]]
-           [:div.flex.items-center.gap-2
+             [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:title link)]
+             [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
+           [:div {:class ["flex" "items-center" "gap-2"]}
             (icons/edit)
             icons/bin]])])
      ; Empty state
-     [:div.text-center.mx-auto.mt-16
-      [:h2.text-2xl.font-semibold.text-gray-900.mb-3 "No bookmarks yet"]
-      [:p.text-gray-600.mb-8 "Start building your collection by adding your first link"]])])
+     [:div {:class ["text-center" "mx-auto" "mt-16"]}
+      [:h2 {:class ["text-2xl" "font-semibold" "text-gray-900" "mb-3"]} "No bookmarks yet"]
+      [:p {:class ["text-gray-600" "mb-8"]} "Start building your collection by adding your first link"]])])
 
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
