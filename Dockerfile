@@ -1,8 +1,8 @@
 FROM --platform=linux/amd64 clojure:temurin-21-tools-deps-1.12.0.1479-alpine AS build
 
 # Install bb
-# RUN apk --no-cache add curl \
-#  && curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
+RUN apk --no-cache add curl
+# RUN curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
 #  && chmod +x install \
 #  && ./install --version 1.12.194 --static
 
