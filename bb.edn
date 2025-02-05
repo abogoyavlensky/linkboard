@@ -38,7 +38,12 @@
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
 
   css-build {:doc "Build minified css"
-             :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
+             ; TODO: uncomment!
+             ;:task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")
+             :task (do
+                     (shell "ls" "-alh" "/usr/local/bin/")
+                     (shell "ls" "-alh" "/usr/local/bin/tailwindcss")
+                     (shell "/usr/local/bin/tailwindcss" "-i" input-css-file "-o" output-css-file "--minify"))}
 
   build {:doc "Build application uberjar"
          :requires ([assets :as assets])
