@@ -14,17 +14,22 @@ RUN curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/d
 RUN chmod +x tailwindcss
 RUN mv tailwindcss /usr/bin
 
-# Build uberjar
-WORKDIR /app
-COPY . /app
-RUN bb build
+RUN ls -alh /usr/bin/tailwindcss
+RUN /usr/bin/tailwindcss --help
+RUN tailwindcss --help
 
 
-FROM --platform=linux/amd64 eclipse-temurin:21.0.2_13-jre-alpine
-LABEL org.opencontainers.image.source=https://github.com/abogoyavlensky/linkboard
-
-WORKDIR /app
-COPY --from=build /app/target/standalone.jar /app/standalone.jar
-
-EXPOSE 80
-CMD ["java", "-Xmx256m", "-jar", "standalone.jar"]
+## Build uberjar
+#WORKDIR /app
+#COPY . /app
+#RUN bb build
+#
+#
+#FROM --platform=linux/amd64 eclipse-temurin:21.0.2_13-jre-alpine
+#LABEL org.opencontainers.image.source=https://github.com/abogoyavlensky/linkboard
+#
+#WORKDIR /app
+#COPY --from=build /app/target/standalone.jar /app/standalone.jar
+#
+#EXPOSE 80
+#CMD ["java", "-Xmx256m", "-jar", "standalone.jar"]

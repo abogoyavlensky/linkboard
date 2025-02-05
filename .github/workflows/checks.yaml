@@ -12,6 +12,8 @@ jobs:
 #     TODO: remove!
     steps:
       - run: echo "Running lint and format checks"
+      - run: docker build -t linboard:0.1 .
+
 #     TOOD: uncomment!
 #      - uses: actions/checkout@v4
 #      - uses: ./.github/actions/cache-clojure-deps
