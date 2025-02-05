@@ -7,8 +7,12 @@ RUN apk --no-cache add curl \
   && ./install --version 1.12.194 --static
 
 # Install tailwindcss
-RUN curl -sL -o /usr/local/bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.3/tailwindcss-linux-x64 \
-  && chmod +x /usr/local/bin/tailwindcss
+#RUN curl -sL -o /usr/local/bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.3/tailwindcss-linux-x64 \
+#  && chmod +x /usr/local/bin/tailwindcss
+
+RUN curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.3/tailwindcss-linux-x64
+RUN chmod +x tailwindcss
+RUN mv tailwindcss /usr/bin
 
 # Build uberjar
 WORKDIR /app
