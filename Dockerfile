@@ -1,16 +1,16 @@
 FROM --platform=linux/amd64 clojure:temurin-21-tools-deps-1.12.0.1479-alpine AS build
 
 # Install bb
-RUN apk --no-cache add curl \
-  && curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
-  && chmod +x install \
-  && ./install --version 1.12.194 --static
+# RUN apk --no-cache add curl \
+#  && curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install \
+#  && chmod +x install \
+#  && ./install --version 1.12.194 --static
 
 # Install tailwindcss
 #RUN curl -sL -o /usr/local/bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.3/tailwindcss-linux-x64 \
 #  && chmod +x /usr/local/bin/tailwindcss
 
-RUN curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.3/tailwindcss-linux-x64
+RUN curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.15/tailwindcss-linux-x64
 RUN chmod +x tailwindcss
 RUN mv tailwindcss /usr/bin
 
