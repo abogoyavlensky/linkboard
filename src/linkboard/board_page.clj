@@ -53,7 +53,7 @@
        ; Links
        [:div {:class ["flex-1"]}
         (for [link links]
-          [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-sm"]
+          [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
                :href (:url link)
                :target "_blank"}
            [:div {:class ["flex" "items-center" "gap-3"]}

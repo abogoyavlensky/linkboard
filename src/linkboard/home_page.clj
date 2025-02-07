@@ -10,7 +10,7 @@
 (defn- list-item
   [board]
   ; TODO: make this component common
-  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center" "justify-between" "shadow-sm" "mt-4" "cursor-pointer"]
+  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "mt-4" "cursor-pointer"]
        :hx-get (format "/boards/%s" (:id board))
        :hx-target "#content"
        :hx-push-url "true"}
@@ -36,7 +36,7 @@
   [{:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
-   [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-sm"]
+   [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
         :href "#"}
     [:div {:class ["flex" "items-center" "gap-3"]}
      icons/queue-list
