@@ -5,6 +5,7 @@
 .cpcache
 .lsp/
 lsp/
+log/
 .nrepl-history
 .nrepl-port
 .vscode
