@@ -36,12 +36,18 @@
   (eftest/run-tests (eftest/find-tests "test") {:report eftest-report/report}))
 
 (comment
-  ; Manage system
+  ; It's convenient to bind shortcuts to these functions in your editor.
+  ; Start or restart system
   (reset)
+  ; Check system state
   (keys state/system)
+  ; Stop system
   (stop)
+  ; Run all project tests
   (run-all-tests)
 
-  ; Example of add-lib dynamically:
+  ; Example of add-lib dynamically
+  ; Sync all new libs at once
   (repl-deps/sync-deps)
+  ; or sync a specific lib
   (repl-deps/add-lib 'hiccup/hiccup {:mvn/version "2.0.0-RC3"}))
