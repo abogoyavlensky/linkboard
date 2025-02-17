@@ -15,6 +15,7 @@
             [ring.adapter.jetty :as jetty]
             [ring.middleware.anti-forgery :as ring-anti-forgery]
             [ring.middleware.cookies :as ring-cookies]
+            [ring.middleware.reload :as ring-reload]
             [ring.middleware.session :as ring-session]
             [ring.middleware.session.cookie :as ring-session-cookie])
   (:import com.zaxxer.hikari.HikariDataSource))
@@ -31,6 +32,8 @@
               :coercion coercion-malli/coercion
               :middleware [; enable cookies
                            ring-cookies/wrap-cookies
+
+                           ; TODO: move to the top level middleware!
                            ; store session in cookies
                            [ring-session/wrap-session
                             {:cookie-attrs {:secure true
@@ -39,6 +42,7 @@
                                       {:key (-> options
                                               :session-secret-key
                                               server-utils/string->16-byte-array)})}]
+
                            ; add handler options to request
                            [server-utils/wrap-context context]
                            ; parse any request parameters
@@ -48,8 +52,7 @@
                            ; negotiate request and response
                            muuntaja/format-middleware
                            ; Check CSRF token
-                           ; add call (linkboard.components/csrf-token)
-                           ; to form with POST method
+                           ; add call (linkboard.components/csrf-token) to a form
                            ring-anti-forgery/wrap-anti-forgery
                            ; handle exceptions
                            server-utils/exception-middleware
@@ -64,8 +67,11 @@
       (ring/create-default-handler
         {:not-found (fn [_]
                       {:status 404
-                       ; TODO: common html
-                       :body "Not found"})}))))
+                       ; TODO: add common html!
+                       :body "Not found"})}))
+    {:middleware (cond-> []
+                   ; Enable code auto-reload in dev mode
+                   (:auto-reload? options) (conj ring-reload/wrap-reload))}))
 
 (defmethod ig/assert-key ::server
   [_ params]
@@ -87,11 +93,8 @@
   [_ {:keys [options]
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
-  (let [ring-handler (if (:auto-reload? options)
-                       (server-utils/wrap-reload #(handler context))
-                       (handler context))]
-    (jetty/run-jetty ring-handler {:port (:port options)
-                                   :join? false})))
+  (jetty/run-jetty (handler context) {:port (:port options)
+                                      :join? false}))
 
 (defmethod ig/halt-key! ::server
   [_ server]

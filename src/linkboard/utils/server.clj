@@ -19,19 +19,6 @@
       (assoc :context context)
       (handler))))
 
-(defn wrap-reload
-  "Reload ring handler on every request. Useful in dev mode."
-  [f]
-  ; Require reloader locally to exclude dev dependency from prod build
-  (let [reload! ((requiring-resolve 'ring.middleware.reload/reloader) ["src"] true)]
-    (fn
-      ([request]
-       (reload!)
-       ((f) request))
-      ([request respond raise]
-       (reload!)
-       ((f) request respond raise)))))
-
 (defn string->16-byte-array [s]
   (let [digest (MessageDigest/getInstance "MD5")]
     (.digest digest (.getBytes s "UTF-8"))))

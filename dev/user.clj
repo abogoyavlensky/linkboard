@@ -14,14 +14,10 @@
 ; Malli schema instrumentation
 (malli-dev/start!)
 
-(defn- dev-config
-  [& _]
-  (system-utils/config :dev))
-
 (defn reset
   "Restart system."
   []
-  (ig-repl/set-prep! dev-config)
+  (ig-repl/set-prep! #(system-utils/config :dev))
   (ig-repl/reset))
 
 (defn stop
