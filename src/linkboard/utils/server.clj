@@ -38,25 +38,26 @@
 
 ; Handlers
 
-(def ^:private cache-30d "public,max-age=2592000,immutable")
-
-(defn- resource-response-cached
-  ([path]
-   (resource-response-cached path {}))
-  ([path options]
-   (-> (response/resource-response path options)
-     (response/header "Cache-Control" cache-30d))))
+(def ^:private DEFAULT-CACHE-30D "public,max-age=2592000,immutable")
 
 (defn create-resource-handler-cached
   "Return resource handler with optional Cache-Control header."
-  [{:keys [cached?]
+  [{:keys [cached? cache-control]
+    :or {cached? false
+         cache-control DEFAULT-CACHE-30D}
     :as opts}]
-  (let [response-fn (if cached?
-                      resource-response-cached
-                      response/resource-response)]
-    (-> response-fn
-      (ring/-create-file-or-resource-handler opts)
-      (gzip/wrap-gzip))))
+  (letfn [(resource-response-cached-fn
+            ([path]
+             (resource-response-cached-fn path {}))
+            ([path options]
+             (-> (response/resource-response path options)
+               (response/header "Cache-Control" cache-control))))]
+    (let [response-fn (if cached?
+                        resource-response-cached-fn
+                        response/resource-response)]
+      (-> response-fn
+        (ring/-create-file-or-resource-handler opts)
+        (gzip/wrap-gzip)))))
 
 (defn render-html
   [content]

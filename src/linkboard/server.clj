@@ -59,9 +59,9 @@
                            ring-coercion/coerce-request-middleware
                            ring-coercion/coerce-response-middleware]}})
     (ring/routes
-      (server-utils/create-resource-handler-cached
-        {:path "/assets/"
-         :cached? (:cache-assets? options)})
+      (server-utils/create-resource-handler-cached {:path "/assets/"
+                                                    :cached? (:cache-assets? options)
+                                                    :cache-control (:cache-control options)})
       (ring/redirect-trailing-slash-handler)
       (ring/create-default-handler
         {:not-found (fn [_]
@@ -79,7 +79,8 @@
                 [:port pos-int?]
                 [:session-secret-key string?]
                 [:auto-reload? boolean?]
-                [:cache-assets? boolean?]]]
+                [:cache-assets? {:optional true} boolean?]
+                [:cache-control {:optional true} symbol?]]]
               [:db [:fn
                     {:error/message "Wrong db datasource type"}
                     #(instance? HikariDataSource %)]]]
