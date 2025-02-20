@@ -12,7 +12,6 @@
         ring/ring-anti-forgery {:mvn/version "1.4.0"}
         amalloy/ring-gzip-middleware {:mvn/version "0.1.4"}
         hiccup/hiccup {:mvn/version "2.0.0-RC4"}
-        ring/ring-devel {:mvn/version "1.13.0"}  ; code auto-reload in dev
         ; db
         hikari-cp/hikari-cp {:mvn/version "3.2.0"}
         org.xerial/sqlite-jdbc {:mvn/version "3.49.0.0"}
@@ -23,7 +22,8 @@
  :paths ["src" "resources"]
 
  :aliases {:dev {:extra-paths ["dev"]
-                 :extra-deps {integrant/repl {:mvn/version "0.4.0"}}}
+                 :extra-deps {integrant/repl {:mvn/version "0.4.0"}
+                              ring/ring-devel {:mvn/version "1.13.0"}}}
 
            :test {:extra-paths ["test"]
                   :extra-deps {eftest/eftest {:mvn/version "0.6.0"}

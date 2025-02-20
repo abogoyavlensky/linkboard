@@ -15,7 +15,6 @@
             [ring.adapter.jetty :as jetty]
             [ring.middleware.anti-forgery :as ring-anti-forgery]
             [ring.middleware.cookies :as ring-cookies]
-            [ring.middleware.reload :as ring-reload]
             [ring.middleware.session :as ring-session]
             [ring.middleware.session.cookie :as ring-session-cookie])
   (:import com.zaxxer.hikari.HikariDataSource))
@@ -68,10 +67,7 @@
         {:not-found (fn [_]
                       {:status 404
                        ; TODO: add common html!
-                       :body "Not found"})}))
-    {:middleware (cond-> []
-                   ; Enable code auto-reload in dev mode
-                   (:auto-reload? options) (conj ring-reload/wrap-reload))}))
+                       :body "Not found"})}))))
 
 (defmethod ig/assert-key ::server
   [_ params]
@@ -93,8 +89,11 @@
   [_ {:keys [options]
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
-  (jetty/run-jetty (handler context) {:port (:port options)
-                                      :join? false}))
+  (let [ring-handler (if (:auto-reload? options)
+                       (server-utils/wrap-reload #(handler context))
+                       (handler context))]
+    (jetty/run-jetty ring-handler {:port (:port options)
+                                   :join? false})))
 
 (defmethod ig/halt-key! ::server
   [_ server]
