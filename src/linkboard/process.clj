@@ -23,5 +23,4 @@
   [_ {:keys [options process]}]
   (log/info (format "[DB] Stopping process %s..." (:cmd options)))
   (when (some? process)
-    (.destroyForcibly process)
-    (reset! process nil)))
+    (.destroyForcibly process)))
