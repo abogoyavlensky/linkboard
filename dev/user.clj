@@ -17,7 +17,7 @@
 (defn reset
   "Restart system."
   []
-  (ig-repl/set-prep! #(system-utils/config :dev))
+  (ig-repl/set-prep! #(system-utils/config :dev "config.dev.edn"))
   (ig-repl/reset))
 
 (defn stop
