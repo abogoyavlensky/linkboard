@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 clojure:temurin-21-tools-deps-1.12.0.1479-alpine AS build
+FROM clojure:temurin-21-tools-deps-1.12.0.1479-alpine AS build
 
 # Install bb
 RUN apk --no-cache add curl \
@@ -16,7 +16,7 @@ COPY . /app
 RUN bb build
 
 
-FROM --platform=linux/amd64 eclipse-temurin:21.0.2_13-jre-alpine
+FROM eclipse-temurin:21.0.2_13-jre-alpine
 LABEL org.opencontainers.image.source=https://github.com/abogoyavlensky/linkboard
 
 WORKDIR /app

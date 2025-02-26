@@ -16,8 +16,9 @@
   [_ options]
   (log/info (format "[DB] Starting process %s..." (:cmd options)))
   {:options options
-   :process (apply process/start {:out :inherit
-                                  :err :inherit} (:cmd options))})
+   ; TODO: uncomment :err to write process output to server log
+   :process (apply process/start {; :err :inherit
+                                  :out :inherit} (:cmd options))})
 
 (defmethod ig/halt-key! ::process
   [_ {:keys [options process]}]
