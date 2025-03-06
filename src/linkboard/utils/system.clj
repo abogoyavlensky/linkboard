@@ -34,13 +34,13 @@
 
 (defn validate-schema!
   "Validate data against schema and throw a humanized error if data is not valid."
-  [{:keys [schema data error-message]}]
+  [{:keys [component schema data]}]
   (some-> schema
     (mu/closed-schema)
     (m/explain data)
     (me/with-spell-checking)
     (me/humanize)
-    (#(throw (Exception. (str error-message ": " %))))))
+    (#(throw (Exception. (format "Invalid %s component config: %s" component %))))))
 
 (defn at-shutdown
   "Add hook for shutdown system on sigterm."

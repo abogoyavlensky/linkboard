@@ -32,10 +32,10 @@
 (defmethod ig/assert-key ::db
   [_ params]
   (system-utils/validate-schema!
-    {:data params
+    {:component ::db
+     :data params
      :schema [:map
-              [:jdbc-url string?]]
-     :error-message (format "Invalid %s component config" ::db)}))
+              [:jdbc-url string?]]}))
 
 (defmethod ig/init-key ::db
   [_ options]

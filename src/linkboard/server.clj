@@ -72,7 +72,8 @@
 (defmethod ig/assert-key ::server
   [_ params]
   (system-utils/validate-schema!
-    {:data params
+    {:component ::server
+     :data params
      :schema [:map
               [:options
                [:map
@@ -83,8 +84,7 @@
                 [:cache-control {:optional true} symbol?]]]
               [:db [:fn
                     {:error/message "Wrong db datasource type"}
-                    #(instance? HikariDataSource %)]]]
-     :error-message (format "Invalid %s component config" ::server)}))
+                    #(instance? HikariDataSource %)]]]}))
 
 (defmethod ig/init-key ::server
   [_ {:keys [options]

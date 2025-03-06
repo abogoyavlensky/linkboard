@@ -7,10 +7,10 @@
 (defmethod ig/assert-key ::process
   [_ params]
   (system-utils/validate-schema!
-    {:data params
+    {:component ::process
+     :data params
      :schema [:map
-              [:cmd [:vector {:min 1} string?]]]
-     :error-message (format "Invalid %s component config" ::process)}))
+              [:cmd [:vector {:min 1} string?]]]}))
 
 (defmethod ig/init-key ::process
   [_ options]
