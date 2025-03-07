@@ -4,7 +4,8 @@
             [linkboard.db :as db]
             [linkboard.server :as-alias server]
             [linkboard.test-utils :as test-utils]
-            [linkboard.webdriver :as-alias webdriver]))
+            [linkboard.webdriver :as-alias webdriver]
+            [reitit-extras.tests :as reitit-extras]))
 
 ; TODO: run system once
 (use-fixtures :each
@@ -15,7 +16,7 @@
   (let [db (::db/db test-utils/*test-system*)
         driver (get-in test-utils/*test-system* [::webdriver/webdriver :driver])
         server (::server/server test-utils/*test-system*)
-        url (test-utils/get-server-url server :container)]
+        url (reitit-extras/get-server-url server :container)]
 
     (->> {:insert-into :user
           :values [{:sync_code "test-sync-code"}]}
