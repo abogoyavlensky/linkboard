@@ -2,7 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [linkboard.routes :as app-routes]
-            [linkboard.utils.server :as server-utils]
+            [reitit-extras.core :as reitit-extras]
             [linkboard.utils.system :as system-utils]
             [muuntaja.core :as muuntaja-core]
             [reitit.coercion.malli :as coercion-malli]
@@ -40,10 +40,10 @@
                              :store (ring-session-cookie/cookie-store
                                       {:key (-> options
                                               :session-secret-key
-                                              server-utils/string->16-byte-array)})}]
+                                              reitit-extras/string->16-byte-array)})}]
 
                            ; add handler options to request
-                           [server-utils/wrap-context context]
+                           [reitit-extras/wrap-context context]
                            ; parse any request parameters
                            ring-parameters/parameters-middleware
                            ; send files
@@ -54,14 +54,14 @@
                            ; add call (linkboard.components/csrf-token) to a form
                            ring-anti-forgery/wrap-anti-forgery
                            ; handle exceptions
-                           server-utils/exception-middleware
+                           reitit-extras/exception-middleware
                            ; coerce request and response to spec
                            ring-coercion/coerce-request-middleware
                            ring-coercion/coerce-response-middleware]}})
     (ring/routes
-      (server-utils/create-resource-handler-cached {:path "/assets/"
-                                                    :cached? (:cache-assets? options)
-                                                    :cache-control (:cache-control options)})
+      (reitit-extras/create-resource-handler-cached {:path "/assets/"
+                                                     :cached? (:cache-assets? options)
+                                                     :cache-control (:cache-control options)})
       (ring/redirect-trailing-slash-handler)
       (ring/create-default-handler
         {:not-found (fn [_]
@@ -91,7 +91,7 @@
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
   (let [ring-handler (if (:auto-reload? options)
-                       (server-utils/wrap-reload #(handler context))
+                       (reitit-extras/wrap-reload #(handler context))
                        (handler context))]
     (jetty/run-jetty ring-handler {:port (:port options)
                                    :join? false})))

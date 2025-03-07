@@ -1,5 +1,5 @@
 (ns linkboard.components
-  (:require [hiccup2.core :as h]
+  (:require [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
             [ring.middleware.anti-forgery :as anti-forgery]))
 
@@ -21,7 +21,7 @@
   {:malli/schema [:=> [:cat [:vector :any]] [:sequential :any]]}
   [content]
   (list
-    (h/raw "<!DOCTYPE html>")
+    (hiccup/raw "<!DOCTYPE html>")
     [:html
      [:head
       [:meta {:charset "UTF-8"}]

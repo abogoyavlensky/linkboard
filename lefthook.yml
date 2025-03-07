@@ -1,9 +1,6 @@
-pre-commit:
+pre-push:
   parallel: true
   commands:
-    lint:
+    check:
       glob: "*.{clj,edn}"
-      run: bb lint
-    fmt:
-      glob: "*.{clj,edn}"
-      run: bb fmt-check
+      run: bb check

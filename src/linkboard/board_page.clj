@@ -2,7 +2,7 @@
   (:require [linkboard.components :as components]
             [linkboard.db :as db]
             [linkboard.icons :as icons]
-            [linkboard.utils.server :as server-utils]))
+            [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user
 (def USER_ID 1)
@@ -93,7 +93,7 @@
     (cond-> (board-view {:board board
                          :links links})
       (not (components/hx-request? request)) components/base
-      true server-utils/render-html)))
+      true reitit-extras/render-html)))
 
 (defn add-link-handler
   {:malli/schema [:=> [:cat :map] :map]}

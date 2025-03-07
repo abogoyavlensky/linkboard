@@ -2,7 +2,7 @@
   (:require [linkboard.components :as components]
             [linkboard.db :as db]
             [linkboard.icons :as icons]
-            [linkboard.utils.server :as server-utils]))
+            [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user
 (def USER-ID 1)
@@ -90,12 +90,11 @@
                              :left-join [[:link :l] [:= :b.id :l.board-id]]
                              :where [:= :b.user-id USER-ID]
                              :group-by [:b.id :b.title]
-                             :order-by [[:b.created_at :desc]]})]
-
-    (cond-> (boards-view {:boards boards
-                          :all-links-count all-links-count})
-      (not (components/hx-request? request)) components/base
-      true server-utils/render-html)))
+                             :order-by [[:b.created_at :desc]]})
+        page-view (cond-> (boards-view {:boards boards
+                                        :all-links-count all-links-count})
+                    (not (components/hx-request? request)) components/base)]
+    (reitit-extras/render-html page-view)))
 
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -116,4 +115,4 @@
                              :order-by [[:b.created_at :desc]]})]
     (-> {:boards boards}
       (board-list)
-      (server-utils/render-html))))
+      (reitit-extras/render-html))))
