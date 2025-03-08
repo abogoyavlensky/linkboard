@@ -29,20 +29,7 @@
       {:exception pretty/exception
        :data {:muuntaja muuntaja-core/instance
               :coercion coercion-malli/coercion
-              :middleware [; enable cookies
-                           ring-cookies/wrap-cookies
-
-                           ; TODO: move to the top level middleware!
-                           ; store session in cookies
-                           [ring-session/wrap-session
-                            {:cookie-attrs {:secure true
-                                            :http-only true}
-                             :store (ring-session-cookie/cookie-store
-                                      {:key (-> options
-                                              :session-secret-key
-                                              reitit-extras/string->16-byte-array)})}]
-
-                           ; add handler options to request
+              :middleware [; add handler options to request
                            [reitit-extras/wrap-context context]
                            ; parse any request parameters
                            ring-parameters/parameters-middleware
@@ -67,7 +54,14 @@
         {:not-found (fn [_]
                       {:status 404
                        ; TODO: add common html!
-                       :body "Not found"})}))))
+                       :body "Not found"})})
+      {:middleware [ring-cookies/wrap-cookies
+                    [ring-session/wrap-session
+                     {:cookie-attrs {:secure true
+                                     :http-only true}
+                      :store (ring-session-cookie/cookie-store
+                               {:key (reitit-extras/string->16-byte-array
+                                       (:session-secret-key options))})}]]})))
 
 (defmethod ig/assert-key ::server
   [_ params]

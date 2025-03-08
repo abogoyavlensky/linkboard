@@ -20,7 +20,6 @@
 
 (defn base
   "Base component for html page."
-  {:malli/schema [:=> [:cat :map [:vector :any]] [:sequential :any]]}
   [router content]
   (list
     (hiccup/raw "<!DOCTYPE html>")
