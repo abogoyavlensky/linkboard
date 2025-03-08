@@ -98,8 +98,8 @@
     (if (components/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (components/base router)
-           (reitit-extras/render-html)))))
+        (components/base router)
+        (reitit-extras/render-html)))))
 
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
