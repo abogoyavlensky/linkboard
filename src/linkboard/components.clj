@@ -1,6 +1,8 @@
 (ns linkboard.components
   (:require [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
+            [linkboard.routes :as-alias r]
+            [reitit-extras.core :as reitit-extras]
             [ring.middleware.anti-forgery :as anti-forgery]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
@@ -18,8 +20,8 @@
 
 (defn base
   "Base component for html page."
-  {:malli/schema [:=> [:cat [:vector :any]] [:sequential :any]]}
-  [content]
+  {:malli/schema [:=> [:cat :map [:vector :any]] [:sequential :any]]}
+  [router content]
   (list
     (hiccup/raw "<!DOCTYPE html>")
     [:html
@@ -48,7 +50,7 @@
         {:class ["px-4" "pt-2" "pb-4" "mb-12" "flex" "justify-between" "items-center"]}
         [:div
          [:a
-          {:hx-get "/"
+          {:hx-get (reitit-extras/get-route router ::r/home-page)
            :hx-target "#content"
            :hx-push-url "true"}
           [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]

@@ -2,19 +2,20 @@
   (:require [linkboard.components :as components]
             [linkboard.db :as db]
             [linkboard.icons :as icons]
+            [linkboard.routes :as-alias r]
             [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user
 (def USER_ID 1)
 
 (defn- board-view
-  [{:keys [board links]}]
+  [router {:keys [board links]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:a {:class ["text-blue-500" "hover:text-blue-600"]
-          :hx-get "/"
+          :hx-get (reitit-extras/get-route router ::r/home-page)
           :hx-target "#content"
           :hx-push-url "true"}
       icons/chevron-left]
@@ -24,7 +25,7 @@
      (components/modal
        {:open-btn-text [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]
         :title "Add link"
-        :hx-post (format "/boards/%s/links" (:id board))
+        :hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
         :hx-target "#content"
         :form-fields (list
                        [:input
@@ -74,6 +75,7 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [path]} :parameters
+    router :reitit.core/router
     :as request}]
   (let [board (->> {:select [:*]
                     :from [:board]
@@ -89,11 +91,15 @@
                             [:= :b.user-id USER_ID]
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
-                (db/exec! db))]
-    (cond-> (board-view {:board board
-                         :links links})
-      (not (components/hx-request? request)) components/base
-      true reitit-extras/render-html)))
+                (db/exec! db))
+        page-view (board-view router {:board board
+                                      :links links})]
+
+    (if (components/hx-request? request)
+      (reitit-extras/render-html page-view)
+      (->> page-view
+           (components/base router)
+           (reitit-extras/render-html)))))
 
 (defn add-link-handler
   {:malli/schema [:=> [:cat :map] :map]}

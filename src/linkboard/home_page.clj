@@ -2,16 +2,17 @@
   (:require [linkboard.components :as components]
             [linkboard.db :as db]
             [linkboard.icons :as icons]
+            [linkboard.routes :as-alias r]
             [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user
 (def USER-ID 1)
 
 (defn- list-item
-  [board]
+  [router board]
   ; TODO: make this component common
   [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "mt-4" "cursor-pointer"]
-       :hx-get (format "/boards/%s" (:id board))
+       :hx-get (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
        :hx-target "#content"
        :hx-push-url "true"}
    [:div {:class ["flex" "items-center" "gap-3"]}
@@ -28,12 +29,12 @@
              :stroke-width "2"}]]]])
 
 (defn- board-list
-  [{:keys [boards]}]
+  [router {:keys [boards]}]
   (list (for [board boards]
-          (list-item board))))
+          (list-item router board))))
 
 (defn- boards-view
-  [{:keys [boards all-links-count]}]
+  [router {:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
@@ -55,7 +56,7 @@
      [:div (components/modal
              {:open-btn-text icons/plus
               :title "Create board"
-              :hx-post "/boards"
+              :hx-post (reitit-extras/get-route router ::r/board-list)
               :hx-target "#board-list"
               :form-fields (list
                              [:input
@@ -71,11 +72,12 @@
                                :autofocus true
                                :placeholder "Enter board name"}])})]]
     [:div#board-list
-     (board-list {:boards boards})]]])
+     (board-list router {:boards boards})]]])
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
+    router :reitit.core/router
     :as request}]
   (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
@@ -91,15 +93,19 @@
                              :where [:= :b.user-id USER-ID]
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
-        page-view (cond-> (boards-view {:boards boards
-                                        :all-links-count all-links-count})
-                    (not (components/hx-request? request)) components/base)]
-    (reitit-extras/render-html page-view)))
+        page-view (boards-view router {:boards boards
+                                       :all-links-count all-links-count})]
+    (if (components/hx-request? request)
+      (reitit-extras/render-html page-view)
+      (->> page-view
+           (components/base router)
+           (reitit-extras/render-html)))))
 
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
-    {:keys [form]} :parameters}]
+    {:keys [form]} :parameters
+    router :reitit.core/router}]
   ; Create a new board
   (->> {:insert-into :board
         :values [{:title (:title form)
@@ -113,6 +119,6 @@
                              :where [:= :b.user-id USER-ID]
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})]
-    (-> {:boards boards}
-      (board-list)
+    (->> {:boards boards}
+      (board-list router)
       (reitit-extras/render-html))))
