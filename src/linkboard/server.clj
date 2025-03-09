@@ -28,14 +28,14 @@
   [_ {:keys [options]
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
-  (let [handler-config {:routes app-routes/routes
-                        :default-handlers {:not-found (fn [_]
-                                                        {:status 404
-                                                         ; TODO: add common html!
-                                                         :body "Not found"})}}
-        ring-handler (reitit-extras/get-handler-ssr handler-config context)]
-    (jetty/run-jetty ring-handler {:port (:port options)
-                                   :join? false})))
+  (-> {:routes app-routes/routes
+       :default-handlers {:not-found (fn [_]
+                                       {:status 404
+                                        ; TODO: add common html!
+                                        :body "Not found"})}}
+      (reitit-extras/get-handler-ssr context)
+      (jetty/run-jetty {:port (:port options)
+                        :join? false})))
 
 (defmethod ig/halt-key! ::server
   [_ server]

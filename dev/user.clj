@@ -8,7 +8,6 @@
             [integrant.repl.state :as state]
             [integrant-extras.core :as ig-extras]))
 
-
 (repl/set-refresh-dirs "dev" "src" "test")
 
 ; Malli schema instrumentation
@@ -17,7 +16,7 @@
 (defn reset
   "Restart system."
   []
-  (ig-repl/set-prep! #(ig-extras/get-config :dev "config.dev.edn"))
+  (ig-repl/set-prep! #(ig-extras/read-config :dev "config.dev.edn"))
   (ig-repl/reset))
 
 (defn stop

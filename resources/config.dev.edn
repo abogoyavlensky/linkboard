@@ -1,2 +1,2 @@
 #merge [#include "config.edn"
-        {:linkboard.process/process {:cmd ["bb" "css-watch"]}}]
+        {:integrant-extras.process/process {:cmd ["bb" "css-watch"]}}]

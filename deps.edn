@@ -5,8 +5,8 @@
         ; system & config
         integrant/integrant {:mvn/version "0.13.1"}
         ; TODO: bump version
-        ;io.github.abogoyavlensky/integrant-extras {:mvn/version "0.1.0-SNAPSHOT"}
-        io.github.abogoyavlensky/integrant-extras {:local/root "../integrant-extras"}
+        io.github.abogoyavlensky/integrant-extras {:mvn/version "0.1.2-SNAPSHOT"}
+        ;io.github.abogoyavlensky/integrant-extras {:local/root "../integrant-extras"}
         ; server
         metosin/reitit {:mvn/version "0.7.2"}
         io.github.abogoyavlensky/reitit-extras {:mvn/version "0.1.14"}
