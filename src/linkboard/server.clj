@@ -33,9 +33,9 @@
                                        {:status 404
                                         ; TODO: add common html!
                                         :body "Not found"})}}
-      (reitit-extras/get-handler-ssr context)
-      (jetty/run-jetty {:port (:port options)
-                        :join? false})))
+    (reitit-extras/get-handler-ssr context)
+    (jetty/run-jetty {:port (:port options)
+                      :join? false})))
 
 (defmethod ig/halt-key! ::server
   [_ server]
