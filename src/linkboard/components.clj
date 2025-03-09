@@ -2,8 +2,7 @@
   (:require [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
             [linkboard.routes :as-alias r]
-            [reitit-extras.core :as reitit-extras]
-            [ring.middleware.anti-forgery :as anti-forgery]))
+            [reitit-extras.core :as reitit-extras]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
@@ -76,13 +75,6 @@
                 :src "/assets/js/alpinejs.3.14.3.min.js"
                 :defer true}]]]))
 
-(defn csrf-token
-  []
-  [:input {:type "hidden"
-           :name "__anti-forgery-token"
-           :id "__anti-forgery-token"
-           :value (force anti-forgery/*anti-forgery-token*)}])
-
 (defn modal
   [{:keys [title open-btn-text hx-post hx-target form-fields]}]
   [:div.relative.w-auto.h-auto
@@ -138,7 +130,7 @@
       {:class ["relative" "w-auto" "pb-8"]}
       [:div
        {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (csrf-token)
+       (reitit-extras/csrf-token)
        form-fields]]
      [:div
       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}

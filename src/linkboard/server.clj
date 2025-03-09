@@ -3,77 +3,9 @@
             [integrant.core :as ig]
             [linkboard.routes :as app-routes]
             [linkboard.utils.system :as system-utils]
-            [muuntaja.core :as muuntaja-core]
             [reitit-extras.core :as reitit-extras]
-            [reitit.coercion.malli :as coercion-malli]
-            [reitit.dev.pretty :as pretty]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as ring-coercion]
-            [reitit.ring.middleware.multipart :as ring-multipart]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.ring.middleware.parameters :as ring-parameters]
-            [ring.adapter.jetty :as jetty]
-            [ring.middleware.anti-forgery :as ring-anti-forgery]
-            [ring.middleware.content-type :as content-type]
-            [ring.middleware.cookies :as ring-cookies]
-            [ring.middleware.default-charset :as default-charset]
-            [ring.middleware.not-modified :as not-modified]
-            [ring.middleware.session :as ring-session]
-            [ring.middleware.session.cookie :as ring-session-cookie]
-            [ring.middleware.x-headers :as x-headers])
+            [ring.adapter.jetty :as jetty])
   (:import com.zaxxer.hikari.HikariDataSource))
-
-(defn- handler
-  "Return main application handler."
-  [{:keys [options]
-    :as context}]
-  (let [session-store (ring-session-cookie/cookie-store
-                        {:key (reitit-extras/string->16-byte-array
-                                (:session-secret-key options))})]
-    (ring/ring-handler
-      (ring/router
-        app-routes/routes
-        {:exception pretty/exception
-         :data {:muuntaja muuntaja-core/instance
-                :coercion coercion-malli/coercion
-                :middleware [[x-headers/wrap-content-type-options :nosniff]
-                             [x-headers/wrap-frame-options :sameorigin]
-                             not-modified/wrap-not-modified
-                             content-type/wrap-content-type
-                             [default-charset/wrap-default-charset "utf-8"]
-                             ring-cookies/wrap-cookies
-                             [ring-session/wrap-session
-                              {:cookie-attrs {:secure true
-                                              :http-only true}
-                               :flash true
-                               :store session-store}]
-                             ; add handler options to request
-                             [reitit-extras/wrap-context context]
-                             ; parse any request parameters
-                             ring-parameters/parameters-middleware
-                             ; send files
-                             ring-multipart/multipart-middleware
-                             ; negotiate request and response
-                             muuntaja/format-middleware
-                             ; Check CSRF token
-                             ; add call (linkboard.components/csrf-token) to a form
-                             ring-anti-forgery/wrap-anti-forgery
-                             ; handle exceptions
-                             reitit-extras/exception-middleware
-                             ; coerce request and response to spec
-                             ring-coercion/coerce-exceptions-middleware
-                             ring-coercion/coerce-request-middleware
-                             ring-coercion/coerce-response-middleware]}})
-      (ring/routes
-        (reitit-extras/create-resource-handler-cached {:path "/assets/"
-                                                       :cached? (:cache-assets? options)
-                                                       :cache-control (:cache-control options)})
-        (ring/redirect-trailing-slash-handler)
-        (ring/create-default-handler
-          {:not-found (fn [_]
-                        {:status 404
-                         ; TODO: add common html!
-                         :body "Not found"})})))))
 
 (defmethod ig/assert-key ::server
   [_ params]
@@ -96,9 +28,12 @@
   [_ {:keys [options]
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
-  (let [ring-handler (if (:auto-reload? options)
-                       (reitit-extras/wrap-reload #(handler context))
-                       (handler context))]
+  (let [handler-config {:routes app-routes/routes
+                        :default-handlers {:not-found (fn [_]
+                                                        {:status 404
+                                                         ; TODO: add common html!
+                                                         :body "Not found"})}}
+        ring-handler (reitit-extras/get-handler-ssr handler-config context)]
     (jetty/run-jetty ring-handler {:port (:port options)
                                    :join? false})))
 
