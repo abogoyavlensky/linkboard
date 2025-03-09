@@ -2,14 +2,14 @@
   (:require [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [linkboard.routes :as app-routes]
-            [linkboard.utils.system :as system-utils]
+            [integrant-extras.core :as ig-extras]
             [reitit-extras.core :as reitit-extras]
             [ring.adapter.jetty :as jetty])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defmethod ig/assert-key ::server
   [_ params]
-  (system-utils/validate-schema!
+  (ig-extras/validate-schema!
     {:component ::server
      :data params
      :schema [:map

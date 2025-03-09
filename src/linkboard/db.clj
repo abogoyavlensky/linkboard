@@ -3,7 +3,7 @@
             [hikari-cp.core :as cp]
             [honey.sql :as honey]
             [integrant.core :as ig]
-            [linkboard.utils.system :as system-utils]
+            [integrant-extras.core :as ig-extras]
             [next.jdbc :as jdbc]
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
@@ -31,7 +31,7 @@
 
 (defmethod ig/assert-key ::db
   [_ params]
-  (system-utils/validate-schema!
+  (ig-extras/validate-schema!
     {:component ::db
      :data params
      :schema [:map

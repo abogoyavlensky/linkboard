@@ -2,11 +2,11 @@
   (:require [clojure.java.process :as process]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
-            [linkboard.utils.system :as system-utils]))
+            [integrant-extras.core :as ig-extras]))
 
 (defmethod ig/assert-key ::process
   [_ params]
-  (system-utils/validate-schema!
+  (ig-extras/validate-schema!
     {:component ::process
      :data params
      :schema [:map

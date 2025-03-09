@@ -6,7 +6,7 @@
             [eftest.report.pretty :as eftest-report]
             [integrant.repl :as ig-repl]
             [integrant.repl.state :as state]
-            [linkboard.utils.system :as system-utils]))
+            [integrant-extras.core :as ig-extras]))
 
 
 (repl/set-refresh-dirs "dev" "src" "test")
@@ -17,7 +17,7 @@
 (defn reset
   "Restart system."
   []
-  (ig-repl/set-prep! #(system-utils/config :dev "config.dev.edn"))
+  (ig-repl/set-prep! #(ig-extras/get-config :dev "config.dev.edn"))
   (ig-repl/reset))
 
 (defn stop

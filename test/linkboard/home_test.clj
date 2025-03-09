@@ -1,21 +1,21 @@
 (ns linkboard.home-test
   (:require [clojure.test :refer :all]
             [etaoin.api :as etaoin]
+            [integrant-extras.tests :as ig-extras]
             [linkboard.db :as db]
             [linkboard.server :as-alias server]
-            [linkboard.test-utils :as test-utils]
             [linkboard.webdriver :as-alias webdriver]
             [reitit-extras.tests :as reitit-extras]))
 
 ; TODO: run system once
 (use-fixtures :each
-  (test-utils/with-system "config.e2e.edn"))
+  (ig-extras/with-system "config.e2e.edn"))
 
 ; TODO: improve test
 (deftest test-home-page-list-boards-ok
-  (let [db (::db/db test-utils/*test-system*)
-        driver (get-in test-utils/*test-system* [::webdriver/webdriver :driver])
-        server (::server/server test-utils/*test-system*)
+  (let [db (::db/db ig-extras/*test-system*)
+        driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
+        server (::server/server ig-extras/*test-system*)
         url (reitit-extras/get-server-url server :container)]
 
     (->> {:insert-into :user
