@@ -1,8 +1,8 @@
 (ns linkboard.process
   (:require [clojure.java.process :as process]
             [clojure.tools.logging :as log]
-            [integrant.core :as ig]
-            [integrant-extras.core :as ig-extras]))
+            [integrant-extras.core :as ig-extras]
+            [integrant.core :as ig]))
 
 (defmethod ig/assert-key ::process
   [_ params]

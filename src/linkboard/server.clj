@@ -1,8 +1,8 @@
 (ns linkboard.server
   (:require [clojure.tools.logging :as log]
+            [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
             [linkboard.routes :as app-routes]
-            [integrant-extras.core :as ig-extras]
             [reitit-extras.core :as reitit-extras]
             [ring.adapter.jetty :as jetty])
   (:import com.zaxxer.hikari.HikariDataSource))

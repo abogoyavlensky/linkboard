@@ -2,8 +2,8 @@
   (:require [clojure.tools.logging :as log]
             [hikari-cp.core :as cp]
             [honey.sql :as honey]
-            [integrant.core :as ig]
             [integrant-extras.core :as ig-extras]
+            [integrant.core :as ig]
             [next.jdbc :as jdbc]
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
