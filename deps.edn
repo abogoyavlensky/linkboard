@@ -13,7 +13,7 @@
         io.github.abogoyavlensky/reitit-extras {:mvn/version "0.1.11"}
         ;io.github.abogoyavlensky/reitit-extras {:local/root "../reitit-extras"}
         ; TODO: remove!
-        ring/ring-defaults {:mvn/version "0.3.4"}
+        ring/ring-defaults {:mvn/version "0.6.0"}
         ; db
         hikari-cp/hikari-cp {:mvn/version "3.2.0"}
         org.xerial/sqlite-jdbc {:mvn/version "3.49.1.0"}
