@@ -24,3 +24,4 @@ log/
 resources/public/css/output.*
 .aider*
 .testcontainers.properties
+output/

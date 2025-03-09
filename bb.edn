@@ -45,6 +45,6 @@
          :requires ([assets :as assets])
          :task (do
                  (run 'css-build)
-                 (assets/hash-css! {:asset-file output-css-file
-                                    :target-file "src/linkboard/components.clj"})
+                 (assets/hash-asset-file! {:asset-file output-css-file
+                                           :target-file "src/linkboard/components.clj"})
                  (clojure "-T:build build"))}}}
