@@ -1,8 +1,15 @@
 (ns linkboard.core
   (:gen-class)
-  (:require [integrant-extras.core :as ig-extras]))
+  (:require [integrant-extras.core :as ig-extras]
+            [resauce.core :as resauce]))
+
+
 
 (defn -main
   "Run application system in production env."
   []
-  (ig-extras/run-system {:profile :prod}))
+
+  (prn (resauce/resource-dir "public/css"))
+
+
+  #_(ig-extras/run-system {:profile :prod}))

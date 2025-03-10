@@ -25,3 +25,4 @@ resources/public/css/output.*
 .aider*
 .testcontainers.properties
 output/
+resources-hashed/

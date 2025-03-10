@@ -19,6 +19,27 @@
     ; update output asset file name with hash in target file
     (fs/update-file target-file #(str/replace % asset-file-name asset-file-name-hashed))))
 
+(defn hash-asset-file!-NEW
+  [{:keys [asset-file]}]
+  (let [content (slurp asset-file)
+        content-hash (digest/md5 content)
+        asset-file-name (fs/file-name asset-file)
+        [asset-file-name-no-ext asset-file-ext] (fs/split-ext asset-file-name)
+        asset-file-name-hashed (format "%s.%s.%s" asset-file-name-no-ext content-hash asset-file-ext)
+        ;asset-file-path-hashed (fs/file (fs/parent asset-file) asset-file-name-hashed)
+        target-dir (fs/parent (str/replace asset-file #"^resources/" "resources-hashed/"))
+        ;asset-file-path-hashed (fs/file "resources-hashed" "public" "css" asset-file-name-hashed)
+        asset-file-path-hashed (fs/file target-dir asset-file-name-hashed)]
+
+    (when-not (fs/exists? (fs/parent asset-file-path-hashed))
+      (fs/create-dirs (fs/parent asset-file-path-hashed)))
+
+    ; create hashed asset file
+    (spit asset-file-path-hashed content)
+    asset-file-path-hashed))
+    ; update output asset file name with hash in target file
+    ;(fs/update-file target-file #(str/replace % asset-file-name asset-file-name-hashed))))
+
 (defn fetch-js!
   "Fetches a JavaScript file from a URL and saves it to resources/public/js directory with version in the filename.
    
@@ -74,3 +95,17 @@
                  :version "2.0.4"}]]
     (doseq [item assets]
       (fetch-js! item))))
+
+(comment
+  (fs/list-dir "resources/public")
+  (fs/components "resources/public")
+  (doseq [file (->> (file-seq (fs/file "resources/public"))
+                    (remove #(fs/directory? %))
+                    ; TODO: move as is!
+                    (remove #(contains? #{"json"} (fs/extension %))))]
+    (let [file-path (.getPath file)]
+          ;new-path (str/replace file-path #"^resources/" "resources-hashed/")]
+      ; TODO: generate manifest.edn
+      (prn (hash-asset-file!-NEW {:asset-file file-path})))))
+      ;(println new-path))))
+    ;(println (.getPath file))))
