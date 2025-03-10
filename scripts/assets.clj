@@ -106,6 +106,21 @@
     (let [file-path (.getPath file)]
           ;new-path (str/replace file-path #"^resources/" "resources-hashed/")]
       ; TODO: generate manifest.edn
-      (prn (hash-asset-file!-NEW {:asset-file file-path})))))
+      (prn (.getPath (hash-asset-file!-NEW {:asset-file file-path}))))))
       ;(println new-path))))
     ;(println (.getPath file))))
+
+(comment
+  (let [asset-files (->> (file-seq (fs/file "resources/public"))
+                         (remove #(fs/directory? %))
+                         ; TODO: move as is!
+                         (remove #(contains? #{"json"} (fs/extension %))))
+        manifest-map (reduce
+                       (fn [manifest file]
+                         (let [source-file-relative (str/replace file #"^resources/public/" "")
+                               output-file (hash-asset-file!-NEW {:asset-file (.getPath file)})
+                               output-file-relative (str/replace (.getPath output-file) #"^resources-hashed/public/" "")]
+                           (assoc manifest source-file-relative output-file-relative)))
+                       {}
+                       asset-files)]
+    (spit (fs/file "resources-hashed" "manifest.edn") (pr-str manifest-map))))
