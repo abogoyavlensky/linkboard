@@ -20,14 +20,13 @@
     (fs/update-file target-file #(str/replace % asset-file-name asset-file-name-hashed))))
 
 (defn hash-asset-file!-NEW
-  [{:keys [asset-file]}]
+  [{:keys [asset-file target-dir]}]
   (let [content (slurp asset-file)
         content-hash (digest/md5 content)
         asset-file-name (fs/file-name asset-file)
         [asset-file-name-no-ext asset-file-ext] (fs/split-ext asset-file-name)
         asset-file-name-hashed (format "%s.%s.%s" asset-file-name-no-ext content-hash asset-file-ext)
         ;asset-file-path-hashed (fs/file (fs/parent asset-file) asset-file-name-hashed)
-        target-dir (fs/parent (str/replace asset-file #"^resources/" "resources-hashed/"))
         ;asset-file-path-hashed (fs/file "resources-hashed" "public" "css" asset-file-name-hashed)
         asset-file-path-hashed (fs/file target-dir asset-file-name-hashed)]
 
@@ -111,16 +110,19 @@
     ;(println (.getPath file))))
 
 (comment
-  (let [asset-files (->> (file-seq (fs/file "resources/public"))
+  (let [asset-files (->> (file-seq (fs/file "resources" "public"))
                          (remove #(fs/directory? %))
                          ; TODO: move as is!
                          (remove #(contains? #{"json"} (fs/extension %))))
         manifest-map (reduce
                        (fn [manifest file]
                          (let [source-file-relative (str/replace file #"^resources/public/" "")
-                               output-file (hash-asset-file!-NEW {:asset-file (.getPath file)})
+                               target-dir (fs/parent (str/replace (.getPath file) #"^resources/" "resources-hashed/"))
+                               output-file (hash-asset-file!-NEW {:asset-file (.getPath file)
+                                                                  :target-dir target-dir})
                                output-file-relative (str/replace (.getPath output-file) #"^resources-hashed/public/" "")]
                            (assoc manifest source-file-relative output-file-relative)))
                        {}
                        asset-files)]
     (spit (fs/file "resources-hashed" "manifest.edn") (pr-str manifest-map))))
+
