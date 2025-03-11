@@ -4,7 +4,6 @@
             [clj-commons.digest :as digest]
             [babashka.http-client :as http]))
 
-(def ^:private ASSET-DIR-JS "resources/public/js")
 (def DEFAULT-RESOURCES-DIR "resources")
 (def DEFAULT-PUBLIC-DIR "public")
 (def DEFAULT-RESOURCES-HASHED-DIR "resources-hashed")
@@ -43,61 +42,47 @@
     ; update output asset file name with hash in target file
     ;(fs/update-file target-file #(str/replace % asset-file-name asset-file-name-hashed))))
 
-(defn fetch-js!
-  "Fetches a JavaScript file from a URL and saves it to resources/public/js directory with version in the filename.
+(defn fetch-assets!
+  "Fetches an asset file from a URL and saves it to resources/public directory.
    
    Parameters:
    - url: URL to fetch the JavaScript file from
-   - name: Base name for the file (without extension)
-   - version: Version string to include in the filename
-   - target-file: Optional file to update references in (similar to hash-css!)
-   - old-reference: Optional string to replace in target-file
-   
+   - filepath: Path to save the file, relative to resources/public
+
    Returns the path to the saved file."
-  [{:keys [url-template filename-template version target-file old-reference]}]
-  (let [js-dir ASSET-DIR-JS
-        url (str/replace url-template #"\{\{VERSION\}\}" version)
-        filename (str/replace filename-template #"\{\{VERSION\}\}" version)
-        filepath (str js-dir "/" filename)]
+  [{:keys [url filepath]} target-dir]
+  (let [target-filepath (fs/file target-dir filepath)]
 
     ; Create js directory if it doesn't exist
-    (when-not (fs/exists? js-dir)
-      (fs/create-dirs js-dir))
+    (when-not (fs/exists? (fs/parent target-filepath))
+      (fs/create-dirs (fs/parent target-filepath)))
 
     ; Fetch the file and save it
-    (println (format "Fetching %s from %s" filename url))
+    (println (format "Fetching %s from %s" filepath url))
     (let [response (http/get url)
           content (:body response)]
       (if (= 200 (:status response))
         (do
           ; Save the file
-          (fs/create-dirs (fs/parent filepath))
-          (spit filepath content)
-          (println (format "Saved %s" filepath))
-          
-          ;; Update references in target file if provided
-          ;(when (and target-file old-reference)
-          ;  (fs/update-file target-file #(str/replace % old-reference filename)))
-          
-          filepath)
-        (throw (ex-info "Failed to fetch JavaScript file" 
-                       {:url url :status (:status response)}))))))
+          (spit target-filepath content)
+          (println (format "Saved to %s" target-filepath)))
+        (throw (ex-info "Failed to fetch JavaScript file"
+                       {:url url
+                        :status (:status response)
+                        :response (:body response)}))))))
 
 
 
 (comment
-  (let [url "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"
-        assets [{:url-template "https://cdn.jsdelivr.net/npm/alpinejs@{{VERSION}}/dist/cdn.min.js"
-                 :filename-template "alpinejs.{{VERSION}}.min.js"
-                 :version "3.14.8"}
-                {:url-template "https://cdn.jsdelivr.net/npm/@alpinejs/focus@{{VERSION}}/dist/cdn.min.js"
-                 :filename-template "alpinejs.focus.{{VERSION}}.min.js"
-                 :version "3.14.8"}
-                {:url-template "https://unpkg.com/htmx.org@{{VERSION}}/dist/htmx.min.js"
-                 :filename-template "htmx.{{VERSION}}.min.js"
-                 :version "2.0.4"}]]
+  (let [assets [{:url "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"
+                 :filepath "js/alpinejs.min.js"}
+                {:url "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.14.8/dist/cdn.min.js"
+                 :filepath "js/alpinejs.focus.min.js"}
+                {:url "https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"
+                 :filepath "js/htmx.min.js"}]
+        target-dir (.getPath (fs/file DEFAULT-RESOURCES-DIR DEFAULT-PUBLIC-DIR))]
     (doseq [item assets]
-      (fetch-js! item))))
+      (fetch-assets! item target-dir))))
 
 (comment
   (fs/list-dir "resources/public")
