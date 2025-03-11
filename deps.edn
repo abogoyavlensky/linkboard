@@ -40,4 +40,4 @@
            :build {:deps {io.github.abogoyavlensky/slim {:mvn/version "0.3.1"}}
                    :ns-default slim.app
                    :exec-args {:main-ns linkboard.core
-                               :src-dirs ["src" "resources-hashed"]}}}}
+                               :src-dirs ["src" "resources" "resources-hashed"]}}}}

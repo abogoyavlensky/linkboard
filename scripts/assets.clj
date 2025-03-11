@@ -5,6 +5,10 @@
             [babashka.http-client :as http]))
 
 (def ^:private ASSET-DIR-JS "resources/public/js")
+(def DEFAULT-RESOURCES-DIR "resources")
+(def DEFAULT-PUBLIC-DIR "public")
+(def DEFAULT-RESOURCES-HASHED-DIR "resources-hashed")
+(def DEFAULT-MANIFEST-FILE "manifest.edn")
 
 (defn hash-asset-file!
   [{:keys [asset-file target-file]}]
@@ -110,19 +114,25 @@
     ;(println (.getPath file))))
 
 (comment
-  (let [asset-files (->> (file-seq (fs/file "resources" "public"))
-                         (remove #(fs/directory? %))
-                         ; TODO: move as is!
-                         (remove #(contains? #{"json"} (fs/extension %))))
+  (let [asset-files (->> (file-seq (fs/file DEFAULT-RESOURCES-DIR DEFAULT-PUBLIC-DIR))
+                         (remove #(fs/directory? %)))
         manifest-map (reduce
                        (fn [manifest file]
-                         (let [source-file-relative (str/replace file #"^resources/public/" "")
-                               target-dir (fs/parent (str/replace (.getPath file) #"^resources/" "resources-hashed/"))
+                         (let [source-file-relative (->> file
+                                                        (fs/components)
+                                                        (drop 2)
+                                                        (apply fs/file)
+                                                        .getPath)
+                               target-dir (->> (fs/components file)
+                                               (drop 1)
+                                               (concat [(fs/path DEFAULT-RESOURCES-HASHED-DIR)])
+                                               (apply fs/file)
+                                               (fs/parent))
+                               _ (prn file)
                                output-file (hash-asset-file!-NEW {:asset-file (.getPath file)
                                                                   :target-dir target-dir})
-                               output-file-relative (str/replace (.getPath output-file) #"^resources-hashed/public/" "")]
+                               output-file-relative (.getPath (apply fs/file (drop 2 (fs/components output-file))))]
                            (assoc manifest source-file-relative output-file-relative)))
                        {}
                        asset-files)]
-    (spit (fs/file "resources-hashed" "manifest.edn") (pr-str manifest-map))))
-
+    (spit (fs/file DEFAULT-RESOURCES-HASHED-DIR DEFAULT-MANIFEST-FILE) (pr-str manifest-map))))
