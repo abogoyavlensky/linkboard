@@ -21,8 +21,9 @@ log/
 .env
 .env.local
 *.sqlite*
-resources/public/css/output.*
 .aider*
 .testcontainers.properties
 output/
+resources/public/css/output.*
+*/manifest.edn
 resources-hashed/

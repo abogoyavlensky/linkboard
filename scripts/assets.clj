@@ -42,7 +42,7 @@
     ; update output asset file name with hash in target file
     ;(fs/update-file target-file #(str/replace % asset-file-name asset-file-name-hashed))))
 
-(defn fetch-assets!
+(defn- fetch-asset!
   "Fetches an asset file from a URL and saves it to resources/public directory.
    
    Parameters:
@@ -71,7 +71,11 @@
                         :status (:status response)
                         :response (:body response)}))))))
 
-
+(defn fetch-assets!
+  [assets-map]
+  (let [target-dir (.getPath (fs/file DEFAULT-RESOURCES-DIR DEFAULT-PUBLIC-DIR))]
+    (doseq [item assets-map]
+      (fetch-asset! item target-dir))))
 
 (comment
   (let [assets [{:url "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"
@@ -82,7 +86,7 @@
                  :filepath "js/htmx.min.js"}]
         target-dir (.getPath (fs/file DEFAULT-RESOURCES-DIR DEFAULT-PUBLIC-DIR))]
     (doseq [item assets]
-      (fetch-assets! item target-dir))))
+      (fetch-asset! item target-dir))))
 
 (comment
   (fs/list-dir "resources/public")

@@ -41,6 +41,16 @@
   css-build {:doc "Build minified css"
              :task (shell "tailwindcss" "-i" input-css-file "-o" output-css-file "--minify")}
 
+  fetch-assets {:doc "Fetch static file assets from URLs"
+                :requires ([assets :as assets])
+                :task (assets/fetch-assets!
+                        [{:url "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"
+                          :filepath "js/alpinejs.min.js"}
+                         {:url "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.14.8/dist/cdn.min.js"
+                          :filepath "js/alpinejs.focus.min.js"}
+                         {:url "https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"
+                          :filepath "js/htmx.min.js"}])}
+
   build {:doc "Build application uberjar"
          :requires ([assets :as assets])
          :task (do
