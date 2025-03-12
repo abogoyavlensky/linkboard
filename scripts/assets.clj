@@ -102,26 +102,33 @@
       ;(println new-path))))
     ;(println (.getPath file))))
 
-(comment
-  (let [asset-files (->> (file-seq (fs/file DEFAULT-RESOURCES-DIR DEFAULT-PUBLIC-DIR))
-                         (remove #(fs/directory? %)))
-        manifest-map (reduce
-                       (fn [manifest file]
-                         (let [source-file-relative (->> file
-                                                        (fs/components)
-                                                        (drop 2)
-                                                        (apply fs/file)
-                                                        .getPath)
-                               target-dir (->> (fs/components file)
-                                               (drop 1)
-                                               (concat [(fs/path DEFAULT-RESOURCES-HASHED-DIR)])
-                                               (apply fs/file)
-                                               (fs/parent))
-                               _ (prn file)
-                               output-file (hash-asset-file!-NEW {:asset-file (.getPath file)
-                                                                  :target-dir target-dir})
-                               output-file-relative (.getPath (apply fs/file (drop 2 (fs/components output-file))))]
-                           (assoc manifest source-file-relative output-file-relative)))
-                       {}
-                       asset-files)]
-    (spit (fs/file DEFAULT-RESOURCES-HASHED-DIR DEFAULT-MANIFEST-FILE) (pr-str manifest-map))))
+(defn hash-assets!
+  ([]
+   (hash-assets! {}))
+  ([{:keys [resource-dir public-dir resource-dir-target manifest-file]
+     :or {manifest-file DEFAULT-MANIFEST-FILE
+          resource-dir DEFAULT-RESOURCES-DIR
+          public-dir DEFAULT-PUBLIC-DIR
+          resource-dir-target DEFAULT-RESOURCES-HASHED-DIR}}]
+   (let [asset-files (->> (file-seq (fs/file resource-dir public-dir))
+                          (remove #(fs/directory? %)))
+         manifest-map (reduce
+                        (fn [manifest file]
+                          (let [source-file-relative (->> file
+                                                         (fs/components)
+                                                         (drop 2)
+                                                         (apply fs/file)
+                                                         .getPath)
+                                target-dir (->> (fs/components file)
+                                                (drop 1)
+                                                (concat [(fs/path resource-dir-target)])
+                                                (apply fs/file)
+                                                (fs/parent))
+                                _ (prn file)
+                                output-file (hash-asset-file!-NEW {:asset-file (.getPath file)
+                                                                   :target-dir target-dir})
+                                output-file-relative (.getPath (apply fs/file (drop 2 (fs/components output-file))))]
+                            (assoc manifest source-file-relative output-file-relative)))
+                        {}
+                        asset-files)]
+     (spit (fs/file resource-dir-target manifest-file) (pr-str manifest-map)))))
