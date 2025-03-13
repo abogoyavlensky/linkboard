@@ -14,22 +14,40 @@
 (use-fixtures :each
   test-utils/with-truncated-tables)
 
-; TODO: improve test
-(deftest test-home-page-list-boards-ok
-  (let [db (::db/db ig-extras/*test-system*)
-        driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
-        server (::server/server ig-extras/*test-system*)
-        url (reitit-extras/get-server-url server :container)]
+(deftest test-home-page-loads-correctly
+  (testing "Home page loads and displays correctly"
+    (let [db (::db/db ig-extras/*test-system*)
+          driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
+          server (::server/server ig-extras/*test-system*)
+          url (reitit-extras/get-server-url server :container)]
 
-    (->> {:insert-into :user
-          :values [{:sync_code "test-sync-code"}]}
-      (db/exec-one! db))
+      ;; Create test user
+      (db/exec-one! db {:insert-into :user
+                        :values [{:sync_code "test-sync-code"}]})
 
-    (etaoin/go driver url)
-    (etaoin/refresh driver)
-    (etaoin/wait-visible driver {:tag :h1
-                                 :fn/has-text "Linkboard"}
-      {:timeout 5})
+      ;; Create test boards
+      (db/exec-one! db {:insert-into :board
+                        :values [{:title "Test Board 1"
+                                  :user_id 1}]})
 
-    (is (= 1 (count (db/exec! db {:select [:*]
-                                  :from [:user]}))))))
+      ;; Navigate to home page
+      (etaoin/go driver url)
+      (etaoin/wait-visible driver {:tag :h1
+                                   :fn/has-text "Linkboard"}
+        {:timeout 5})
+
+      ;; Verify page elements
+      (is (etaoin/visible? driver {:tag :h1
+                                   :fn/has-text "Linkboard"}))
+      (is (etaoin/visible? driver {:tag :h2
+                                   :fn/has-text "MY BOARDS"}))
+
+      ;; Verify board is displayed
+      (is (etaoin/visible? driver {:tag :span
+                                   :fn/has-text "Test Board 1"}))
+
+      ;; Verify database state
+      (is (= 1 (count (db/exec! db {:select [:*]
+                                    :from [:user]}))))
+      (is (= 1 (count (db/exec! db {:select [:*]
+                                    :from [:board]})))))))
