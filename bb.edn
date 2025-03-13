@@ -1,5 +1,4 @@
-{; TODO: update to latest version
- :deps {io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.0-SNAPSHOT"}}
+{:deps {io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.0"}}
  :tasks
  {:init (do
           (def input-css-file "resources/public/css/input.css")
