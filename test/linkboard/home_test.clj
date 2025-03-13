@@ -4,12 +4,15 @@
             [integrant-extras.tests :as ig-extras]
             [linkboard.db :as db]
             [linkboard.server :as-alias server]
+            [linkboard.test-utils :as test-utils]
             [linkboard.webdriver :as-alias webdriver]
             [reitit-extras.tests :as reitit-extras]))
 
-; TODO: run system once
-(use-fixtures :each
+(use-fixtures :once
   (ig-extras/with-system "config.e2e.edn"))
+
+(use-fixtures :each
+  test-utils/with-truncated-tables)
 
 ; TODO: improve test
 (deftest test-home-page-list-boards-ok
@@ -28,5 +31,5 @@
                                  :fn/has-text "Linkboard"}
       {:timeout 5})
 
-    (is (= 2 (count (db/exec! db {:select [:*]
+    (is (= 1 (count (db/exec! db {:select [:*]
                                   :from [:user]}))))))
