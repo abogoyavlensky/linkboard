@@ -4,8 +4,8 @@
             [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
             [linkboard.routes :as-alias r]
-            [reitit-extras.core :as reitit-extras]
-            [manifest-edn.core :as manifest]))
+            [manifest-edn.core :as manifest]
+            [reitit-extras.core :as reitit-extras]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
