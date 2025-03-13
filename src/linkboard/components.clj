@@ -1,7 +1,5 @@
 (ns linkboard.components
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [hiccup2.core :as hiccup]
+  (:require [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
             [linkboard.routes :as-alias r]
             [manifest-edn.core :as manifest]
