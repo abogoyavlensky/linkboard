@@ -4,27 +4,10 @@
             [hiccup2.core :as hiccup]
             [linkboard.icons :as icons]
             [linkboard.routes :as-alias r]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as reitit-extras]
+            [manifest-edn.core :as manifest]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
-
-(def MANIFEST-FILE "manifest.edn")
-(def DEFAULT-ASSET-PREFIX "assets")
-
-(def read-manifest
-  (memoize
-    (fn [manifest-file]
-      (some-> manifest-file
-        (io/resource)
-        (slurp)
-        (edn/read-string)))))
-
-(defn asset
-  ([asset-file]
-   (asset DEFAULT-ASSET-PREFIX asset-file))
-  ([asset-prefix asset-file]
-   (let [manifest (read-manifest MANIFEST-FILE)]
-     (str "/" asset-prefix "/" (get manifest asset-file asset-file)))))
 
 (defn hx-request?
   [{:keys [headers]}]
@@ -52,12 +35,12 @@
       [:link {:rel "manifest"
               :href "/assets/manifest.json"}]
       [:link {:rel "icon"
-              :href (asset "images/favicon-1.png")}]
+              :href (manifest/asset "images/favicon-1.png")}]
       [:link {:rel "apple-touch-icon"
               :sizes "180x180"
-              :href (asset "images/apple-touch-icon-1.png")}]
+              :href (manifest/asset "images/apple-touch-icon-1.png")}]
       [:link {:type "text/css"
-              :href (asset "css/output.css")
+              :href (manifest/asset "css/output.css")
               :rel "stylesheet"}]
       [:title "Linkboard"]]
      [:body
@@ -87,12 +70,12 @@
          :class ["pb-12"]}
         content]]
       [:script {:type "text/javascript"
-                :src (asset "js/htmx.min.js")}]
+                :src (manifest/asset "js/htmx.min.js")}]
       [:script {:type "text/javascript"
-                :src (asset "js/alpinejs.focus.min.js")
+                :src (manifest/asset "js/alpinejs.focus.min.js")
                 :defer true}]
       [:script {:type "text/javascript"
-                :src (asset "js/alpinejs.min.js")
+                :src (manifest/asset "js/alpinejs.min.js")
                 :defer true}]]]))
 
 (defn modal

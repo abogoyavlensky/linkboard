@@ -9,6 +9,8 @@
         metosin/reitit {:mvn/version "0.7.2"}
         io.github.abogoyavlensky/reitit-extras {:mvn/version "0.1.14"}
         ring/ring-jetty-adapter {:mvn/version "1.13.0"}
+        ; TODO: update to latest version
+        io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.0-SNAPSHOT"}
         ; db
         hikari-cp/hikari-cp {:mvn/version "3.2.0"}
         org.xerial/sqlite-jdbc {:mvn/version "3.49.1.0"}
@@ -16,7 +18,7 @@
         com.github.seancorfield/honeysql {:mvn/version "2.6.1281"}
         dev.weavejester/ragtime {:mvn/version "0.11.0"}}
 
- :paths ["src" "resources" "resources-hashed"]
+ :paths ["src" "resources"]
 
  :aliases {:dev {:extra-paths ["dev"]
                  :extra-deps {integrant/repl {:mvn/version "0.4.0"}
