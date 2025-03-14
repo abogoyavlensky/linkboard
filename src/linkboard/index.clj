@@ -10,6 +10,7 @@
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
             :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
+    ; TODO: update with favicon!
     [:meta {:name "msapplication-TileColor"
             :content "#f9fafb"}]
     [:link {:rel "manifest"
@@ -27,11 +28,13 @@
    [:body
     content
     [:script {:type "text/javascript"
-              :src (manifest/asset "js/htmx.min.js")}]
+              :src (manifest/asset "js/htmx.min.js")
+              :defer true}]
     [:script {:type "text/javascript"
               :src (manifest/asset "js/alpinejs.min.js")
               :defer true}]]])
 
+; ========= TODO: Remove starter page  ========================
 (def starter-page
   (base
     [:div
@@ -134,3 +137,14 @@
          [:span {:class ["text-sm" "font-medium"]} "AlpineJS"]]]]]
      [:footer {:class ["py-6" "text-center" "text-sm" "text-slate-500"]}
       [:p "Made with ❤️ for the Clojure community"]]]))
+
+; ========= TODO: Remove starter page  ========================
+
+(def page-not-found
+  (base
+    [:div
+     {:class ["bg-slate-50" "text-slate-800" "min-h-screen" "flex" "flex-col"]}
+     [:main {:class ["flex" "items-center" "justify-center" "mt-56"]}
+      [:div {:class ["container" "mx-auto" "px-4" "max-w-4xl" "text-center"]}
+       [:h1 {:class ["text-5xl" "mb-6" "text-slate-900"]}
+         "Page not found"]]]]))

@@ -4,7 +4,8 @@
             [integrant.core :as ig]
             [linkboard.routes :as app-routes]
             [reitit-extras.core :as reitit-extras]
-            [ring.adapter.jetty :as jetty])
+            [ring.adapter.jetty :as jetty]
+            [linkboard.handlers :as handlers])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defmethod ig/assert-key ::server
@@ -29,10 +30,7 @@
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
   (-> {:routes app-routes/routes
-       :default-handlers {:not-found (fn [_]
-                                       {:status 404
-                                        ; TODO: add common html!
-                                        :body "Not found"})}}
+       :default-handlers {:not-found handlers/page-not-found}}
     (reitit-extras/get-handler-ssr context)
     (jetty/run-jetty {:port (:port options)
                       :join? false})))
