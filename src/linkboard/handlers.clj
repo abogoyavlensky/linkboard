@@ -5,5 +5,5 @@
 (defn index-handler
   [_]
   (-> index/starter-page
-      (index/base)
-      (reitit-extras/render-html)))
+    (index/base)
+    (reitit-extras/render-html)))
