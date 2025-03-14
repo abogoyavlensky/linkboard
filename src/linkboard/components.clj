@@ -1,6 +1,5 @@
 (ns linkboard.components
-  (:require [hiccup2.core :as hiccup]
-            [linkboard.icons :as icons]
+  (:require [linkboard.icons :as icons]
             [linkboard.routes :as-alias r]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as reitit-extras]))
@@ -21,60 +20,58 @@
 (defn base
   "Base component for html page."
   [router content]
-  (list
-    (hiccup/raw "<!DOCTYPE html>")
-    [:html
-     [:head
-      [:meta {:charset "UTF-8"}]
-      [:meta {:name "viewport"
-              :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
-      [:meta {:name "msapplication-TileColor"
-              :content "#f9fafb"}]
-      [:link {:rel "manifest"
-              :href "/assets/manifest.json"}]
-      [:link {:rel "icon"
-              :href (manifest/asset "images/favicon-1.png")}]
-      [:link {:rel "apple-touch-icon"
-              :sizes "180x180"
-              :href (manifest/asset "images/apple-touch-icon-1.png")}]
-      [:link {:type "text/css"
-              :href (manifest/asset "css/output.css")
-              :rel "stylesheet"}]
-      [:title "Linkboard"]]
-     [:body
-      {:class ["bg-gray-50"]}
+  [:html
+   [:head
+    [:meta {:charset "UTF-8"}]
+    [:meta {:name "viewport"
+            :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
+    [:meta {:name "msapplication-TileColor"
+            :content "#f9fafb"}]
+    [:link {:rel "manifest"
+            :href "/assets/manifest.json"}]
+    [:link {:rel "icon"
+            :href (manifest/asset "images/favicon-1.png")}]
+    [:link {:rel "apple-touch-icon"
+            :sizes "180x180"
+            :href (manifest/asset "images/apple-touch-icon-1.png")}]
+    [:link {:type "text/css"
+            :href (manifest/asset "css/output.css")
+            :rel "stylesheet"}]
+    [:title "Linkboard"]]
+   [:body
+    {:class ["bg-gray-50"]}
+    [:div
+     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
+     [:div
+      {:class ["px-4" "pt-2" "pb-4" "mb-12" "flex" "justify-between" "items-center"]}
       [:div
-       {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
-       [:div
-        {:class ["px-4" "pt-2" "pb-4" "mb-12" "flex" "justify-between" "items-center"]}
-        [:div
-         [:a
-          {:hx-get (reitit-extras/get-route router ::r/home-page)
-           :hx-target "#content"
-           :hx-push-url "true"}
-          [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
-         [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
-          [:p "Personal bookmark manager"]
-          [:a
-           {:href PROJECT-GITHUB-LINK
-            :target "_blank"}
-           icons/github]]]
-        [:div {:class ["flex" "gap-4"]}
-         [:a {:class ["text-blue-500" "text-lg"]
-              :href "#"} "Sync"]]]
-       [:div
-        {:id "content"
-         :hx-history-elt true
-         :class ["pb-12"]}
-        content]]
-      [:script {:type "text/javascript"
-                :src (manifest/asset "js/htmx.min.js")}]
-      [:script {:type "text/javascript"
-                :src (manifest/asset "js/alpinejs.focus.min.js")
-                :defer true}]
-      [:script {:type "text/javascript"
-                :src (manifest/asset "js/alpinejs.min.js")
-                :defer true}]]]))
+       [:a
+        {:hx-get (reitit-extras/get-route router ::r/home-page)
+         :hx-target "#content"
+         :hx-push-url "true"}
+        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
+       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
+        [:p "Personal bookmark manager"]
+        [:a
+         {:href PROJECT-GITHUB-LINK
+          :target "_blank"}
+         icons/github]]]
+      [:div {:class ["flex" "gap-4"]}
+       [:a {:class ["text-blue-500" "text-lg"]
+            :href "#"} "Sync"]]]
+     [:div
+      {:id "content"
+       :hx-history-elt true
+       :class ["pb-12"]}
+      content]]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/htmx.min.js")}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/alpinejs.focus.min.js")
+              :defer true}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/alpinejs.min.js")
+              :defer true}]]])
 
 (defn modal
   [{:keys [title open-btn-text hx-post hx-target form-fields]}]
