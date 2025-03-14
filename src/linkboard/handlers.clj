@@ -4,4 +4,6 @@
 
 (defn index-handler
   [_]
-  (reitit-extras/render-html index/base))
+  (-> index/starter-page
+      (index/base)
+      (reitit-extras/render-html)))
