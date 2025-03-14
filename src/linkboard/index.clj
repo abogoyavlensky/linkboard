@@ -34,7 +34,17 @@
               :src (manifest/asset "js/alpinejs.min.js")
               :defer true}]]])
 
+(defn error-page
+  [text]
+  (base
+    [:div
+     {:class ["bg-slate-50" "text-slate-800" "min-h-screen" "flex" "flex-col"]}
+     [:main {:class ["flex" "items-center" "justify-center" "mt-56"]}
+      [:div {:class ["container" "mx-auto" "px-4" "max-w-4xl" "text-center"]}
+       [:h1 {:class ["text-5xl" "mb-6" "text-slate-900"]} text]]]]))
+
 ; ========= TODO: Remove starter page  ========================
+
 (def starter-page
   (base
     [:div
@@ -139,12 +149,3 @@
       [:p "Made with ❤️ for the Clojure community"]]]))
 
 ; ========= TODO: Remove starter page  ========================
-
-(def page-not-found
-  (base
-    [:div
-     {:class ["bg-slate-50" "text-slate-800" "min-h-screen" "flex" "flex-col"]}
-     [:main {:class ["flex" "items-center" "justify-center" "mt-56"]}
-      [:div {:class ["container" "mx-auto" "px-4" "max-w-4xl" "text-center"]}
-       [:h1 {:class ["text-5xl" "mb-6" "text-slate-900"]}
-         "Page not found"]]]]))

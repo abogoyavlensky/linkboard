@@ -7,8 +7,9 @@
   [_]
   (reitit-extras/render-html index/starter-page))
 
-(defn page-not-found
-  [_]
-  (-> index/page-not-found
-      (reitit-extras/render-html)
-      (response/status 404)))
+(defn default-handler
+  [error-text]
+  (fn [_]
+    (-> (index/error-page error-text)
+        (reitit-extras/render-html)
+        (response/status 500))))
