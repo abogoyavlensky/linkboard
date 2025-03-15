@@ -12,15 +12,18 @@
             :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
     ; TODO: update with favicon!
     [:meta {:name "msapplication-TileColor"
-            :content "#f9fafb"}]
+            :content "#ffffff"}]
     [:link {:rel "manifest"
             :href "/assets/manifest.json"}]
     ; TODO: update favicon!
-    ;[:link {:rel "icon"
-    ;        :href (manifest/asset "images/favicon-1.png")}]
-    ;[:link {:rel "apple-touch-icon"
-    ;        :sizes "180x180"
-    ;        :href (manifest/asset "images/apple-touch-icon-1.png")}]
+    [:link {:rel "icon"
+            :href (manifest/asset "images/icon@32px.png")}]
+    [:link {:rel "icon"
+            :href (manifest/asset "images/icon.svg")
+            :type "image/svg+xml"}]
+    [:link {:rel "apple-touch-icon"
+            :sizes "180x180"
+            :href (manifest/asset "images/icon@180px.png")}]
     [:link {:type "text/css"
             :href (manifest/asset "css/output.css")
             :rel "stylesheet"}]
