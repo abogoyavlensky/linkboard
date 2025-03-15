@@ -34,7 +34,7 @@
       (etaoin/go driver url)
       (etaoin/wait-visible driver {:tag :h1
                                    :fn/has-text "Linkboard"}
-        {:timeout 5})
+                           {:timeout 5})
 
       ; Verify page elements
       (is (etaoin/visible? driver {:tag :h1
@@ -62,7 +62,7 @@
       (etaoin/go driver (str url "/index"))
       (etaoin/wait-visible driver {:tag :span
                                    :fn/has-text "Clojure Stack Lite"}
-        {:timeout 5})
+                           {:timeout 5})
 
       ; Verify page elements
       (is (etaoin/visible? driver {:tag :span

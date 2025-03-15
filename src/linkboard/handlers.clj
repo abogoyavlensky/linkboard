@@ -11,5 +11,5 @@
   [error-text]
   (fn [_]
     (-> (index/error-page error-text)
-      (reitit-extras/render-html)
-      (response/status 500))))
+        (reitit-extras/render-html)
+        (response/status 500))))

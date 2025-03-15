@@ -7,8 +7,8 @@
   (->> {:select [:name]
         :from [:sqlite_master]
         :where [:= :type "table"]}
-    (db/exec! db)
-    (map (comp keyword :name))))
+       (db/exec! db)
+       (map (comp keyword :name))))
 
 (defn with-truncated-tables
   "Remove all data from all tables."

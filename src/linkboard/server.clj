@@ -33,9 +33,9 @@
        :default-handlers {:not-found (handlers/default-handler "Page not found")
                           :method-not-allowed (handlers/default-handler "Method not allowed")
                           :not-acceptable (handlers/default-handler "Not acceptable")}}
-    (reitit-extras/get-handler-ssr context)
-    (jetty/run-jetty {:port (:port options)
-                      :join? false})))
+      (reitit-extras/get-handler-ssr context)
+      (jetty/run-jetty {:port (:port options)
+                        :join? false})))
 
 (defmethod ig/halt-key! ::server
   [_ server]

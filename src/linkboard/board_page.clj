@@ -82,7 +82,7 @@
                     :where [:and
                             [:= :id (:id path)]
                             [:= :user-id USER_ID]]}
-                (db/exec-one! db))
+                   (db/exec-one! db))
         ; TODO: add pagination
         links (->> {:select [:l.*]
                     :from [[:link :l]]
@@ -91,15 +91,15 @@
                             [:= :b.user-id USER_ID]
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
-                (db/exec! db))
+                   (db/exec! db))
         page-view (board-view router {:board board
                                       :links links})]
 
     (if (components/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-        (components/base router)
-        (reitit-extras/render-html)))))
+           (components/base router)
+           (reitit-extras/render-html)))))
 
 (defn add-link-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -113,6 +113,6 @@
     (->> {:insert-into :link
           :values [{:url (:url form)
                     :board-id board-id}]}
-      (db/exec-one! db))
+         (db/exec-one! db))
     ; Render board content
     (board-handler (assoc-in request [:parameters :path] {:id board-id}))))

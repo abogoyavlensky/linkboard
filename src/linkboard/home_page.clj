@@ -83,8 +83,8 @@
                               :from [[:board :b]]
                               :join [[:link :l] [:= :b.id :l.board-id]]
                               :where [:= :b.user-id USER-ID]}
-                          (db/exec-one! db)
-                          :links-count)
+                             (db/exec-one! db)
+                             :links-count)
         ; TODO: add pagination
         boards (db/exec! db {:select [:b.*
                                       [[:count :l.id] :link-count]]
@@ -98,8 +98,8 @@
     (if (components/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-        (components/base router)
-        (reitit-extras/render-html)))))
+           (components/base router)
+           (reitit-extras/render-html)))))
 
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -110,7 +110,7 @@
   (->> {:insert-into :board
         :values [{:title (:title form)
                   :user-id USER-ID}]}
-    (db/exec-one! db))
+       (db/exec-one! db))
   ; Render home page with new board in the list
   (let [boards (db/exec! db {:select [:b.*
                                       [[:count :l.id] :link-count]]
@@ -120,5 +120,5 @@
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})]
     (->> {:boards boards}
-      (board-list router)
-      (reitit-extras/render-html))))
+         (board-list router)
+         (reitit-extras/render-html))))
