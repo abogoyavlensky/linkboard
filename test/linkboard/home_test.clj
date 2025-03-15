@@ -54,8 +54,7 @@
 
 (deftest test-index-page-loads-correctly
   (testing "Index page loads and displays correctly"
-    (let [db (::db/db ig-extras/*test-system*)
-          driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
+    (let [driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
           server (::server/server ig-extras/*test-system*)
           url (reitit-extras/get-server-url server :container)]
 

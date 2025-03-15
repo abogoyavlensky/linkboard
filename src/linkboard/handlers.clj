@@ -1,7 +1,7 @@
 (ns linkboard.handlers
   (:require [linkboard.index :as index]
-            [ring.util.response :as response]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as reitit-extras]
+            [ring.util.response :as response]))
 
 (defn index-handler
   [_]
@@ -11,5 +11,5 @@
   [error-text]
   (fn [_]
     (-> (index/error-page error-text)
-        (reitit-extras/render-html)
-        (response/status 500))))
+      (reitit-extras/render-html)
+      (response/status 500))))

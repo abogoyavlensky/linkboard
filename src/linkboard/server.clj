@@ -2,10 +2,10 @@
   (:require [clojure.tools.logging :as log]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
+            [linkboard.handlers :as handlers]
             [linkboard.routes :as app-routes]
             [reitit-extras.core :as reitit-extras]
-            [ring.adapter.jetty :as jetty]
-            [linkboard.handlers :as handlers])
+            [ring.adapter.jetty :as jetty])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 (defmethod ig/assert-key ::server
