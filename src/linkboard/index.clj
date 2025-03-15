@@ -37,18 +37,16 @@
 (defn error-page
   [text]
   (base
-    [:div
-     {:class ["bg-slate-50" "text-slate-800" "min-h-screen" "flex" "flex-col"]}
-     [:main {:class ["flex" "items-center" "justify-center" "mt-56"]}
-      [:div {:class ["container" "mx-auto" "px-4" "max-w-4xl" "text-center"]}
-       [:h1 {:class ["text-5xl" "mb-6" "text-slate-900"]} text]]]]))
+    [:div {:class ["mt-56"]}
+     [:div {:class ["mx-auto" "text-center"]}
+      [:h1 {:class ["text-5xl"]} text]]]))
 
 ; ========= TODO: Remove starter page  ========================
 
 (def starter-page
   (base
     [:div
-     {:class ["bg-slate-50" "text-slate-800" "min-h-screen" "flex" "flex-col"]}
+     {:class ["text-slate-800" "min-h-screen" "flex" "flex-col"]}
      [:nav {:class ["w-full" "py-4" "px-6" "flex" "justify-end"]}
       [:a {:class ["text-slate-700" "hover:text-slate-900"]
            :href "https://github.com/bogoyavlensky/clojure-stack-lite"
@@ -64,8 +62,8 @@
        [:h1 {:class ["text-6xl" "font-bold" "mb-6" "text-slate-900"]} "Welcome to "
         [:span {:class ["bg-gradient-to-r" "from-emerald-400" "via-sky-400" "to-sky-200" "bg-clip-text" "text-transparent" "relative"]}
          "Clojure Stack Lite"]]
-       [:p {:class ["text-2xl" "mb-10" "text-slate-400"]} "A lightweight, modern template to jumpstart your Clojure projects"]
-       [:p {:class ["text-lg" "mb-12" "text-slate-600"]}
+       [:p {:class ["text-2xl" "mb-10" "text-slate-500"]} "A lightweight, modern template to jumpstart your Clojure projects"]
+       [:p {:class ["text-lg" "mb-12" "text-slate-500"]}
         "To begin, modify the existing view in " [:code {:class ["bg-slate-200" "px-1" "rounded"]} "src/yourproject/views/home.clj"]
         " or add a new route in " [:code {:class ["bg-slate-200" "px-1" "rounded"]} "src/yourproject/routes.clj"]
         " and define a handler in " [:code {:class ["bg-slate-200" "px-1" "rounded"]} "src/yourproject/handlers.clj"]]
