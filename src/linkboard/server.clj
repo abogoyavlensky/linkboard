@@ -20,7 +20,7 @@
                 [:session-secret-key string?]
                 [:auto-reload? boolean?]
                 [:cache-assets? {:optional true} boolean?]
-                [:cache-control {:optional true} symbol?]]]
+                [:cache-control {:optional true} string?]]]
               [:db [:fn
                     {:error/message "Wrong db datasource type"}
                     #(instance? HikariDataSource %)]]]}))
