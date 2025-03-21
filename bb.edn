@@ -14,6 +14,9 @@
   fmt {:doc "Fix code formatting"
        :task (shell "cljfmt" "fix")}
 
+  repl {:doc "Run built-in REPL"
+        :task (shell "clj -A:dev:test")}
+
   lint-init {:doc "Linting project's classpath"
              :task (shell "clj-kondo" "--parallel" "--dependencies" "--copy-configs"
                      "--lint" (with-out-str (clojure "-Spath")))}

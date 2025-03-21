@@ -5,7 +5,6 @@
             [linkboard.db :as db]
             [linkboard.server :as-alias server]
             [linkboard.test-utils :as test-utils]
-            [linkboard.webdriver :as-alias webdriver]
             [reitit-extras.tests :as reitit-extras]))
 
 (use-fixtures :once
@@ -17,7 +16,7 @@
 (deftest test-home-page-loads-correctly
   (testing "Home page loads and displays correctly"
     (let [db (::db/db ig-extras/*test-system*)
-          driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
+          driver (get-in ig-extras/*test-system* [::test-utils/webdriver :driver])
           server (::server/server ig-extras/*test-system*)
           url (reitit-extras/get-server-url server :container)]
 
@@ -54,7 +53,7 @@
 
 (deftest test-index-page-loads-correctly
   (testing "Index page loads and displays correctly"
-    (let [driver (get-in ig-extras/*test-system* [::webdriver/webdriver :driver])
+    (let [driver (get-in ig-extras/*test-system* [::test-utils/webdriver :driver])
           server (::server/server ig-extras/*test-system*)
           url (reitit-extras/get-server-url server :container)]
 
