@@ -30,9 +30,9 @@
       :as context}]
   (log/info (str "[SERVER] Starting server..."))
   (-> {:routes app-routes/routes
-       :default-handlers {:not-found (handlers/default-handler "Page not found")
-                          :method-not-allowed (handlers/default-handler "Method not allowed")
-                          :not-acceptable (handlers/default-handler "Not acceptable")}}
+       :default-handlers {:not-found (handlers/default-handler "Page not found" 404)
+                          :method-not-allowed (handlers/default-handler "Method not allowed" 405)
+                          :not-acceptable (handlers/default-handler "Not acceptable" 406)}}
       (reitit-extras/get-handler-ssr context)
       (jetty/run-jetty {:port (:port options)
                         :join? false})))

@@ -8,8 +8,8 @@
   (reitit-extras/render-html index/starter-page))
 
 (defn default-handler
-  [error-text]
+  [error-text status-code]
   (fn [_]
     (-> (index/error-page error-text)
         (reitit-extras/render-html)
-        (response/status 500))))
+        (response/status status-code))))
