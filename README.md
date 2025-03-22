@@ -54,13 +54,13 @@ gem install kamal -v 2.3.0
 First deploy to the fresh server:
 
 ```shell
-kamal setup
+bb kamal setup
 ```
 
 ### Regular deployment
 
 ```shell
-kamal deploy
+bb kamal deploy
 ```
 
 ## Deploy from Github Actions

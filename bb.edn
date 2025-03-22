@@ -53,6 +53,9 @@
                          {:url "https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"
                           :filepath "js/htmx.min.js"}])}
 
+  kamal {:doc "Deploy application using Kamal"
+         :task (apply shell "kamal" (concat *command-line-args* ["--config-file" ".kamal/deploy.yml"]))}
+
   build {:doc "Build application uberjar"
          :requires ([manifest-edn.core :as manifest])
          :task (do
