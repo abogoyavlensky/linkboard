@@ -98,7 +98,7 @@
     (if (components/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (components/base router)
+           (components/base)
            (reitit-extras/render-html)))))
 
 (defn add-link-handler

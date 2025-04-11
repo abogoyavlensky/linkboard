@@ -29,7 +29,7 @@
 
 (defmethod ig/init-key ::webdriver
   [_ {:keys [server]}]
-  (log/info (str "[DB] Starting webdriver..."))
+  (log/info "[DB] Starting webdriver...")
   (let [server-port (.getLocalPort (first (.getConnectors server)))
         ; Expose port from local machine to container
         _ (Testcontainers/exposeHostPorts (int-array [server-port]))
@@ -46,6 +46,6 @@
 
 (defmethod ig/halt-key! ::webdriver
   [_ {:keys [driver]}]
-  (log/info (str "[DB] Closing webdriver..."))
+  (log/info "[DB] Closing webdriver...")
   ; Do not stop the container to be able to reuse it
   (etaoin/quit driver))
