@@ -1,8 +1,8 @@
 (ns linkboard.home-page
-  (:require [linkboard.components :as components]
-            [linkboard.db :as db]
-            [linkboard.icons :as icons]
+  (:require [linkboard.core.db :as db]
             [linkboard.routes :as-alias r]
+            [linkboard.ui.components :as components]
+            [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user

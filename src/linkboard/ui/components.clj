@@ -1,6 +1,6 @@
-(ns linkboard.components
-  (:require [linkboard.icons :as icons]
-            [linkboard.routes :as-alias r]
+(ns linkboard.ui.components
+  (:require [linkboard.routes :as-alias r]
+            [linkboard.ui.icons :as icons]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as reitit-extras]))
 

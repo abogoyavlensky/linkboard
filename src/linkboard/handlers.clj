@@ -1,5 +1,5 @@
 (ns linkboard.handlers
-  (:require [linkboard.components :as components]
+  (:require [linkboard.ui.components :as components]
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 

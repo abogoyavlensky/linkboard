@@ -1,4 +1,4 @@
-(ns linkboard.server
+(ns linkboard.core.server
   (:require [clojure.tools.logging :as log]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]

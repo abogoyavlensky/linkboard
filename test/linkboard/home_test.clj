@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             ;[etaoin.api :as etaoin]
             [integrant-extras.tests :as ig-extras]
-            ;[linkboard.db :as db]
+            ;[linkboard.core.db :as db]
             [linkboard.server :as-alias server]
             [linkboard.test-utils :as test-utils]))
             ;[reitit-extras.tests :as reitit-extras]))

@@ -1,4 +1,4 @@
-(ns linkboard.icons)
+(ns linkboard.ui.icons)
 
 (defn- base-svg
   [{:keys [path color]}]

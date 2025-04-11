@@ -1,4 +1,4 @@
-(ns linkboard.db
+(ns linkboard.core.db
   (:require [clojure.tools.logging :as log]
             [hikari-cp.core :as cp]
             [honey.sql :as honey]

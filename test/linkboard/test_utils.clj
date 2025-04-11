@@ -3,7 +3,7 @@
             [etaoin.api :as etaoin]
             [integrant-extras.tests :as ig-extras]
             [integrant.core :as ig]
-            [linkboard.db :as db])
+            [linkboard.core.db :as db])
   (:import [org.testcontainers Testcontainers]
            [org.testcontainers.containers GenericContainer]))
 
