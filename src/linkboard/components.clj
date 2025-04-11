@@ -19,7 +19,7 @@
 
 (defn base
   "Base component for html page."
-  [router content]
+  [content]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -46,7 +46,7 @@
       {:class ["px-4" "pt-2" "pb-4" "mb-12" "flex" "justify-between" "items-center"]}
       [:div
        [:a
-        {:hx-get (reitit-extras/get-route router ::r/home-page)
+        {:hx-get "/"
          :hx-target "#content"
          :hx-push-url "true"}
         [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
@@ -72,6 +72,13 @@
     [:script {:type "text/javascript"
               :src (manifest/asset "js/alpinejs.min.js")
               :defer true}]]])
+
+(defn error-page
+  [text]
+  (base
+    [:div {:class ["mt-56"]}
+     [:div {:class ["mx-auto" "text-center"]}
+      [:h1 {:class ["text-5xl"]} text]]]))
 
 (defn modal
   [{:keys [title open-btn-text hx-post hx-target form-fields]}]
@@ -128,7 +135,7 @@
       {:class ["relative" "w-auto" "pb-8"]}
       [:div
        {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (reitit-extras/csrf-token)
+       (reitit-extras/csrf-token-html)
        form-fields]]
      [:div
       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}

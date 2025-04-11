@@ -1,6 +1,5 @@
 (ns linkboard.routes
   (:require [linkboard.board-page :as board-page]
-            [linkboard.handlers :as handlers]
             [linkboard.home-page :as home-page]
             [ring.util.response :as response]))
 
@@ -8,9 +7,6 @@
   [["/" {:name ::home-page
          :get {:handler home-page/home-handler
                :responses {200 {:body string?}}}}]
-   ["/index" {:name ::index-page
-              :get {:handler handlers/index-handler}
-              :responses {200 {:body string?}}}]
    ["/boards"
     ["" {:name ::board-list
          :post {:handler home-page/create-board-handler
