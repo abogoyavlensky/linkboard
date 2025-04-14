@@ -39,11 +39,11 @@
             :rel "stylesheet"}]
     [:title "Linkboard"]]
    [:body
-    {:class ["bg-gray-50"]}
+    {:class ["bg-slate-50"]}
     [:div
      {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
      [:div
-      {:class ["px-4" "pt-2" "pb-4" "mb-12" "flex" "justify-between" "items-center"]}
+      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
       [:div
        [:a
         {:hx-get "/"
@@ -148,3 +148,12 @@
         :x-on:click "modalOpen=false"
         :type "submit"}
        "Save"]]]]])
+
+(defn search-bar
+  []
+  [:div {:class ["pb-4"]}
+   [:div {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]}
+    [:div {:class ["mr-2"]} icons/search]
+    [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
+             :type "text"
+             :placeholder "Search"}]]])

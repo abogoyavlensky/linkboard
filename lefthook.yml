@@ -1,15 +1,9 @@
 pre-push:
   parallel: true
   commands:
-    fmt:
-      glob: "*.{clj,edn}"
-      run: bb fmt-check
     lint:
       glob: "*.{clj,edn}"
-      run: bb lint
+      run: bb fmt && bb lint
     test:
       glob: "*.{clj,edn}"
       run: bb test
-    outdated:
-      glob: "*.{clj,edn}"
-      run: bb outdated

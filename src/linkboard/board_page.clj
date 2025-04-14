@@ -1,12 +1,35 @@
 (ns linkboard.board-page
   (:require [linkboard.core.db :as db]
+            [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
-            [linkboard.ui.components :as components]
+            [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as reitit-extras]
+            [ring.util.response :as response]))
 
 ; TODO: change to authenticated user
 (def USER_ID 1)
+
+(defn- link-list-item
+  [{:keys [router link board]}]
+  [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]}
+   [:a {:class ["flex" "items-center" "gap-3"]
+        :href (:url link)
+        :target "_blank"}
+    ; TODO: try to fetch actual favicon from the site by link
+    icons/bookmark
+    [:div
+     [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:title link)]
+     [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
+   [:div {:class ["flex" "items-center" "gap-2"]}
+    (icons/edit)
+    [:div
+     {:hx-delete (reitit-extras/get-route router ::r/link-details {:path {:id (:id board)
+                                                                          :link-id (:id link)}})
+      :hx-headers (reitit-extras/csrf-token-json)
+      :hx-target "closest .link-item"
+      :hx-swap "outerHTML"}
+     icons/bin]]])
 
 (defn- board-view
   [router {:keys [board links]}]
@@ -22,7 +45,7 @@
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
      ;(components/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
-     (components/modal
+     (c/modal
        {:open-btn-text [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]
         :title "Add link"
         :hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
@@ -43,29 +66,13 @@
 
    (if (seq links)
      (list
-       ; Search bar
-       [:div {:class ["pb-4"]}
-        [:div {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]}
-         [:div {:class ["mr-2"]} icons/search]
-         [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
-                  :type "text"
-                  :placeholder "Search"}]]]
-
+       (c/search-bar)
        ; Links
        [:div {:class ["flex-1"]}
         (for [link links]
-          [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
-               :href (:url link)
-               :target "_blank"}
-           [:div {:class ["flex" "items-center" "gap-3"]}
-            ; TODO: try to fetch actual icon from the site by link
-            icons/bookmark
-            [:div
-             [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:title link)]
-             [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
-           [:div {:class ["flex" "items-center" "gap-2"]}
-            (icons/edit)
-            icons/bin]])])
+          (link-list-item {:router router
+                           :link link
+                           :board board}))])
      ; Empty state
      [:div {:class ["text-center" "mx-auto" "mt-16"]}
       [:h2 {:class ["text-2xl" "font-semibold" "text-gray-900" "mb-3"]} "No bookmarks yet"]
@@ -95,10 +102,10 @@
         page-view (board-view router {:board board
                                       :links links})]
 
-    (if (components/hx-request? request)
+    (if (c/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (components/base)
+           (c/base)
            (reitit-extras/render-html)))))
 
 (defn add-link-handler
@@ -116,3 +123,11 @@
          (db/exec-one! db))
     ; Render board content
     (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
+
+(defn delete-link-handler
+  [{:keys [path-params context]}]
+  (let [board-id (-> path-params :id parse-long)]
+    ; TODO: fetch board by user, validate if it's owened by user
+    (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
+                                   :board-id board-id})
+    (response/response nil)))

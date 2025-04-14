@@ -7,6 +7,8 @@
   [["/" {:name ::home-page
          :get {:handler home-page/home-handler
                :responses {200 {:body string?}}}}]
+   ["/up" {:name ::health-check
+           :get {:handler (fn [_] (response/response "OK"))}}]
    ["/boards"
     ["" {:name ::board-list
          :post {:handler home-page/create-board-handler
@@ -17,9 +19,12 @@
           :get {:handler board-page/board-handler
                 :parameters {:path {:id pos-int?}}
                 :responses {200 {:body string?}}}}]
-     ["/links" {:name ::board-details-links
-                :post {:handler board-page/add-link-handler
-                       :parameters {:form {:url [:string {:min 1}]}}
-                       :responses {200 {:body string?}}}}]]]
-   ["/up" {:name ::health-check
-           :get {:handler (fn [_] (response/response "OK"))}}]])
+     ["/links"
+      ["" {:name ::board-details-links
+           :post {:handler board-page/add-link-handler
+                  :parameters {:form {:url [:string {:min 1}]}}
+                  :responses {200 {:body string?}}}}]
+      ["/:link-id" {:name ::link-details
+                    :delete {:handler board-page/delete-link-handler
+                             :parameters {:path {:id pos-int?
+                                                 :link-id pos-int?}}}}]]]]])

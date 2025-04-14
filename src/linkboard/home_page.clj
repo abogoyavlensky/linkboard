@@ -1,7 +1,7 @@
 (ns linkboard.home-page
   (:require [linkboard.core.db :as db]
             [linkboard.routes :as-alias r]
-            [linkboard.ui.components :as components]
+            [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
 
@@ -37,6 +37,7 @@
   [router {:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
+   (c/search-bar)
    [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
         :href "#"}
     [:div {:class ["flex" "items-center" "gap-3"]}
@@ -53,7 +54,7 @@
    [:div {:class ["mt-6"]}
     [:div {:class ["flex" "justify-between" "mb-4"]}
      [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
-     [:div (components/modal
+     [:div (c/modal
              {:open-btn-text icons/plus
               :title "Create board"
               :hx-post (reitit-extras/get-route router ::r/board-list)
@@ -95,10 +96,10 @@
                              :order-by [[:b.created_at :desc]]})
         page-view (boards-view router {:boards boards
                                        :all-links-count all-links-count})]
-    (if (components/hx-request? request)
+    (if (c/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (components/base)
+           (c/base)
            (reitit-extras/render-html)))))
 
 (defn create-board-handler
