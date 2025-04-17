@@ -115,7 +115,7 @@
              :x-transition:leave "ease-in duration-200"
              :x-transition:leave-start "opacity-100 translate-y-0 sm:scale-100"
              :x-transition:leave-end "opacity-0 -translate-y-2 sm:scale-95"}
-       form-attrs)
+            form-attrs)
      [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
       [:h3 {:class ["text-lg" "font-semibold"]} title]
       [:button
