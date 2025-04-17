@@ -23,13 +23,23 @@
      [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
    [:div {:class ["flex" "items-center" "gap-2"]}
     (icons/edit)
-    [:div
-     {:hx-delete (reitit-extras/get-route router ::r/link-details {:path {:id (:id board)
-                                                                          :link-id (:id link)}})
-      :hx-headers (reitit-extras/csrf-token-json)
-      :hx-target "closest .link-item"
-      :hx-swap "outerHTML"}
-     icons/bin]]])
+    (c/modal
+      {:open-btn-text icons/bin
+       :title "Delete link"
+       :submit-btn-title "Confirm"
+       :form-fields [:div
+                     [:p {:class ["text-md text-gray-600" "mb-2"]}
+                      "Are you sure you want to delete following link?"]
+                     [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
+                      (or (:title link) (:url link))]]
+       :form-attrs {:hx-delete (reitit-extras/get-route
+                                 router
+                                 ::r/link-details
+                                 {:path {:id (:id board)
+                                         :link-id (:id link)}})
+                    :hx-headers (reitit-extras/csrf-token-json)
+                    :hx-target "closest .link-item"
+                    :hx-swap "outerHTML"}})]])
 
 (defn- board-view
   [router {:keys [board links]}]
@@ -48,8 +58,8 @@
      (c/modal
        {:open-btn-text [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]
         :title "Add link"
-        :hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
-        :hx-target "#content"
+        :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
+                     :hx-target "#content"}
         :form-fields (list
                        [:input
                         {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"

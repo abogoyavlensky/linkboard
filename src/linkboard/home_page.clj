@@ -57,8 +57,8 @@
      [:div (c/modal
              {:open-btn-text icons/plus
               :title "Create board"
-              :hx-post (reitit-extras/get-route router ::r/board-list)
-              :hx-target "#board-list"
+              :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
+                           :hx-target "#board-list"}
               :form-fields (list
                              [:input
                               {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
