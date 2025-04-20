@@ -55,9 +55,10 @@
       icons/chevron-left]
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
-     ;(components/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
      (c/modal
-       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
+       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]
+                                                  :x-on:keyup.l.window.prevent "modalOpen = true"}
+                                            icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
                      :hx-target "#content"}

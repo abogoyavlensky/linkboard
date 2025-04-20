@@ -56,7 +56,10 @@
     [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
      [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
      [:div (c/modal
-             {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add board"]})
+             {:open-btn-text (c/button
+                               {:content [:div {:class ["flex" "items-center" "gap-1"]
+                                                :x-on:keyup.b.window.prevent "modalOpen = true"}
+                                          icons/plus-circle "Add board"]})
               :title "Create board"
               :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
                            :hx-target "#board-list"}
