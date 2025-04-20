@@ -3,7 +3,7 @@ pre-push:
   commands:
     lint:
       glob: "*.{clj,edn}"
-      run: bb fmt && bb lint
+      run: bb fmt-check && bb lint
     test:
       glob: "*.{clj,edn}"
       run: bb test
