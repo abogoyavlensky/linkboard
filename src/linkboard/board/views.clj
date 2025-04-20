@@ -22,7 +22,34 @@
       (or (:title link) (:url link))]
      [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
    [:div {:class ["flex" "items-center" "gap-2"]}
-    (icons/edit)
+    (c/modal
+      {:open-btn-text (icons/edit)
+       :title "Edit link"
+       :submit-btn-title "Save changes"
+       :form-fields [:div
+                     [:div.mb-4
+                      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "title"} "Title"]
+                      [:input.w-full.px-3.py-2.border.rounded-md.text-sm
+                       {:type "text"
+                        :name "title"
+                        :id "title"
+                        :value (or (:title link) "")
+                        :placeholder "Link title"}]]
+                     [:div
+                      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "url"} "URL"]
+                      [:input.w-full.px-3.py-2.border.rounded-md.text-sm
+                       {:type "text"
+                        :name "url"
+                        :id "url"
+                        :value (:url link)
+                        :placeholder "https://example.com"}]]]
+       :form-attrs {:hx-put (reitit-extras/get-route
+                              router
+                              ::r/link-details
+                              {:path {:id (:id board)
+                                      :link-id (:id link)}})
+                    :hx-headers (reitit-extras/csrf-token-json)
+                    :hx-target "#content"}})
     (c/modal
       {:open-btn-text icons/bin
        :title "Delete link"
@@ -55,8 +82,7 @@
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
      (c/modal
-       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]
-                                                  :x-on:keyup.l.window.prevent "modalOpen = true"}
+       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]}
                                             icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})

@@ -62,6 +62,26 @@
     ; Render board content
     (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
 
+(defn update-link-handler
+  [{{:keys [db]} :context
+    {:keys [form]} :parameters
+    :keys [path-params]
+    :as request}]
+  (let [board-id (-> path-params :id parse-long)
+        link-id (-> path-params :link-id parse-long)
+        title (:title form)
+        url (:url form)]
+    ; Update link in the database
+    (->> {:update :link
+          :set {:title title
+                :url url}
+          :where [:and
+                  [:= :id link-id]
+                  [:= :board-id board-id]]}
+         (db/exec-one! db))
+    ; Render updated board content
+    (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
+
 (defn delete-link-handler
   [{:keys [path-params context]}]
   (let [board-id (-> path-params :id parse-long)]

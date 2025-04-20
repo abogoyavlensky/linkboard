@@ -25,6 +25,11 @@
                   :parameters {:form {:url [:string {:min 1}]}}
                   :responses {200 {:body string?}}}}]
       ["/:link-id" {:name ::link-details
+                    :put {:handler board-handlers/update-link-handler
+                          :parameters {:path {:id pos-int?
+                                              :link-id pos-int?}
+                                       :form {:title [:string {:min 1}]
+                                              :url [:string {:min 1}]}}}
                     :delete {:handler board-handlers/delete-link-handler
                              :parameters {:path {:id pos-int?
                                                  :link-id pos-int?}}}}]]]]])
