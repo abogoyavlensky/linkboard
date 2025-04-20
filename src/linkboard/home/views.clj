@@ -1,12 +1,8 @@
-(ns linkboard.home-page
-  (:require [linkboard.core.db :as db]
-            [linkboard.routes :as-alias r]
+(ns linkboard.home.views
+  (:require [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
-
-; TODO: change to authenticated user
-(def USER-ID 1)
 
 (defn- list-item
   [router board]
@@ -29,12 +25,12 @@
      [:path {:d "M15 18l-6-6 6-6"
              :stroke-width "2"}]]]])
 
-(defn- board-list
+(defn board-list
   [router {:keys [boards]}]
   (list (for [board boards]
           (list-item router board))))
 
-(defn- boards-view
+(defn boards-view
   [router {:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
@@ -78,52 +74,3 @@
                                :placeholder "Enter board name"}])})]]
     [:div#board-list
      (board-list router {:boards boards})]]])
-
-(defn home-handler
-  {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
-    router :reitit.core/router
-    :as request}]
-  (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
-                              :from [[:board :b]]
-                              :join [[:link :l] [:= :b.id :l.board-id]]
-                              :where [:= :b.user-id USER-ID]}
-                             (db/exec-one! db)
-                             :links-count)
-        ; TODO: add pagination
-        boards (db/exec! db {:select [:b.*
-                                      [[:count :l.id] :link-count]]
-                             :from [[:board :b]]
-                             :left-join [[:link :l] [:= :b.id :l.board-id]]
-                             :where [:= :b.user-id USER-ID]
-                             :group-by [:b.id :b.title]
-                             :order-by [[:b.created_at :desc]]})
-        page-view (boards-view router {:boards boards
-                                       :all-links-count all-links-count})]
-    (if (c/hx-request? request)
-      (reitit-extras/render-html page-view)
-      (->> page-view
-           (c/base)
-           (reitit-extras/render-html)))))
-
-(defn create-board-handler
-  {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    router :reitit.core/router}]
-  ; Create a new board
-  (->> {:insert-into :board
-        :values [{:title (:title form)
-                  :user-id USER-ID}]}
-       (db/exec-one! db))
-  ; Render home page with new board in the list
-  (let [boards (db/exec! db {:select [:b.*
-                                      [[:count :l.id] :link-count]]
-                             :from [[:board :b]]
-                             :left-join [[:link :l] [:= :b.id :l.board-id]]
-                             :where [:= :b.user-id USER-ID]
-                             :group-by [:b.id :b.title]
-                             :order-by [[:b.created_at :desc]]})]
-    (->> {:boards boards}
-         (board-list router)
-         (reitit-extras/render-html))))

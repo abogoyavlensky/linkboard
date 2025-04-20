@@ -1,14 +1,8 @@
-(ns linkboard.board-page
-  (:require [linkboard.core.db :as db]
-            [linkboard.queries :as q]
-            [linkboard.routes :as-alias r]
+(ns linkboard.board.views
+  (:require [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
-            [reitit-extras.core :as reitit-extras]
-            [ring.util.response :as response]))
-
-; TODO: change to authenticated user
-(def USER_ID 1)
+            [reitit-extras.core :as reitit-extras]))
 
 (defn- link-list-item
   [{:keys [router link board]}]
@@ -42,7 +36,7 @@
                     :hx-target "closest .link-item"
                     :hx-swap "outerHTML"}})]])
 
-(defn- board-view
+(defn board-view
   [router {:keys [board links]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
@@ -89,57 +83,3 @@
      [:div {:class ["text-center" "mx-auto" "mt-16"]}
       [:h2 {:class ["text-2xl" "font-semibold" "text-gray-900" "mb-3"]} "No bookmarks yet"]
       [:p {:class ["text-gray-600" "mb-8"]} "Start building your collection by adding your first link"]])])
-
-(defn board-handler
-  {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
-    {:keys [path]} :parameters
-    router :reitit.core/router
-    :as request}]
-  (let [board (->> {:select [:*]
-                    :from [:board]
-                    :where [:and
-                            [:= :id (:id path)]
-                            [:= :user-id USER_ID]]}
-                   (db/exec-one! db))
-        ; TODO: add pagination
-        links (->> {:select [:l.*]
-                    :from [[:link :l]]
-                    :join [[:board :b] [:= :l.board-id :b.id]]
-                    :where [:and
-                            [:= :b.user-id USER_ID]
-                            [:= :b.id (:id path)]]
-                    :order-by [[:l.created-at :desc]]}
-                   (db/exec! db))
-        page-view (board-view router {:board board
-                                      :links links})]
-
-    (if (c/hx-request? request)
-      (reitit-extras/render-html page-view)
-      (->> page-view
-           (c/base)
-           (reitit-extras/render-html)))))
-
-(defn add-link-handler
-  {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    :keys [path-params]
-    :as request}]
-  ; TODO: add validation for url!
-  ; Add a link to board
-  (let [board-id (-> path-params :id parse-long)]
-    (->> {:insert-into :link
-          :values [{:url (:url form)
-                    :board-id board-id}]}
-         (db/exec-one! db))
-    ; Render board content
-    (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
-
-(defn delete-link-handler
-  [{:keys [path-params context]}]
-  (let [board-id (-> path-params :id parse-long)]
-    ; TODO: fetch board by user, validate if it's owened by user
-    (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
-                                   :board-id board-id})
-    (response/response nil)))
