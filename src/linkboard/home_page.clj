@@ -11,7 +11,8 @@
 (defn- list-item
   [router board]
   ; TODO: make this component common
-  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "mt-4" "cursor-pointer"]
+  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
+               "justify-between" "shadow-xs" "mt-2" "cursor-pointer"]
        :hx-get (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
        :hx-target "#content"
        :hx-push-url "true"}
@@ -52,10 +53,10 @@
       [:path {:d "M15 18l-6-6 6-6"
               :stroke-width "2"}]]]]
    [:div {:class ["mt-6"]}
-    [:div {:class ["flex" "justify-between" "mb-4"]}
+    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
      [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
      [:div (c/modal
-             {:open-btn-text icons/plus
+             {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add board"]})
               :title "Create board"
               :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
                            :hx-target "#board-list"}

@@ -12,7 +12,8 @@
 
 (defn- link-list-item
   [{:keys [router link board]}]
-  [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]}
+  [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
+                           "items-center" "justify-between" "shadow-xs"]}
    [:a {:class ["flex" "items-center" "gap-3"]
         :href (:url link)
         :target "_blank"}
@@ -56,7 +57,7 @@
     [:div {:class ["flex" "items-center" "gap-2"]}
      ;(components/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
      (c/modal
-       {:open-btn-text [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]
+       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]} icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
                      :hx-target "#content"}
