@@ -18,6 +18,10 @@
      ["" {:name ::board-details
           :get {:handler board-handlers/board-handler
                 :parameters {:path {:id pos-int?}}
+                :responses {200 {:body string?}}}
+          :put {:handler board-handlers/update-board-handler
+                :parameters {:path {:id pos-int?}
+                             :form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}}]
      ["/links"
       ["" {:name ::board-details-links
