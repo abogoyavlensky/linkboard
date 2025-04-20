@@ -1,9 +1,9 @@
 (ns linkboard.board.handlers
-  (:require [linkboard.core.db :as db]
+  (:require [linkboard.board.views :as views]
+            [linkboard.core.db :as db]
             [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [linkboard.board.views :as views]
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 
