@@ -11,10 +11,15 @@
    [:a {:class ["flex" "items-center" "gap-3"]
         :href (:url link)
         :target "_blank"}
-    ; TODO: try to fetch actual favicon from the site by link
-    icons/bookmark
+    (if (and (:icon link) (seq (:icon link)))
+      [:img {:src (:icon link)
+             :class ["w-5" "h-5"]
+             :onerror "this.onerror=null; this.src=''; this.classList.add('hidden');"
+             :alt "Site icon"}]
+      icons/bookmark)
     [:div
-     [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:title link)]
+     [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]}
+      (or (:title link) (:url link))]
      [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
    [:div {:class ["flex" "items-center" "gap-2"]}
     (icons/edit)

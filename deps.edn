@@ -12,6 +12,8 @@
         io.github.abogoyavlensky/reitit-extras {:mvn/version "0.1.22"}
         ring/ring-jetty-adapter {:mvn/version "1.14.1"}
         io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.1"}
+        ; html parsing
+        org.clj-commons/hickory {:mvn/version "0.7.7"}
         ; db
         hikari-cp/hikari-cp {:mvn/version "3.2.0"}
         org.xerial/sqlite-jdbc {:mvn/version "3.49.1.0"}

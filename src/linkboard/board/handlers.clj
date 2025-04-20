@@ -4,6 +4,7 @@
             [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
+            [linkboard.utils.url :as url]
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 
@@ -48,9 +49,14 @@
     :as request}]
   ; TODO: add validation for url!
   ; Add a link to board
-  (let [board-id (-> path-params :id parse-long)]
+  (let [board-id (-> path-params :id parse-long)
+        url (:url form)
+        ; Fetch metadata for the URL
+        metadata (url/fetch-page-metadata url)]
     (->> {:insert-into :link
-          :values [{:url (:url form)
+          :values [{:url url
+                    :title (:title metadata)
+                    :icon (:icon metadata)
                     :board-id board-id}]}
          (db/exec-one! db))
     ; Render board content
