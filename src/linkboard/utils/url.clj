@@ -1,9 +1,9 @@
 (ns linkboard.utils.url
-  (:require [clojure.string :as str]
-            [clj-http.client :as http]
-            [lambdaisland.uri :as uri]
+  (:require [clj-http.client :as http]
+            [clojure.string :as str]
             [hickory.core :as hickory]
-            [hickory.select :as s]))
+            [hickory.select :as s]
+            [lambdaisland.uri :as uri]))
 
 (def ^:private max-download-bytes
   "Maximum number of bytes to download (1MB)"
@@ -29,13 +29,13 @@
   [url-str]
   (try
     (let [response (http/get url-str
-                     {:socket-timeout 5000
-                      :conn-timeout 5000
-                      :max-body-length max-download-bytes
-                      :headers {"User-Agent" "Mozilla/5.0 (compatible; LinkBoard/1.0)"}
-                      :insecure? true      ; Accept self-signed certificates
-                      :throw-exceptions false})]
-      
+                             {:socket-timeout 5000
+                              :conn-timeout 5000
+                              :max-body-length max-download-bytes
+                              :headers {"User-Agent" "Mozilla/5.0 (compatible; LinkBoard/1.0)"}
+                              :insecure? true ; Accept self-signed certificates
+                              :throw-exceptions false})]
+
       (if (not= 200 (:status response))
         {:error (str "HTTP error: " (:status response))
          :url url-str}
@@ -57,7 +57,6 @@
                        path
                        (str "/" path))]
     (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path)))
-
 
 (defn- parse-html-metadata
   "Extract title and favicon from HTML content."
