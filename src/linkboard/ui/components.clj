@@ -85,14 +85,16 @@
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.relative.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
-    :x-on:keydown.escape.window "modalOpen = false"}
+    :x-on:keydown.escape.window "modalOpen = false"
+    :x-cloak ""}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
    [:div
     {:x-show "modalOpen"
-     :x-cloak "true"
+     :x-cloak ""
+     :style "display: none;"
      :class ["z-99" "fixed" "top-0" "left-0" "flex" "items-center" "justify-center" "w-screen" "h-screen"]}
     [:div
      {:class ["absolute" "inset-0" "w-full" "h-full" "backdrop-blur-xs" "bg-opacity-70" "bg-black/50"]
@@ -108,6 +110,7 @@
      (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
                      "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
              :x-show "modalOpen"
+             :style "display: none;"
              :x-trap.inert.noscroll "modalOpen"
              :x-transition:enter "ease-out duration-300"
              :x-transition:enter-start "opacity-0 -translate-y-2 sm:scale-95"
