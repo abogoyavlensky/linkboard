@@ -82,7 +82,7 @@
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]
      (c/modal
        {:open-btn-text [:div.ml-2.text-gray-500.hover:text-gray-700.cursor-pointer
-                         (icons/edit)]
+                        (icons/edit)]
         :title "Edit board"
         :submit-btn-title "Save changes"
         :form-fields [:div
