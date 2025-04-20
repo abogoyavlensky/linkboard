@@ -13,7 +13,9 @@
         ring/ring-jetty-adapter {:mvn/version "1.14.1"}
         io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.1"}
         ; html parsing
+        clj-http/clj-http {:mvn/version "3.13.0"}
         org.clj-commons/hickory {:mvn/version "0.7.7"}
+        lambdaisland/uri {:mvn/version "1.19.155"}
         ; db
         hikari-cp/hikari-cp {:mvn/version "3.2.0"}
         org.xerial/sqlite-jdbc {:mvn/version "3.49.1.0"}
