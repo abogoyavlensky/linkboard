@@ -99,6 +99,20 @@
     ; Render updated board content
     (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
 
+(defn delete-board-handler
+  [{{:keys [db]} :context
+    :keys [path-params]}]
+  (let [board-id (-> path-params :id parse-long)]
+    ; Delete board (this will cascade delete all links in the board)
+    (->> {:delete-from :board
+          :where [:and
+                  [:= :id board-id]
+                  [:= :user-id USER_ID]]}
+         (db/exec-one! db))
+    ; Redirect to home page
+    (-> (response/response nil)
+        (response/header "HX-Redirect" "/"))))
+
 (defn delete-link-handler
   [{:keys [path-params context]}]
   (let [board-id (-> path-params :id parse-long)]

@@ -116,7 +116,21 @@
                          :name "url"
                          :minlength 1
                          :autofocus true
-                         :placeholder "Enter link url"}])})]]
+                         :placeholder "Enter link url"}])})
+     (c/modal
+       {:open-btn-text [:div.ml-2.text-red-500.hover:text-red-700.cursor-pointer
+                        icons/bin]
+        :title "Delete board"
+        :submit-btn-title "Confirm"
+        :form-fields [:div
+                      [:p {:class ["text-md text-gray-600" "mb-2"]}
+                       "Are you sure you want to delete this board?"]
+                      [:p {:class ["text-sm text-gray-600" "mb-2"]}
+                       "This will permanently delete the board and all its links."]
+                      [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
+                       (:title board)]]
+        :form-attrs {:hx-delete (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
+                     :hx-headers (reitit-extras/csrf-token-json)}})]]
 
    (if (seq links)
      (list
