@@ -79,7 +79,8 @@
           :hx-target "#content"
           :hx-push-url "true"}
       icons/chevron-left]
-     [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]
+     [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
+    [:div {:class ["flex" "items-center" "gap-2"]}
      (c/modal
        {:open-btn-text [:div.ml-2.text-gray-500.hover:text-gray-700.cursor-pointer
                         (icons/edit)]
@@ -96,8 +97,21 @@
                          :placeholder "Enter board name"}]]]
         :form-attrs {:hx-put (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (reitit-extras/csrf-token-json)
-                     :hx-target "#content"}})]
-    [:div {:class ["flex" "items-center" "gap-2"]}
+                     :hx-target "#content"}})
+     (c/modal
+       {:open-btn-text [:div.ml-2.text-red-500.hover:text-red-700.cursor-pointer
+                        icons/bin]
+        :title "Delete board"
+        :submit-btn-title "Confirm"
+        :form-fields [:div
+                      [:p {:class ["text-md text-gray-600" "mb-2"]}
+                       "Are you sure you want to delete this board?"]
+                      [:p {:class ["text-sm text-gray-600" "mb-2"]}
+                       "This will permanently delete the board and all its links."]
+                      [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
+                       (:title board)]]
+        :form-attrs {:hx-delete (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
+                     :hx-headers (reitit-extras/csrf-token-json)}})
      (c/modal
        {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]}
                                             icons/plus-circle "Add link"]})
@@ -116,21 +130,7 @@
                          :name "url"
                          :minlength 1
                          :autofocus true
-                         :placeholder "Enter link url"}])})
-     (c/modal
-       {:open-btn-text [:div.ml-2.text-red-500.hover:text-red-700.cursor-pointer
-                        icons/bin]
-        :title "Delete board"
-        :submit-btn-title "Confirm"
-        :form-fields [:div
-                      [:p {:class ["text-md text-gray-600" "mb-2"]}
-                       "Are you sure you want to delete this board?"]
-                      [:p {:class ["text-sm text-gray-600" "mb-2"]}
-                       "This will permanently delete the board and all its links."]
-                      [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
-                       (:title board)]]
-        :form-attrs {:hx-delete (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
-                     :hx-headers (reitit-extras/csrf-token-json)}})]]
+                         :placeholder "Enter link url"}])})]]
 
    (if (seq links)
      (list
