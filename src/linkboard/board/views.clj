@@ -7,22 +7,22 @@
 (defn- link-list-item
   [{:keys [router link board]}]
   [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
-                           "items-center" "justify-between" "shadow-xs"]}
-   [:a {:class ["flex" "items-center" "gap-3"]
+                           "items-center" "shadow-xs"]}
+   [:a {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]
         :href (:url link)
         :rel "noopener noreferrer"
         :target "_blank"}
     (if (and (:icon link) (seq (:icon link)))
       [:img {:src (:icon link)
-             :class ["w-5" "h-5"]
+             :class ["w-5" "h-5" "flex-shrink-0"]
              :onerror "this.onerror=null; this.src=''; this.classList.add('hidden');"
              :alt "Site icon"}]
       icons/bookmark)
-    [:div
-     [:span {:class ["text-l" "truncate" "w-full" "sm:w-48" "lg:w-96"]}
-      (or (:title link) (:url link))]
-     [:p {:class ["text-gray-400" "truncate" "w-full" "sm:w-48" "lg:w-96"]} (:url link)]]]
-   [:div {:class ["flex" "items-center" "gap-2"]}
+    [:div {:class ["min-w-0" "flex-grow" "max-w-full"]}
+     [:span {:class ["text-l" "break-words" "block" "w-full"]}
+      (:title link)]
+     [:p {:class ["text-gray-400" "truncate" "block" "w-full"]} (:url link)]]]
+   [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
     (c/modal
       {:open-btn-text (icons/edit)
        :title "Edit link"
