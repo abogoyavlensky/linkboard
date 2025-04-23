@@ -1,9 +1,12 @@
 pre-push:
+  commands:
+    test:
+      glob: "*.{clj,edn}"
+      run: bb test
+
+pre-commit:
   parallel: true
   commands:
     lint:
       glob: "*.{clj,edn}"
-      run: bb fmt-check && bb lint
-    test:
-      glob: "*.{clj,edn}"
-      run: bb test
+      run: bb fmt && bb lint
