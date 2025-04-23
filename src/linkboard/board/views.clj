@@ -10,6 +10,7 @@
                            "items-center" "justify-between" "shadow-xs"]}
    [:a {:class ["flex" "items-center" "gap-3"]
         :href (:url link)
+        :rel "noopener noreferrer"
         :target "_blank"}
     (if (and (:icon link) (seq (:icon link)))
       [:img {:src (:icon link)

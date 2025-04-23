@@ -4,7 +4,7 @@
             [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [linkboard.utils.url :as url]
+            [linkboard.board.fetch :as fetch]
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 
@@ -52,7 +52,7 @@
   (let [board-id (-> path-params :id parse-long)
         url (:url form)
         ; Fetch metadata for the URL
-        metadata (url/fetch-page-metadata url)]
+        metadata (fetch/fetch-page-metadata url)]
     (->> {:insert-into :link
           :values [{:url url
                     :title (:title metadata)

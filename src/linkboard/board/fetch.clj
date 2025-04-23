@@ -1,7 +1,8 @@
-(ns linkboard.utils.url
+(ns linkboard.board.fetch
   (:require [clj-http.client :as http]
             [clojure.string :as str]
             [hickory.core :as hickory]
+            [clojure.tools.logging :as log]
             [hickory.select :as s]
             [lambdaisland.uri :as uri]))
 
@@ -20,9 +21,7 @@
         (str/replace host #"^www\." "")))
     (catch Exception _
       ; If URL parsing fails, return the original URL
-      (or
-        (second (re-find #"^(?:https?://)?(?:www\.)?([^/]+)" url))
-        url))))
+      url)))
 
 (defn- fetch-url-limited
   "Fetch URL content with a size limit to prevent downloading large files."
@@ -53,10 +52,11 @@
   "Normalize URL for favicon handling."
   [base-url path]
   (let [url-map (uri/uri base-url)
-        favicon-path (if (str/starts-with? path "/")
-                       path
-                       (str "/" path))]
-    (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path)))
+        favicon-path (:path (uri/uri path))
+        favicon-path* (if (str/starts-with? favicon-path "/")
+                        favicon-path
+                        (str "/" favicon-path))]
+    (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path*)))
 
 (defn- parse-html-metadata
   "Extract title and favicon from HTML content."
@@ -74,9 +74,7 @@
                           (s/and (s/tag :link)
                                  (s/attr :rel #(re-matches #"(?i)^(shortcut )?icon$" %)))
                           (s/and (s/tag :link)
-                                 (s/attr :rel #(re-matches #"(?i)^apple-touch-icon(-precomposed)?$" %)))
-                          (s/and (s/tag :link)
-                                 (s/attr :rel #(= "fluid-icon" %))))
+                                 (s/attr :rel #(re-matches #"(?i)^apple-touch-icon(-precomposed)?$" %))))
 
           ;; Find all icon nodes
           icon-nodes (s/select icon-selector hickory-doc)
@@ -102,16 +100,15 @@
    Returns a map with :title and :icon. If fetching fails,
    returns domain name as title and empty string as icon."
   [url]
-  (if (str/blank? url)
-    {:title ""
-     :icon ""}
-    (let [normalized-url (if (re-find #"^https?://" url)
-                           url
-                           (str "https://" url))
-          result (fetch-url-limited normalized-url)]
-      (if (:error result)
+  (let [normalized-url (if (re-find #"^https?://" url)
+                         url
+                         (str "https://" url))
+        result (fetch-url-limited normalized-url)]
+    (if (:error result)
+      (do
+        (log/warn "[FETCH] Error fetching URL:" (:error result))
         ;; Return domain name as fallback title when fetching fails
         {:title (get-domain-from-url normalized-url)
-         :icon ""}
-        ;; Parse HTML to extract metadata
-        (parse-html-metadata (:html result) normalized-url)))))
+         :icon ""})
+      ;; Parse HTML to extract metadata
+      (parse-html-metadata (:html result) normalized-url))))
