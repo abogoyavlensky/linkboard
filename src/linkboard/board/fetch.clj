@@ -1,8 +1,8 @@
 (ns linkboard.board.fetch
   (:require [clj-http.client :as http]
             [clojure.string :as str]
-            [hickory.core :as hickory]
             [clojure.tools.logging :as log]
+            [hickory.core :as hickory]
             [hickory.select :as s]
             [lambdaisland.uri :as uri]))
 

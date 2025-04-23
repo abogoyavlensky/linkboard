@@ -1,10 +1,10 @@
 (ns linkboard.board.handlers
-  (:require [linkboard.board.views :as views]
+  (:require [linkboard.board.fetch :as fetch]
+            [linkboard.board.views :as views]
             [linkboard.core.db :as db]
             [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [linkboard.board.fetch :as fetch]
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 
