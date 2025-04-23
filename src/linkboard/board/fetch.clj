@@ -56,7 +56,9 @@
         favicon-path* (if (str/starts-with? favicon-path "/")
                         favicon-path
                         (str "/" favicon-path))
-        result-url (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path*)
+        result-url (if (and (:host (uri/uri path)) (:scheme (uri/uri path)))
+                     path
+                     (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path*))
         response (http/get result-url
                            {:socket-timeout 5000
                             :conn-timeout 5000
