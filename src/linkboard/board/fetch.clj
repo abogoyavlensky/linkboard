@@ -55,8 +55,17 @@
         favicon-path (:path (uri/uri path))
         favicon-path* (if (str/starts-with? favicon-path "/")
                         favicon-path
-                        (str "/" favicon-path))]
-    (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path*)))
+                        (str "/" favicon-path))
+        result-url (format "%s://%s%s" (:scheme url-map) (:host url-map) favicon-path*)
+        response (http/get result-url
+                           {:socket-timeout 5000
+                            :conn-timeout 5000
+                            :max-body-length max-download-bytes
+                            :headers {"User-Agent" "Mozilla/5.0 (compatible; LinkBoard/1.0)"}
+                            :insecure? true ; Accept self-signed certificates
+                            :throw-exceptions false})]
+    (when (= 200 (:status response))
+      result-url)))
 
 (defn- parse-html-metadata
   "Extract title and favicon from HTML content."
