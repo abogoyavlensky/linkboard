@@ -3,8 +3,8 @@
             [linkboard.home.views :as views]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [ring.util.response :as response]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as reitit-extras]
+            [ring.util.response :as response]))
 
 ; TODO: change to authenticated user
 (def USER-ID 1)
@@ -64,5 +64,5 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [form]} :parameters}]
   (-> (reitit-extras/render-html [:div])
-    (assoc :session {:sync-code (:sync-code form)})
-    (response/header "HX-Refresh" "true")))
+      (assoc :session {:sync-code (:sync-code form)})
+      (response/header "HX-Refresh" "true")))
