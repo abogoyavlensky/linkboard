@@ -1,8 +1,8 @@
 (ns linkboard.routes
-  (:require [clojure.string :as str]
+  (:require [clj-ulid :as ulid]
+            [clojure.string :as str]
             [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
-            [clj-ulid :as ulid]
             [ring.util.response :as response]))
 
 (defn wrap-sync-code
