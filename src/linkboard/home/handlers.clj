@@ -3,6 +3,7 @@
             [linkboard.home.views :as views]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
+            [ring.util.response :as response]
             [reitit-extras.core :as reitit-extras]))
 
 ; TODO: change to authenticated user
@@ -61,6 +62,7 @@
 
 (defn update-sync-code-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [form]} :parameters
-    :as request}]
-  (assoc (home-handler request) :session {:sync-code (:sync-code form)}))
+  [{{:keys [form]} :parameters}]
+  (-> (reitit-extras/render-html [:div])
+    (assoc :session {:sync-code (:sync-code form)})
+    (response/header "HX-Refresh" "true")))
