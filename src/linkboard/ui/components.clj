@@ -135,10 +135,6 @@
        [:div
         {:x-data "{ modalOpen: false }"
          :class ["flex" "items-center"]}
-        ;[:button
-        ; {:class ["text-blue-500" "text-lg"]
-        ;  :x-on:click "modalOpen = true"}
-        ; "Sync"]
         (modal
           {:title "Sync your devices"
            :open-btn-text [:button
@@ -150,10 +146,17 @@
                                                           ::r/update-sync-code)
                         :hx-target "#content"}
            :form-fields [:div
-                         [:h2 (get-in request [:session :sync-code])]
-                         [:input {:type "text"
-                                  :name "sync-code"
-                                  :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]})]]]
+                         [:div {:class ["mb-4"]}
+                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your sync code"]
+                          [:div {:class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center"]}
+                           (get-in request [:session :sync-code])]]
+                         [:div
+                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "New sync code"]
+                          [:input {:type "text"
+                                   :name "sync-code"
+                                   :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]
+                          [:p {:class ["text-sm" "text-red-500" "mt-2"]}
+                           "WARNING: After syncing with new code, all existing data in this browser will be lost!"]]]})]]]
      [:div
       {:id "content"
        :hx-history-elt true
