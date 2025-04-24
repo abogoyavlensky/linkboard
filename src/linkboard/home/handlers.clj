@@ -63,6 +63,7 @@
 (defn update-sync-code-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [form]} :parameters}]
+  ; TODO: validate if there is such code in DB
   (-> (reitit-extras/render-html [:div])
       (assoc :session {:sync-code (:sync-code form)})
-      (response/header "HX-Refresh" "true")))
+      (response/header "HX-Redirect" "/")))
