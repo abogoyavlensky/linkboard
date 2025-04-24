@@ -38,7 +38,7 @@
     (if (c/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (c/base)
+           (c/base request)
            (reitit-extras/render-html)))))
 
 (defn add-link-handler

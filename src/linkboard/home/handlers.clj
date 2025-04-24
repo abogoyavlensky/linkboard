@@ -12,6 +12,7 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     router :reitit.core/router
+    :keys [session]
     :as request}]
   (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
@@ -28,11 +29,12 @@
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
         page-view (views/boards-view router {:boards boards
-                                             :all-links-count all-links-count})]
+                                             :all-links-count all-links-count
+                                             :session session})]
     (if (c/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
-           (c/base)
+           (c/base request)
            (reitit-extras/render-html)))))
 
 (defn create-board-handler
@@ -56,3 +58,9 @@
     (->> {:boards boards}
          (views/board-list router)
          (reitit-extras/render-html))))
+
+(defn update-sync-code-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [form]} :parameters
+    :as request}]
+  (assoc (home-handler request) :session {:sync-code (:sync-code form)}))

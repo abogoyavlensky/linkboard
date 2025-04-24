@@ -26,6 +26,11 @@
          :middleware [wrap-sync-code]
          :get {:handler home-handlers/home-handler
                :responses {200 {:body string?}}}}]
+   ["/sync" {:name ::update-sync-code
+             :middleware [wrap-sync-code]
+             :post {:handler home-handlers/update-sync-code-handler
+                    :parameters {:form {:sync-code string?}}
+                    :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]
    ["/boards" {:middleware [wrap-sync-code]}

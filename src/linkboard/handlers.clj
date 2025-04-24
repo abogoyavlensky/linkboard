@@ -5,7 +5,7 @@
 
 (defn default-handler
   [error-text status-code]
-  (fn [_]
-    (-> (components/error-page error-text)
+  (fn [request]
+    (-> (components/error-page request error-text)
         (reitit-extras/render-html)
         (response/status status-code))))

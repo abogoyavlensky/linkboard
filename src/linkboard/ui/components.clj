@@ -18,69 +18,6 @@
     :type "button"}
    content])
 
-(defn base
-  "Base component for html page."
-  [content]
-  [:html
-   [:head
-    [:meta {:charset "UTF-8"}]
-    [:meta {:name "viewport"
-            :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
-    [:meta {:name "msapplication-TileColor"
-            :content "#f9fafb"}]
-    [:link {:rel "manifest"
-            :href "/assets/manifest.json"}]
-    [:link {:rel "icon"
-            :href (manifest/asset "images/favicon-1.png")}]
-    [:link {:rel "apple-touch-icon"
-            :sizes "180x180"
-            :href (manifest/asset "images/apple-touch-icon-1.png")}]
-    [:link {:type "text/css"
-            :href (manifest/asset "css/output.css")
-            :rel "stylesheet"}]
-    [:title "Linkboard"]]
-   [:body
-    {:class ["bg-slate-50"]}
-    [:div
-     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
-     [:div
-      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
-      [:div
-       [:a
-        {:hx-get "/"
-         :hx-target "#content"
-         :hx-push-url "true"}
-        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
-       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
-        [:p "Personal bookmark manager"]
-        [:a
-         {:href PROJECT-GITHUB-LINK
-          :target "_blank"}
-         icons/github]]]
-      [:div {:class ["flex" "gap-4"]}
-       [:a {:class ["text-blue-500" "text-lg"]
-            :href "#"} "Sync"]]]
-     [:div
-      {:id "content"
-       :hx-history-elt true
-       :class ["pb-12"]}
-      content]]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/htmx.min.js")}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.focus.min.js")
-              :defer true}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.min.js")
-              :defer true}]]])
-
-(defn error-page
-  [text]
-  (base
-    [:div {:class ["mt-56"]}
-     [:div {:class ["mx-auto" "text-center"]}
-      [:h1 {:class ["text-5xl"]} text]]]))
-
 (defn modal
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.relative.w-auto.h-auto
@@ -154,6 +91,90 @@
         :x-on:click "modalOpen=false"
         :type "submit"}
        (or submit-btn-title "Save")]]]]])
+
+(defn base
+  "Base component for html page."
+  [request content]
+  [:html
+   [:head
+    [:meta {:charset "UTF-8"}]
+    [:meta {:name "viewport"
+            :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"}]
+    [:meta {:name "msapplication-TileColor"
+            :content "#f9fafb"}]
+    [:link {:rel "manifest"
+            :href "/assets/manifest.json"}]
+    [:link {:rel "icon"
+            :href (manifest/asset "images/favicon-1.png")}]
+    [:link {:rel "apple-touch-icon"
+            :sizes "180x180"
+            :href (manifest/asset "images/apple-touch-icon-1.png")}]
+    [:link {:type "text/css"
+            :href (manifest/asset "css/output.css")
+            :rel "stylesheet"}]
+    [:title "Linkboard"]]
+   [:body
+    {:class ["bg-slate-50"]}
+    [:div
+     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
+     [:div
+      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
+      [:div
+       [:a
+        {:hx-get "/"
+         :hx-target "#content"
+         :hx-push-url "true"}
+        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
+       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
+        [:p "Personal bookmark manager"]
+        [:a
+         {:href PROJECT-GITHUB-LINK
+          :target "_blank"}
+         icons/github]]]
+      [:div {:class ["flex" "gap-4"]}
+       [:div
+        {:x-data "{ modalOpen: false }"
+         :class ["flex" "items-center"]}
+        ;[:button
+        ; {:class ["text-blue-500" "text-lg"]
+        ;  :x-on:click "modalOpen = true"}
+        ; "Sync"]
+        (modal
+          {:title "Sync your devices"
+           :open-btn-text [:button
+                           {:class ["text-blue-500" "text-lg" "cursor-pointer"]
+                            :x-on:click "modalOpen = true"}
+                           "Sync"]
+           :submit-btn-title "Sync"
+           :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request)
+                                                          ::r/update-sync-code)
+                        :hx-target "#content"}
+           :form-fields [:div
+                         [:h2 (get-in request [:session :sync-code])]
+                         [:input {:type "text"
+                                  :name "sync-code"
+                                  :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]})]]]
+     [:div
+      {:id "content"
+       :hx-history-elt true
+       :class ["pb-12"]}
+      content]]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/htmx.min.js")}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/alpinejs.focus.min.js")
+              :defer true}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/alpinejs.min.js")
+              :defer true}]]])
+
+(defn error-page
+  [request text]
+  (base
+    request
+    [:div {:class ["mt-56"]}
+     [:div {:class ["mx-auto" "text-center"]}
+      [:h1 {:class ["text-5xl"]} text]]]))
 
 (defn search-bar
   []
