@@ -147,16 +147,16 @@
                         :hx-target "#content"}
            :form-fields [:div
                          [:div {:class ["mb-4"]}
-                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your current Sync Code"]
+                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Current sync code"]
                           [:div {:class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center"]}
                            (get-in request [:session :sync-code])]]
                          [:div
-                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "New Sync Code"]
+                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "New sync code"]
                           [:input {:type "text"
                                    :name "sync-code"
                                    :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]
                           [:p {:class ["text-sm" "text-red-500" "mt-2"]}
-                           "WARNING: After syncing with new Code, all existing data in this browser will be lost!"]]]})]]]
+                           "WARNING: After syncing with new code, all existing data in this browser will be lost!"]]]})]]]
      [:div
       {:id "content"
        :hx-history-elt true
