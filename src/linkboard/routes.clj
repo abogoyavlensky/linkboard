@@ -29,7 +29,7 @@
    ["/sync" {:name ::update-sync-code
              :middleware [wrap-sync-code]
              :post {:handler home-handlers/update-sync-code-handler
-                    :parameters {:form {:sync-code string?}}
+                    :parameters {:form {:sync-code [:string {:min 1}]}}
                     :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]

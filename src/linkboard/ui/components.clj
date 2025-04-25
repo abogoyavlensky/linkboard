@@ -81,12 +81,12 @@
       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
       [:button
        {:class ["inline-flex" "items-center" "justify-center" "h-10" "px-4" "py-2"
-                "text-sm" "font-medium" "transition-colors" "border" "rounded-md"
+                "text-sm" "font-medium" "transition-colors" "border" "rounded-md" "cursor-pointer"
                 "focus:outline-hidden" "focus:ring-2" "focus:ring-neutral-100" "focus:ring-offset-2"]
         :x-on:click "modalOpen=false"
         :type "button"} "Cancel"]
       [:button
-       {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2"
+       {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
         :x-on:click "modalOpen=false"
         :type "submit"}
@@ -148,8 +148,20 @@
            :form-fields [:div
                          [:div {:class ["mb-4"]}
                           [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Current sync code"]
-                          [:div {:class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center"]}
-                           (get-in request [:session :sync-code])]]
+                          [:div {:x-data "{copied: false}"
+                                 :class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer"
+                                         "flex" "items-center" "justify-center" "gap-2"]
+                                 :x-on:click "navigator.clipboard.writeText($el.textContent); copied = true; setTimeout(() => copied = false, 1000)"}
+                           (get-in request [:session :sync-code])
+                           [:div {:x-show "copied"
+                                  :x-transition:enter "transform ease-out duration-300"
+                                  :x-transition:enter-start "opacity-0 translate-y-2"
+                                  :x-transition:enter-end "opacity-100 translate-y-0"
+                                  :x-transition:leave "transition ease-in duration-100"
+                                  :x-transition:leave-start "opacity-100"
+                                  :x-transition:leave-end "opacity-0"
+                                  :class ["text-green-500" "absolute" "ml-76"]}
+                            "✓"]]]
                          [:div
                           [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "New sync code"]
                           [:input {:type "text"
