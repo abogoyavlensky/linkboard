@@ -42,7 +42,6 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    :keys [session]
     router :reitit.core/router}]
 
   ; Create a new board
