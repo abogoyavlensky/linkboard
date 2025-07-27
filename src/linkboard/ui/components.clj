@@ -117,7 +117,7 @@
     {:title "Create Account"
      :open-btn-text [:button
                      {:class ["text-blue-500" "text-lg" "cursor-pointer"]
-                      :x-on:click "modalOpen = true"}
+                      :x-on:click "modalOpen = true; accountId = generateAccountId()"}
                      "Register"]
      :submit-btn-title "Create Account"
      :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request)
@@ -130,7 +130,10 @@
                            :class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer"
                                    "flex" "items-center" "justify-center" "gap-2"]
                            :x-on:click "navigator.clipboard.writeText($el.textContent); copied = true; setTimeout(() => copied = false, 1000)"}
-                     (get-in request [:session :sync-code])
+                     [:span {:x-text "accountId"}]
+                     [:input {:type "hidden"
+                              :name "account-number"
+                              :x-model "accountId"}]
                      [:div {:x-show "copied"
                             :x-transition:enter "transform ease-out duration-300"
                             :x-transition:enter-start "opacity-0 translate-y-2"
@@ -139,7 +142,9 @@
                             :x-transition:leave-start "opacity-100"
                             :x-transition:leave-end "opacity-0"
                             :class ["text-green-500" "absolute" "ml-76"]}
-                      "✓"]]]]}))
+                      "✓"]]
+                    [:p {:class ["text-sm" "text-red-600" "mt-2" "text-left" "font-medium"]}
+                     "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
 
 (defn base
   "Base component for html page."
@@ -182,7 +187,7 @@
          icons/github]]]
       [:div {:class ["flex" "gap-4"]}
        [:div
-        {:x-data "{ modalOpen: false }"
+        {:x-data "{ modalOpen: false, accountId: '' }"
          :class ["flex" "items-center"]}
         (login-modal request)
         (create-account-modal request)]]]
@@ -199,7 +204,9 @@
               :defer true}]
     [:script {:type "text/javascript"
               :src (manifest/asset "js/alpinejs.min.js")
-              :defer true}]]])
+              :defer true}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/utils.js")}]]])
 
 (defn error-page
   [request text]
