@@ -1,6 +1,8 @@
 (ns linkboard.home.handlers
-  (:require [linkboard.core.db :as db]
+  (:require [buddy.hashers :as hashers]
+            [linkboard.core.db :as db]
             [linkboard.home.views :as views]
+            [linkboard.queries :as queries]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [reitit-extras.core :as reitit-extras]
@@ -63,9 +65,31 @@
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [form]} :parameters
+  [{{:keys [db]} :context
+    {:keys [form]} :parameters
     :keys [session]}]
-
-  (-> (reitit-extras/render-html [:div])
-      (assoc :session (assoc session :identity (:account-number form)))
-      (response/header "HX-Redirect" "/")))
+  (if-not (:session-id session)
+    (-> (response/response "No session found")
+        (response/status 400))
+    (let [user (queries/get-user-by-session-id db (:session-id session))
+          hashed-account-number (hashers/derive (:account-number form) {:alg :bcrypt+sha512})]
+      (cond
+        (not user)
+        ; Create new user with session-id and hashed account number
+        (let [created-user (queries/create-user! db (:session-id session) hashed-account-number)
+              identity-data (select-keys created-user [:id :session-id])]
+          (-> (reitit-extras/render-html [:div])
+              (assoc :session (assoc session :identity identity-data))
+              (response/header "HX-Redirect" "/")))
+            
+        (:account-number user)
+        (-> (response/response "User already has an account number")
+            (response/status 400))
+            
+        :else
+        ; Update existing user with account number
+        (let [updated-user (queries/update-user-account-number! db (:id user) hashed-account-number)
+              identity-data (select-keys updated-user [:id :session-id])]
+          (-> (reitit-extras/render-html [:div])
+              (assoc :session (assoc session :identity identity-data))
+              (response/header "HX-Redirect" "/")))))))

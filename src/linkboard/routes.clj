@@ -5,7 +5,8 @@
 
 (defn wrap-auth
   [handler]
-  (fn [{:keys [session] :as request}]
+  (fn [{:keys [session]
+        :as request}]
     (let [has-session-id? (boolean (:session-id session))
           request* (if has-session-id?
                      request
