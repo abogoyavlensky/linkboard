@@ -102,13 +102,12 @@
                       :x-on:click "modalOpen = true"}
                      "Login"]
      :submit-btn-title "Login"
-     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request)
-                                                    ::r/update-sync-code)
+     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request) ::r/login)
                   :hx-target "#content"}
      :form-fields [:div
                    [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
                    [:input {:type "text"
-                            :name "sync-code"
+                            :name "account-number"
                             :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]}))
 
 (defn- create-account-modal
@@ -120,8 +119,7 @@
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
                      "Register"]
      :submit-btn-title "Create Account"
-     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request)
-                                                    ::r/update-sync-code)
+     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request) ::r/create-account)
                   :hx-target "#content"}
      :form-fields [:div
                    [:div {:class ["mb-4"]}
@@ -143,7 +141,7 @@
                             :x-transition:leave-end "opacity-0"
                             :class ["text-green-500" "absolute" "ml-76"]}
                       "✓"]]
-                    [:p {:class ["text-sm" "text-red-600" "mt-2" "text-left" "font-medium"]}
+                    [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
                      "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
 
 (defn base

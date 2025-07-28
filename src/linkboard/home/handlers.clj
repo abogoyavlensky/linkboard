@@ -15,6 +15,7 @@
     router :reitit.core/router
     :keys [session]
     :as request}]
+  #p session
   (let [all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
                               :join [[:link :l] [:= :b.id :l.board-id]]
@@ -30,8 +31,7 @@
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
         page-view (views/boards-view router {:boards boards
-                                             :all-links-count all-links-count
-                                             :session session})]
+                                             :all-links-count all-links-count})]
     (if (c/hx-request? request)
       (reitit-extras/render-html page-view)
       (->> page-view
@@ -61,10 +61,11 @@
          (views/board-list router)
          (reitit-extras/render-html))))
 
-(defn update-sync-code-handler
+(defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [form]} :parameters}]
-  ; TODO: validate if there is such code in DB
+  [{{:keys [form]} :parameters
+    :keys [session]}]
+
   (-> (reitit-extras/render-html [:div])
-      (assoc :session {:sync-code (:sync-code form)})
+      (assoc :session (assoc session :identity (:account-number form)))
       (response/header "HX-Redirect" "/")))

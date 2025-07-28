@@ -7,7 +7,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Personal bookmark management with board organization
 - Automatic link metadata extraction (title, icons)
 - PWA-ready with modern web app icons
-- Sync code functionality for cross-device access
+- Account-based authentication with auto-generated account numbers
+- Client-side account number generation using crypto.randomUUID()
 - Self-hosted deployment with Docker and Kamal
 
 ## Architecture
@@ -43,11 +44,12 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
+  - `POST /create-account` - Account creation endpoint
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
   - `POST /boards/:id/links` - Add link to board
   - `PUT/DELETE` operations for boards and links
-- Sync code middleware (currently disabled)
+- `wrap-auth` middleware for session-id management
 - Malli schema validation for request parameters
 
 #### Handlers
@@ -59,6 +61,14 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Automatic title and icon extraction from URLs
 - HTTP client with Hickory for HTML parsing
 - Favicon detection and processing
+
+#### Account Management (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
+- Client-side account number generation using `crypto.randomUUID()`
+- 16-character alphanumeric IDs with dashes every 4 characters (format: XXXX-XXXX-XXXX-XXXX)
+- Fallback to `Math.random()` for older browsers
+- Alpine.js integration for modal state management
+- One-time display warning for account security
+- Automatic clipboard copy functionality with visual feedback
 
 ## Dependencies
 
@@ -129,6 +139,7 @@ resources/
 └── public/            # Static assets
     ├── css/
     ├── js/
+    │   └── utils.js     # Client-side utilities (account ID generation)
     └── images/
 
 test/                  # Test files
@@ -179,9 +190,11 @@ bb clj-repl              # Start REPL with dev profile
 ## Extension Points
 
 ### Authentication
-- Currently uses hardcoded USER_ID=1
-- Session management infrastructure ready
-- Sync code system partially implemented
+- Account-based system with client-generated account numbers
+- `wrap-auth` middleware for session-id management and persistence
+- Session management infrastructure for cross-request persistence
+- Modal-based login/register UI with Alpine.js state management
+- Account numbers formatted as XXXX-XXXX-XXXX-XXXX for usability
 
 ### Features
 - Pagination for large link collections

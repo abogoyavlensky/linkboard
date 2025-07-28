@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 --;;
 -- Insert a user
-INSERT INTO "user" (sync_code) VALUES ('USER12345');
+INSERT INTO "user" (session_id, account_number) VALUES ('07aa-ac8e-44c2-9b8f', 'USER12345');
 --;;
 -- Insert boards for the user
 INSERT INTO "board" (title, user_id) VALUES ('Work', 1);
