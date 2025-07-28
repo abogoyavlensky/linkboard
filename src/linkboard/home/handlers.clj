@@ -81,11 +81,11 @@
           (-> (reitit-extras/render-html [:div])
               (assoc :session (assoc session :identity identity-data))
               (response/header "HX-Redirect" "/")))
-            
+
         (:account-number user)
         (-> (response/response "User already has an account number")
             (response/status 400))
-            
+
         :else
         ; Update existing user with account number
         (let [updated-user (queries/update-user-account-number! db (:id user) hashed-account-number)
