@@ -44,23 +44,31 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `POST /create-account` - Account creation endpoint
+  - `POST /auth/create-account` - Account creation endpoint
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
   - `POST /boards/:id/links` - Add link to board
   - `PUT/DELETE` operations for boards and links
-- `wrap-auth` middleware for session-id management
+- `wrap-auth` middleware for automatic session-id generation and persistence
 - Malli schema validation for request parameters
 
 #### Handlers
-- **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing and creation
+- **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, and account management
 - **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards
-- Hardcoded USER_ID=1 (authentication not implemented)
+- **Session-based user management**: All handlers validate session and auto-create users as needed
+- **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 
 #### Link Metadata Fetching (`src/linkboard/board/fetch.clj`)
 - Automatic title and icon extraction from URLs
 - HTTP client with Hickory for HTML parsing
 - Favicon detection and processing
+
+#### User Management System (`src/linkboard/queries.clj` + handlers)
+- **Automatic user creation**: Users created on first interaction with empty account_number
+- **Session-based identification**: All operations tied to session_id from `wrap-auth` middleware
+- **Account registration**: Users can later register with account numbers for persistence
+- **Secure password storage**: Account numbers hashed with bcrypt+sha512 algorithm
+- **User isolation**: All boards/links scoped to individual users automatically
 
 #### Account Management (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
 - Client-side account number generation using `crypto.randomUUID()`
@@ -84,6 +92,7 @@ com.github.seancorfield/honeysql "2.7.1325"   ; SQL DSL
 hikari-cp/hikari-cp "3.3.0"           ; Connection pooling
 clj-http/clj-http "3.13.1"            ; HTTP client
 org.clj-commons/hickory "0.7.7"       ; HTML parsing
+buddy/buddy-hashers "2.0.167"         ; Secure password hashing
 ```
 
 ### Development Tools
@@ -120,7 +129,7 @@ src/linkboard/
 │   └── server.clj       # Web server component
 ├── handlers.clj         # Default error handlers
 ├── routes.clj           # Route definitions
-├── queries.clj          # Database queries
+├── queries.clj          # Database queries (user management, boards, links)
 ├── home/               # Home page functionality
 │   ├── handlers.clj
 │   └── views.clj
@@ -148,24 +157,47 @@ test/                  # Test files
 ## Database Schema
 
 ### Tables
-1. **board**: User's bookmark collections
+1. **user**: User accounts and sessions
+   - id, session_id (indexed), account_number (indexed), created_at
+2. **board**: User's bookmark collections  
    - id, title, user_id, created_at
-2. **link**: Individual bookmarks
+3. **link**: Individual bookmarks
    - id, url, title, icon, board_id, created_at
 
 ### Migrations
 - `0001.up.sql`: Initial schema
-- `0002.up.sql`: Additional constraints
-- `0003.up.sql`: Schema updates
+- `0002.up.sql`: User table creation with indexes
+- `0003.up.sql`: Sample data insertion
+- `0004.up.sql`: Performance indexes for session_id and account_number
+
+## Available Functions and Queries
+
+### User Management (`src/linkboard/queries.clj`)
+```clojure
+(get-user-by-session-id db session-id)           ; Retrieve user by session
+(create-user-with-session! db session-id)        ; Create user with session only  
+(create-user! db session-id hashed-account-number) ; Create user with account
+(update-user-account-number! db user-id hash)    ; Add account to existing user
+(ensure-user-exists! db session-id)              ; Get or create user helper
+```
+
+### Account Creation Workflow
+```clojure
+; 1. User clicks Register button (generates client-side account number)
+; 2. POST /auth/create-account with account-number form field
+; 3. Handler validates session, hashes account number, stores in database
+; 4. Returns with identity data in session for future requests
+```
 
 ## API Patterns
 
 ### Request/Response Flow
-1. Reitit handles routing and parameter validation
-2. Handlers extract database and request context
-3. Database queries use HoneySQL DSL
-4. Views render Hiccup-style HTML
-5. HTMX handles partial page updates
+1. `wrap-auth` middleware ensures session-id exists and persists across requests
+2. Reitit handles routing and parameter validation with Malli schemas
+3. Handlers validate session and auto-create users via `ensure-user-exists!`
+4. Database queries use HoneySQL DSL with proper user isolation
+5. Views render Hiccup-style HTML with user-specific data
+6. HTMX handles partial page updates and form submissions
 
 ### Error Handling
 - Schema validation with Malli
@@ -190,11 +222,13 @@ bb clj-repl              # Start REPL with dev profile
 ## Extension Points
 
 ### Authentication
-- Account-based system with client-generated account numbers
-- `wrap-auth` middleware for session-id management and persistence
-- Session management infrastructure for cross-request persistence
+- **Fully implemented session-based authentication system**
+- Automatic user creation on first interaction (empty account_number)
+- Client-generated account numbers with secure bcrypt+sha512 hashing
+- `wrap-auth` middleware for session-id generation and persistence
 - Modal-based login/register UI with Alpine.js state management
 - Account numbers formatted as XXXX-XXXX-XXXX-XXXX for usability
+- Complete user isolation across all operations
 
 ### Features
 - Pagination for large link collections

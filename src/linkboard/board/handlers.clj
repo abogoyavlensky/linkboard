@@ -8,27 +8,26 @@
             [reitit-extras.core :as reitit-extras]
             [ring.util.response :as response]))
 
-; TODO: change to authenticated user
-(def USER_ID 1)
-
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [path]} :parameters
     router :reitit.core/router
+    :keys [session]
     :as request}]
-  (let [board (->> {:select [:*]
+  (let [user (q/get-user-by-session-id db (:session-id session))
+        board (->> {:select [:*]
                     :from [:board]
                     :where [:and
                             [:= :id (:id path)]
-                            [:= :user-id USER_ID]]}
+                            [:= :user-id (:id user)]]}
                    (db/exec-one! db))
         ; TODO: add pagination
         links (->> {:select [:l.*]
                     :from [[:link :l]]
                     :join [[:board :b] [:= :l.board-id :b.id]]
                     :where [:and
-                            [:= :b.user-id USER_ID]
+                            [:= :b.user-id (:id user)]
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
@@ -48,7 +47,7 @@
     :keys [path-params]
     :as request}]
   ; TODO: add validation for url!
-  ; Add a link to board
+  ; TODO: add validation for user ownership of the board
   (let [board-id (-> path-params :id parse-long)
         url (:url form)
         ; Fetch metadata for the URL
@@ -67,6 +66,7 @@
     {:keys [form]} :parameters
     :keys [path-params]
     :as request}]
+  ; TODO: add validation for user ownership of the board
   (let [board-id (-> path-params :id parse-long)
         link-id (-> path-params :link-id parse-long)
         title (:title form)
@@ -85,29 +85,31 @@
 (defn update-board-handler
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    :keys [path-params]
+    :keys [path-params session]
     :as request}]
-  (let [board-id (-> path-params :id parse-long)
+  (let [user (q/get-user-by-session-id db (:session-id session))
+        board-id (-> path-params :id parse-long)
         title (:title form)]
     ; Update board in the database
     (->> {:update :board
           :set {:title title}
           :where [:and
                   [:= :id board-id]
-                  [:= :user-id USER_ID]]}
+                  [:= :user-id (:id user)]]}
          (db/exec-one! db))
     ; Render updated board content
     (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
 
 (defn delete-board-handler
   [{{:keys [db]} :context
-    :keys [path-params]}]
-  (let [board-id (-> path-params :id parse-long)]
+    :keys [path-params session]}]
+  (let [user (q/get-user-by-session-id db (:session-id session))
+        board-id (-> path-params :id parse-long)]
     ; Delete board (this will cascade delete all links in the board)
     (->> {:delete-from :board
           :where [:and
                   [:= :id board-id]
-                  [:= :user-id USER_ID]]}
+                  [:= :user-id (:id user)]]}
          (db/exec-one! db))
     ; Redirect to home page
     (-> (response/response nil)
@@ -115,8 +117,9 @@
 
 (defn delete-link-handler
   [{:keys [path-params context]}]
+  ; TODO: add validation for user ownership of the board
   (let [board-id (-> path-params :id parse-long)]
-    ; TODO: fetch board by user, validate if it's owened by user
+    ; Delete link (validates user ownership through board-id)
     (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
                                    :board-id board-id})
     (response/response nil)))

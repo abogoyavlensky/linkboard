@@ -29,11 +29,11 @@
                             :post {:handler home-handlers/create-account-handler
                                    :parameters {:form {:account-number [:string {:min 1}]}}
                                    :responses {200 {:body string?}}}}]
-   ;["/login" {:name ::login
-   ;           :middleware [wrap-auth]
-   ;           :post {:handler home-handlers/login-handler
-   ;                  :parameters {:form {:account-number [:string {:min 1}]}}
-   ;                  :responses {200 {:body string?}}}}]
+   ["/login" {:name ::login
+              :middleware [wrap-auth]
+              :post {:handler home-handlers/login-handler
+                     :parameters {:form {:account-number [:string {:min 1}]}}
+                     :responses {200 {:body string?}}}}]
 
    ["/boards" ;{:middleware [wrap-auth]}
     ["" {:name ::board-list
