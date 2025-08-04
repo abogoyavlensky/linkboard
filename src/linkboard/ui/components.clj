@@ -108,6 +108,7 @@
                    [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
                    [:input {:type "password"
                             :name "account-number"
+                            :autofocus true
                             :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]}))
 
 (defn- create-account-modal
