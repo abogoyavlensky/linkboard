@@ -21,15 +21,14 @@
   [""
    {:middleware [wrap-auth]}
    ["/" {:name ::home-page
-         ;:middleware [wrap-auth]
          :get {:handler home-handlers/home-handler
                :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]
-   ["/auth/create-account" {:name ::create-account
-                            :post {:handler home-handlers/create-account-handler
-                                   :parameters {:form {:account-number [:string {:min 1}]}}
-                                   :responses {200 {:body string?}}}}]
+   ["/create-account" {:name ::create-account
+                       :post {:handler home-handlers/create-account-handler
+                              :parameters {:form {:account-number [:string {:min 1}]}}
+                              :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
@@ -38,7 +37,7 @@
                :post {:handler home-handlers/logout-handler
                       :responses {200 {:body string?}}}}]
 
-   ["/boards" ;{:middleware [wrap-auth]}
+   ["/boards"
     ["" {:name ::board-list
          :post {:handler home-handlers/create-board-handler
                 :parameters {:form {:title [:string {:min 1}]}}

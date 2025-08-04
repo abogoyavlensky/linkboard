@@ -44,7 +44,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `POST /auth/create-account` - Account creation endpoint
+  - `POST /create-account` - Account creation endpoint
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
   - `POST /boards/:id/links` - Add link to board
@@ -183,7 +183,7 @@ test/                  # Test files
 ### Account Creation Workflow
 ```clojure
 ; 1. User clicks Register button (generates client-side account number)
-; 2. POST /auth/create-account with account-number form field
+; 2. POST /create-account with account-number form field
 ; 3. Handler validates session, hashes account number, stores in database
 ; 4. Returns with identity data in session for future requests
 ```
