@@ -1,5 +1,6 @@
 (ns linkboard.ui.components
-  (:require [linkboard.routes :as-alias r]
+  (:require [clojure.string :as str]
+            [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as ext]))
@@ -89,9 +90,25 @@
        {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
         :autofocus true
-        :x-on:click "modalOpen=false"
+        ;:x-on:click "modalOpen=false"
         :type "submit"}
        (or submit-btn-title "Save")]]]]])
+
+(defn login-form-fields
+  [request]
+  (let [errors (get-in request [:errors :humanized :account-number])]
+    [:div
+     {:id "login-form-fields"}
+     [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
+     [:input {:type "password"
+              :name "account-number"
+              :autofocus true
+              :class (concat ["w-full" "px-3" "py-2" "border" "rounded-lg"]
+                       (when (seq errors)
+                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))}]
+     (when (seq errors)
+       (list (for [error errors]
+               [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])))]))
 
 (defn- login-modal
   [request]
@@ -103,13 +120,8 @@
                      "Login"]
      :submit-btn-title "Login"
      :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/login)
-                  :hx-target "#content"}
-     :form-fields [:div
-                   [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
-                   [:input {:type "password"
-                            :name "account-number"
-                            :autofocus true
-                            :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]}))
+                  :hx-target "#login-form-fields"}
+     :form-fields (login-form-fields request)}))
 
 (defn- create-account-modal
   [request]

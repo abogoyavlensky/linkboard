@@ -92,15 +92,21 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    :keys [session]}]
-  (if-let [user (queries/get-user-by-account-number db (:account-number form))]
-    (-> (ext/render-html [:div])
-        (assoc :session (assoc session :identity (select-keys user [:id :session-id])
-                               :session-id (:session-id user)))
-        (response/header "HX-Redirect" "/"))
-    ; If user not found, return an error response
-    (-> (response/response "Invalid account number.")
-        (response/status 400))))
+    :keys [session errors]
+    :as request}]
+  (if (seq errors)
+    (->> (c/login-form-fields request)
+         (ext/render-html))
+    (if-let [user (queries/get-user-by-account-number db (:account-number form))]
+      (-> (ext/render-html [:div])
+          (assoc :session (assoc session :identity (select-keys user [:id :session-id])
+                                 :session-id (:session-id user)))
+          (response/header "HX-Redirect" "/"))
+      ; If user not found, return an error response
+      (-> request
+          (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
+          (c/login-form-fields)
+          (ext/render-html)))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}
