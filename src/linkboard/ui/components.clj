@@ -104,8 +104,8 @@
               :name "account-number"
               :autofocus true
               :class (concat ["w-full" "px-3" "py-2" "border" "rounded-lg"]
-                       (when (seq errors)
-                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))}]
+                             (when (seq errors)
+                               ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))}]
      (when (seq errors)
        (list (for [error errors]
                [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])))]))
