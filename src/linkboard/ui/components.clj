@@ -2,7 +2,7 @@
   (:require [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
             [manifest-edn.core :as manifest]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as ext]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
@@ -75,7 +75,7 @@
       {:class ["relative" "w-auto" "pb-8"]}
       [:div
        {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (reitit-extras/csrf-token-html)
+       (ext/csrf-token-html)
        form-fields]]
      [:div
       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
@@ -102,11 +102,11 @@
                       :x-on:click "modalOpen = true"}
                      "Login"]
      :submit-btn-title "Login"
-     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request) ::r/login)
+     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/login)
                   :hx-target "#content"}
      :form-fields [:div
                    [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
-                   [:input {:type "text"
+                   [:input {:type "password"
                             :name "account-number"
                             :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]]}))
 
@@ -119,7 +119,7 @@
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
                      "Register"]
      :submit-btn-title "Create Account"
-     :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request) ::r/create-account)
+     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/create-account)
                   :hx-target "#content"}
      :form-fields [:div
                    [:div {:class ["mb-4"]}
@@ -146,7 +146,10 @@
 
 (defn base
   "Base component for html page."
-  [request content]
+  [{user :identity
+    router :reitit.core/router
+    :as request}
+   content]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -184,11 +187,22 @@
           :target "_blank"}
          icons/github]]]
       [:div {:class ["flex" "gap-4"]}
-       [:div
-        {:x-data "{ modalOpen: false, accountId: '' }"
-         :class ["flex" "items-center"]}
-        (login-modal request)
-        (create-account-modal request)]]]
+       (if user
+         [:div
+          {:class ["flex" "items-center"]}
+          [:button
+           {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+            :hx-post (ext/get-route router ::r/logout)
+            :hx-headers (ext/csrf-token-json)}
+           "Logout"]
+          [:button
+           {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+           "Account"]]
+         [:div
+          {:x-data "{ modalOpen: false, accountId: '' }"
+           :class ["flex" "items-center"]}
+          (login-modal request)
+          (create-account-modal request)])]]
 
      [:div
       {:id "content"

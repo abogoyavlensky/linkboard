@@ -1,11 +1,10 @@
 (ns linkboard.home.handlers
-  (:require [buddy.hashers :as hashers]
-            [linkboard.core.db :as db]
+  (:require [linkboard.core.db :as db]
             [linkboard.home.views :as views]
             [linkboard.queries :as queries]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [reitit-extras.core :as reitit-extras]
+            [reitit-extras.core :as ext]
             [ring.util.response :as response]))
 
 (defn home-handler
@@ -32,10 +31,10 @@
         page-view (views/boards-view router {:boards boards
                                              :all-links-count all-links-count})]
     (if (c/hx-request? request)
-      (reitit-extras/render-html page-view)
+      (ext/render-html page-view)
       (->> page-view
            (c/base request)
-           (reitit-extras/render-html)))))
+           (ext/render-html)))))
 
 (defn create-board-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -59,7 +58,7 @@
                                :order-by [[:b.created_at :desc]]})]
       (->> {:boards boards}
            (views/board-list router)
-           (reitit-extras/render-html)))))
+           (ext/render-html)))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -67,13 +66,13 @@
     {:keys [form]} :parameters
     :keys [session]}]
   (let [user (queries/get-user-by-session-id db (:session-id session))
-        hashed-account-number (hashers/derive (:account-number form) {:alg :bcrypt+sha512})]
+        account-number (:account-number form)]
     (cond
       (not user)
       ; Create new user with session-id and hashed account number
-      (let [created-user (queries/create-user! db (:session-id session) hashed-account-number)
+      (let [created-user (queries/create-user! db (:session-id session) account-number)
             identity-data (select-keys created-user [:id :session-id])]
-        (-> (reitit-extras/render-html [:div])
+        (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
             (response/header "HX-Redirect" "/")))
 
@@ -83,9 +82,9 @@
 
       :else
       ; Update existing user's empty account number with actual hashed account number
-      (let [updated-user (queries/update-user-account-number! db (:id user) hashed-account-number)
+      (let [updated-user (queries/update-user-account-number! db (:id user) account-number)
             identity-data (select-keys updated-user [:id :session-id])]
-        (-> (reitit-extras/render-html [:div])
+        (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
             (response/header "HX-Redirect" "/"))))))
 
@@ -93,8 +92,20 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
+    :keys [session]}]
+  (if-let [user (queries/get-user-by-account-number db (:account-number form))]
+    (-> (ext/render-html [:div])
+        (assoc :session (assoc session :identity (select-keys user [:id :session-id])
+                               :session-id (:session-id user)))
+        (response/header "HX-Redirect" "/"))
+    ; If user not found, return an error response
+    (-> (response/response "Invalid account number.")
+        (response/status 400))))
+
+(defn logout-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{router :reitit.core/router
     :keys [_session]}]
-  (let [hashed-account-number (hashers/derive (:account-number form) {:alg :bcrypt+sha512})
-        _user (queries/get-user-by-account-number db hashed-account-number)]
-    ; TODO: implement login logic
-    (response/response "Login not implemented yet")))
+  (-> (ext/render-html [:div])
+      (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+      (assoc :session nil)))

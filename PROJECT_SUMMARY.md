@@ -92,7 +92,6 @@ com.github.seancorfield/honeysql "2.7.1325"   ; SQL DSL
 hikari-cp/hikari-cp "3.3.0"           ; Connection pooling
 clj-http/clj-http "3.13.1"            ; HTTP client
 org.clj-commons/hickory "0.7.7"       ; HTML parsing
-buddy/buddy-hashers "2.0.167"         ; Secure password hashing
 ```
 
 ### Development Tools

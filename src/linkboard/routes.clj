@@ -8,9 +8,10 @@
   (fn [{:keys [session]
         :as request}]
     (let [has-session-id? (boolean (:session-id session))
-          request* (if has-session-id?
-                     request
-                     (assoc-in request [:session :session-id] (str (random-uuid))))
+          user (boolean (:identity session))
+          request* (cond-> request
+                     (not has-session-id?) (assoc-in [:session :session-id] (str (random-uuid)))
+                     user (assoc :identity user))
           response (handler request*)]
       (if (not has-session-id?)
         (update response :session assoc :session-id (get-in request* [:session :session-id]))
@@ -30,10 +31,12 @@
                                    :parameters {:form {:account-number [:string {:min 1}]}}
                                    :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
-              :middleware [wrap-auth]
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
                      :responses {200 {:body string?}}}}]
+   ["/logout" {:name ::logout
+               :post {:handler home-handlers/logout-handler
+                      :responses {200 {:body string?}}}}]
 
    ["/boards" ;{:middleware [wrap-auth]}
     ["" {:name ::board-list
