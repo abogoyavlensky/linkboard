@@ -93,7 +93,8 @@
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
 (defn board-view
-  [{router :reitit.core/router :as request} {:keys [board links]}]
+  [{router :reitit.core/router
+    :as request} {:keys [board links]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
