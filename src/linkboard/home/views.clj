@@ -1,5 +1,6 @@
 (ns linkboard.home.views
-  (:require [linkboard.routes :as-alias r]
+  (:require [clojure.string :as str]
+            [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
@@ -44,8 +45,33 @@
      [:p {:class ["text-gray-500" "text-center" "mb-4" "max-w-sm"]}
       "Get started by creating your first board to organize your bookmarks."]]))
 
+(defn board-form-fields
+  [request]
+  (let [errors (get-in request [:errors :humanized :title])]
+    (list
+      [:div
+       {:id "board-form-fields"}
+       [:input
+        {:id "board-form-fields"
+         :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                         "bg-white" "border" "rounded-md" "border-neutral-300"
+                         "ring-offset-background" "placeholder:text-neutral-500"
+                         "focus:border-neutral-300" "focus:outline-hidden"
+                         "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                         "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                        (when (seq errors)
+                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+         :type "text"
+         :name "title"
+         :minlength 1
+         :autofocus true
+         :value (get-in request [:parameters :form :title] nil)
+         :placeholder "Enter board name"}]
+       (for [error errors]
+         [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])])))
+
 (defn boards-view
-  [router {:keys [boards all-links-count]}]
+  [{router :reitit.core/router :as request} {:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    (c/search-bar)
@@ -71,19 +97,8 @@
                                           icons/plus-circle "Add board"]})
               :title "Create board"
               :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
-                           :hx-target "#board-list"}
-              :form-fields (list
-                             [:input
-                              {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                                       "bg-white" "border" "rounded-md" "border-neutral-300"
-                                       "ring-offset-background" "placeholder:text-neutral-500"
-                                       "focus:border-neutral-300" "focus:outline-hidden"
-                                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                               :type "text"
-                               :name "title"
-                               :minlength 1
-                               :autofocus true
-                               :placeholder "Enter board name"}])})]]
+                           ;:hx-target "#board-list"
+                           :hx-target "#board-form-fields"}
+              :form-fields (board-form-fields request)})]]
     [:div#board-list
      (board-list router {:boards boards})]]])

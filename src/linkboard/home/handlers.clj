@@ -10,10 +10,9 @@
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
-    router :reitit.core/router
     :keys [session]
     :as request}]
-  (let [user (queries/ensure-user-exists! db (:session-id session))
+  (let [user (queries/get-user-by-session-id db (:session-id session))
         all-links-count (->> {:select [[[:count :l.id] :links-count]]
                               :from [[:board :b]]
                               :join [[:link :l] [:= :b.id :l.board-id]]
@@ -28,8 +27,8 @@
                              :where [:= :b.user-id (:id user)]
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
-        page-view (views/boards-view router {:boards boards
-                                             :all-links-count all-links-count})]
+        page-view (views/boards-view request {:boards boards
+                                              :all-links-count all-links-count})]
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
@@ -41,29 +40,36 @@
   [{{:keys [db]} :context
     {:keys [form]} :parameters
     router :reitit.core/router
-    :keys [session]}]
-  (let [user (queries/ensure-user-exists! db (:session-id session))]
-    ; Create a new board
-    (->> {:insert-into :board
-          :values [{:title (:title form)
-                    :user-id (:id user)}]}
-         (db/exec-one! db))
-    ; Render home page with a new board in the list
-    (let [boards (db/exec! db {:select [:b.*
-                                        [[:count :l.id] :link-count]]
-                               :from [[:board :b]]
-                               :left-join [[:link :l] [:= :b.id :l.board-id]]
-                               :where [:= :b.user-id (:id user)]
-                               :group-by [:b.id :b.title]
-                               :order-by [[:b.created_at :desc]]})]
-      (->> {:boards boards}
-           (views/board-list router)
-           (ext/render-html)))))
+    :keys [session errors]
+    :as request}]
+  (if (seq errors)
+    (->> (views/board-form-fields request)
+         (ext/render-html))
+    (let [user (queries/ensure-user-exists! db (:session-id session))]
+      ; Create a new board
+      (->> {:insert-into :board
+            :values [{:title (:title form)
+                      :user-id (:id user)}]}
+           (db/exec-one! db))
+      (-> (ext/render-html [:div])
+          (response/header "HX-Redirect" (ext/get-route router ::r/home-page))))))
+      ;; Render home page with a new board in the list
+      ;(let [boards (db/exec! db {:select [:b.*
+      ;                                    [[:count :l.id] :link-count]]
+      ;                           :from [[:board :b]]
+      ;                           :left-join [[:link :l] [:= :b.id :l.board-id]]
+      ;                           :where [:= :b.user-id (:id user)]
+      ;                           :group-by [:b.id :b.title]
+      ;                           :order-by [[:b.created_at :desc]]})]
+      ;  (->> {:boards boards}
+      ;       (views/board-list router)
+      ;       (ext/render-html))))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
+    router :reitit.core/router
     :keys [session]}]
   (let [user (queries/get-user-by-session-id db (:session-id session))
         account-number (:account-number form)]
@@ -74,7 +80,7 @@
             identity-data (select-keys created-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" "/")))
+            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))))
 
       (:account-number user)
       (-> (response/response "User already exists with an account number.")
@@ -86,13 +92,14 @@
             identity-data (select-keys updated-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" "/"))))))
+            (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))))))
 
 (defn login-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
     :keys [session errors]
+    router :reitit.core/router
     :as request}]
   (if (seq errors)
     (->> (c/login-form-fields request)
@@ -101,7 +108,7 @@
       (-> (ext/render-html [:div])
           (assoc :session (assoc session :identity (select-keys user [:id :session-id])
                                  :session-id (:session-id user)))
-          (response/header "HX-Redirect" "/"))
+          (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))
       ; If user not found, return an error response
       (-> request
           (assoc-in [:errors :humanized :account-number] ["Invalid account number"])

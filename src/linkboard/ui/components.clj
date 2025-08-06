@@ -102,13 +102,18 @@
      [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
      [:input {:type "password"
               :name "account-number"
+              :value (get-in request [:parameters :form :account-number] nil)
               :autofocus true
-              :class (concat ["w-full" "px-3" "py-2" "border" "rounded-lg"]
+              :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                              "bg-white" "border" "rounded-md" "border-neutral-300"
+                              "ring-offset-background" "placeholder:text-neutral-500"
+                              "focus:border-neutral-300" "focus:outline-hidden"
+                              "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                              "disabled:cursor-not-allowed" "disabled:opacity-50"]
                              (when (seq errors)
                                ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))}]
-     (when (seq errors)
-       (list (for [error errors]
-               [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])))]))
+     (for [error errors]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
 (defn- login-modal
   [request]
