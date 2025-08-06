@@ -71,7 +71,8 @@
          [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])])))
 
 (defn boards-view
-  [{router :reitit.core/router :as request} {:keys [boards all-links-count]}]
+  [{router :reitit.core/router
+    :as request} {:keys [boards all-links-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    (c/search-bar)
