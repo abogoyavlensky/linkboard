@@ -53,17 +53,6 @@
            (db/exec-one! db))
       (-> (ext/render-html [:div])
           (response/header "HX-Redirect" (ext/get-route router ::r/home-page))))))
-      ;; Render home page with a new board in the list
-      ;(let [boards (db/exec! db {:select [:b.*
-      ;                                    [[:count :l.id] :link-count]]
-      ;                           :from [[:board :b]]
-      ;                           :left-join [[:link :l] [:= :b.id :l.board-id]]
-      ;                           :where [:= :b.user-id (:id user)]
-      ;                           :group-by [:b.id :b.title]
-      ;                           :order-by [[:b.created_at :desc]]})]
-      ;  (->> {:boards boards}
-      ;       (views/board-list router)
-      ;       (ext/render-html))))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}

@@ -43,22 +43,19 @@
                 :parameters {:form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}}]
     ["/:id"
+     {:parameters {:path {:id pos-int?}}}
      ["" {:name ::board-details
           :get {:handler board-handlers/board-handler
-                :parameters {:path {:id pos-int?}}
                 :responses {200 {:body string?}}}
           :put {:handler board-handlers/update-board-handler
-                :parameters {:path {:id pos-int?}
-                             :form {:title [:string {:min 1}]}}
+                :parameters {:form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}
           :delete {:handler board-handlers/delete-board-handler
-                   :parameters {:path {:id pos-int?}}
                    :responses {200 {:body nil?}}}}]
      ["/links"
       ["" {:name ::board-details-links
            :post {:handler board-handlers/add-link-handler
-                  :parameters {:form {:url [:string {:min 1}]}}
-                  :responses {200 {:body string?}}}}]
+                  :parameters {:form {:url [:string {:min 1}]}}}}]
       ["/:link-id" {:name ::link-details
                     :put {:handler board-handlers/update-link-handler
                           :parameters {:path {:id pos-int?

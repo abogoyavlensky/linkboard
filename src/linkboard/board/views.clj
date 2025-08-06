@@ -1,5 +1,6 @@
 (ns linkboard.board.views
-  (:require [linkboard.routes :as-alias r]
+  (:require [clojure.string :as str]
+            [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
@@ -69,8 +70,30 @@
                     :hx-target "closest .link-item"
                     :hx-swap "outerHTML"}})]])
 
+(defn link-form-fields
+  [request]
+  (let [errors (get-in request [:errors :humanized :url])]
+    [:div
+     {:id "link-form-fields"}
+     [:input
+      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                       "ring-offset-background" "placeholder:text-neutral-500"
+                       "focus:border-neutral-300" "focus:outline-hidden"
+                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                      (when (seq errors)
+                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+       :type "text"
+       :name "url"
+       :minlength 1
+       :autofocus true
+       :placeholder "Enter link"}]
+     (for [error #p errors]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+
 (defn board-view
-  [router {:keys [board links]}]
+  [{router :reitit.core/router :as request} {:keys [board links]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -118,20 +141,8 @@
                                             icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
-                     :hx-target "#content"}
-        :form-fields (list
-                       [:input
-                        {:class ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                                 "bg-white" "border" "rounded-md" "border-neutral-300"
-                                 "ring-offset-background" "placeholder:text-neutral-500"
-                                 "focus:border-neutral-300" "focus:outline-hidden"
-                                 "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                                 "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                         :type "text"
-                         :name "url"
-                         :minlength 1
-                         :autofocus true
-                         :placeholder "Enter link url"}])})]]
+                     :hx-target "#link-form-fields"}
+        :form-fields (link-form-fields request)})]]
 
    (if (seq links)
      (list

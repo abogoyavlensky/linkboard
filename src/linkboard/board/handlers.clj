@@ -5,14 +5,13 @@
             [linkboard.queries :as q]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [reitit-extras.core :as reitit-extras]
+            [reitit-extras.core :as ext]
             [ring.util.response :as response]))
 
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [path]} :parameters
-    router :reitit.core/router
     :keys [session]
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
@@ -31,35 +30,39 @@
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
-        page-view (views/board-view router {:board board
-                                            :links links})]
+        page-view (views/board-view request {:board board
+                                             :links links})]
 
     (if (c/hx-request? request)
-      (reitit-extras/render-html page-view)
+      (ext/render-html page-view)
       (->> page-view
            (c/base request)
-           (reitit-extras/render-html)))))
+           (ext/render-html)))))
 
 (defn add-link-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    :keys [path-params]
+    :keys [errors parameters]
+    router :reitit.core/router
     :as request}]
   ; TODO: add validation for url!
   ; TODO: add validation for user ownership of the board
-  (let [board-id (-> path-params :id parse-long)
-        url (:url form)
-        ; Fetch metadata for the URL
-        metadata (fetch/fetch-page-metadata url)]
-    (->> {:insert-into :link
-          :values [{:url url
-                    :title (:title metadata)
-                    :icon (:icon metadata)
-                    :board-id board-id}]}
-         (db/exec-one! db))
-    ; Render board content
-    (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
+  (if (seq errors)
+    (-> (views/link-form-fields request)
+        (ext/render-html))
+    (let [board-id (get-in parameters [:path :id])
+          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
+          url (:url form)
+          metadata (fetch/fetch-page-metadata url)]
+      (->> {:insert-into :link
+            :values [{:url url
+                      :title (:title metadata)
+                      :icon (:icon metadata)
+                      :board-id board-id}]}
+           (db/exec-one! db))
+      (-> (response/response [:div])
+          (response/header "HX-Redirect" board-path)))))
 
 (defn update-link-handler
   [{{:keys [db]} :context
