@@ -46,7 +46,6 @@
     :keys [errors parameters]
     router :reitit.core/router
     :as request}]
-  ; TODO: add validation for url!
   ; TODO: add validation for user ownership of the board
   (if (seq errors)
     (-> (views/link-form-fields request)

@@ -1,6 +1,7 @@
 (ns linkboard.routes
   (:require [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
+            [linkboard.spec :as spec]
             [ring.util.response :as response]))
 
 (defn wrap-auth
@@ -55,7 +56,7 @@
      ["/links"
       ["" {:name ::board-details-links
            :post {:handler board-handlers/add-link-handler
-                  :parameters {:form {:url [:string {:min 1}]}}}}]
+                  :parameters {:form {:url spec/Link}}}}]
       ["/:link-id" {:name ::link-details
                     :put {:handler board-handlers/update-link-handler
                           :parameters {:path {:id pos-int?

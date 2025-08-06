@@ -86,10 +86,11 @@
                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
        :type "text"
        :name "url"
+       :value (get-in request [:parameters :form :url] nil)
        :minlength 1
        :autofocus true
        :placeholder "Enter link"}]
-     (for [error #p errors]
+     (for [error errors]
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
 (defn board-view
