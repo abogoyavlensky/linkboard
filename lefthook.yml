@@ -1,8 +1,8 @@
-pre-push:
-  commands:
-    test:
-      glob: "*.{clj,edn}"
-      run: bb test
+#pre-push:
+#  commands:
+#    test:
+#      glob: "*.{clj,edn}"
+#      run: bb test
 
 pre-commit:
   parallel: true

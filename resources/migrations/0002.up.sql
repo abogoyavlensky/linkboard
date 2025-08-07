@@ -3,9 +3,17 @@ BEGIN TRANSACTION;
 -- Create the user table
 CREATE TABLE "user" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sync_code VARCHAR NOT NULL UNIQUE,
+    session_id VARCHAR NOT NULL UNIQUE,
+    account_number VARCHAR NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create index on session_id for faster session lookups
+CREATE INDEX idx_user_session_id ON "user" (session_id);
+--;;
+-- Create index on account_number for faster account lookups
+CREATE INDEX idx_user_account_number ON "user" (account_number);
+
 --;;
 -- Create the board table
 CREATE TABLE "board" (

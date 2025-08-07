@@ -1,8 +1,9 @@
 (ns linkboard.ui.components
-  (:require [linkboard.routes :as-alias r]
+  (:require [clojure.string :as str]
+            [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
             [manifest-edn.core :as manifest]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as ext]))
 
 (def ^:const PROJECT-GITHUB-LINK "https://github.com/abogoyavlensky/linkboard")
 
@@ -75,7 +76,7 @@
       {:class ["relative" "w-auto" "pb-8"]}
       [:div
        {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (reitit-extras/csrf-token-html)
+       (ext/csrf-token-html)
        form-fields]]
      [:div
       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
@@ -88,13 +89,85 @@
       [:button
        {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
-        :x-on:click "modalOpen=false"
+        :autofocus true
+        ;:x-on:click "modalOpen=false"
         :type "submit"}
        (or submit-btn-title "Save")]]]]])
 
+(defn login-form-fields
+  [request]
+  (let [errors (get-in request [:errors :humanized :account-number])]
+    [:div
+     {:id "login-form-fields"}
+     [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
+     [:input {:type "password"
+              :name "account-number"
+              :value (get-in request [:parameters :form :account-number] nil)
+              :autofocus true
+              :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                              "bg-white" "border" "rounded-md" "border-neutral-300"
+                              "ring-offset-background" "placeholder:text-neutral-500"
+                              "focus:border-neutral-300" "focus:outline-hidden"
+                              "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                              "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                             (when (seq errors)
+                               ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))}]
+     (for [error errors]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+
+(defn- login-modal
+  [request]
+  (modal
+    {:title "Login"
+     :open-btn-text [:button
+                     {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+                      :x-on:click "modalOpen = true"}
+                     "Login"]
+     :submit-btn-title "Login"
+     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/login)
+                  :hx-target "#login-form-fields"}
+     :form-fields (login-form-fields request)}))
+
+(defn- create-account-modal
+  [request]
+  (modal
+    {:title "Create Account"
+     :open-btn-text [:button
+                     {:class ["text-blue-500" "text-lg" "cursor-pointer"]
+                      :x-on:click "modalOpen = true; accountId = generateAccountId()"}
+                     "Register"]
+     :submit-btn-title "Create Account"
+     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/create-account)
+                  :hx-target "#content"}
+     :form-fields [:div
+                   [:div {:class ["mb-4"]}
+                    [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your Account number"]
+                    [:div {:x-data "{copied: false}"
+                           :class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer"
+                                   "flex" "items-center" "justify-center" "gap-2"]
+                           :x-on:click "navigator.clipboard.writeText($el.textContent); copied = true; setTimeout(() => copied = false, 1000)"}
+                     [:span {:x-text "accountId"}]
+                     [:input {:type "hidden"
+                              :name "account-number"
+                              :x-model "accountId"}]
+                     [:div {:x-show "copied"
+                            :x-transition:enter "transform ease-out duration-300"
+                            :x-transition:enter-start "opacity-0 translate-y-2"
+                            :x-transition:enter-end "opacity-100 translate-y-0"
+                            :x-transition:leave "transition ease-in duration-100"
+                            :x-transition:leave-start "opacity-100"
+                            :x-transition:leave-end "opacity-0"
+                            :class ["text-green-500" "absolute" "ml-76"]}
+                      "✓"]]
+                    [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
+                     "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
+
 (defn base
   "Base component for html page."
-  [request content]
+  [{user :identity
+    router :reitit.core/router
+    :as request}
+   content]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -132,43 +205,23 @@
           :target "_blank"}
          icons/github]]]
       [:div {:class ["flex" "gap-4"]}
-       [:div
-        {:x-data "{ modalOpen: false }"
-         :class ["flex" "items-center"]}
-        (modal
-          {:title "Sync your devices"
-           :open-btn-text [:button
-                           {:class ["text-blue-500" "text-lg" "cursor-pointer"]
-                            :x-on:click "modalOpen = true"}
-                           "Sync"]
-           :submit-btn-title "Sync"
-           :form-attrs {:hx-post (reitit-extras/get-route (:reitit.core/router request)
-                                                          ::r/update-sync-code)
-                        :hx-target "#content"}
-           :form-fields [:div
-                         [:div {:class ["mb-4"]}
-                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Current sync code"]
-                          [:div {:x-data "{copied: false}"
-                                 :class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer"
-                                         "flex" "items-center" "justify-center" "gap-2"]
-                                 :x-on:click "navigator.clipboard.writeText($el.textContent); copied = true; setTimeout(() => copied = false, 1000)"}
-                           (get-in request [:session :sync-code])
-                           [:div {:x-show "copied"
-                                  :x-transition:enter "transform ease-out duration-300"
-                                  :x-transition:enter-start "opacity-0 translate-y-2"
-                                  :x-transition:enter-end "opacity-100 translate-y-0"
-                                  :x-transition:leave "transition ease-in duration-100"
-                                  :x-transition:leave-start "opacity-100"
-                                  :x-transition:leave-end "opacity-0"
-                                  :class ["text-green-500" "absolute" "ml-76"]}
-                            "✓"]]]
-                         [:div
-                          [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "New sync code"]
-                          [:input {:type "text"
-                                   :name "sync-code"
-                                   :class ["w-full" "px-3" "py-2" "border" "rounded-lg"]}]
-                          [:p {:class ["text-sm" "text-red-500" "mt-2"]}
-                           "WARNING: After syncing with new code, all existing data in this browser will be lost!"]]]})]]]
+       (if user
+         [:div
+          {:class ["flex" "items-center"]}
+          [:button
+           {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+            :hx-post (ext/get-route router ::r/logout)
+            :hx-headers (ext/csrf-token-json)}
+           "Logout"]
+          [:button
+           {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+           "Account"]]
+         [:div
+          {:x-data "{ modalOpen: false, accountId: '' }"
+           :class ["flex" "items-center"]}
+          (login-modal request)
+          (create-account-modal request)])]]
+
      [:div
       {:id "content"
        :hx-history-elt true
@@ -181,7 +234,9 @@
               :defer true}]
     [:script {:type "text/javascript"
               :src (manifest/asset "js/alpinejs.min.js")
-              :defer true}]]])
+              :defer true}]
+    [:script {:type "text/javascript"
+              :src (manifest/asset "js/utils.js")}]]])
 
 (defn error-page
   [request text]

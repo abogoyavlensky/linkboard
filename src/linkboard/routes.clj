@@ -1,60 +1,62 @@
 (ns linkboard.routes
-  (:require [clj-ulid :as ulid]
-            [clojure.string :as str]
-            [linkboard.board.handlers :as board-handlers]
+  (:require [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
+            [linkboard.spec :as spec]
             [ring.util.response :as response]))
 
-(defn wrap-sync-code
-  "Middleware that manages the sync-code in session.
-   - Adds a random UUID as :sync-code to request if not present in session
-   - Transfers :sync-code from request to session in response if present"
+(defn wrap-auth
   [handler]
-  (fn [request]
-    (let [session (:session request)
-          has-sync-code? (boolean (:sync-code session))
-          updated-request (if has-sync-code?
-                            request
-                            (assoc-in request [:session :sync-code] (str/upper-case (ulid/ulid))))
-          response (handler updated-request)]
-      (if (not has-sync-code?)
-        (assoc response :session {:sync-code (get-in updated-request [:session :sync-code])})
+  (fn [{:keys [session]
+        :as request}]
+    (let [has-session-id? (boolean (:session-id session))
+          user (boolean (:identity session))
+          request* (cond-> request
+                     (not has-session-id?) (assoc-in [:session :session-id] (str (random-uuid)))
+                     user (assoc :identity user))
+          response (handler request*)]
+      (if (not has-session-id?)
+        (update response :session assoc :session-id (get-in request* [:session :session-id]))
         response))))
 
 (def routes
-  [["/" {:name ::home-page
-         ;:middleware [wrap-sync-code]
+  [""
+   {:middleware [wrap-auth]}
+   ["/" {:name ::home-page
          :get {:handler home-handlers/home-handler
                :responses {200 {:body string?}}}}]
-   ["/sync" {:name ::update-sync-code
-             ;:middleware [wrap-sync-code]
-             :post {:handler home-handlers/update-sync-code-handler
-                    :parameters {:form {:sync-code [:string {:min 1}]}}
-                    :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]
-   ["/boards" ;{:middleware [wrap-sync-code]}
+   ["/create-account" {:name ::create-account
+                       :post {:handler home-handlers/create-account-handler
+                              :parameters {:form {:account-number [:string {:min 1}]}}
+                              :responses {200 {:body string?}}}}]
+   ["/login" {:name ::login
+              :post {:handler home-handlers/login-handler
+                     :parameters {:form {:account-number [:string {:min 1}]}}
+                     :responses {200 {:body string?}}}}]
+   ["/logout" {:name ::logout
+               :post {:handler home-handlers/logout-handler
+                      :responses {200 {:body string?}}}}]
+
+   ["/boards"
     ["" {:name ::board-list
          :post {:handler home-handlers/create-board-handler
                 :parameters {:form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}}]
     ["/:id"
+     {:parameters {:path {:id pos-int?}}}
      ["" {:name ::board-details
           :get {:handler board-handlers/board-handler
-                :parameters {:path {:id pos-int?}}
                 :responses {200 {:body string?}}}
           :put {:handler board-handlers/update-board-handler
-                :parameters {:path {:id pos-int?}
-                             :form {:title [:string {:min 1}]}}
+                :parameters {:form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}
           :delete {:handler board-handlers/delete-board-handler
-                   :parameters {:path {:id pos-int?}}
                    :responses {200 {:body nil?}}}}]
      ["/links"
       ["" {:name ::board-details-links
            :post {:handler board-handlers/add-link-handler
-                  :parameters {:form {:url [:string {:min 1}]}}
-                  :responses {200 {:body string?}}}}]
+                  :parameters {:form {:url spec/Link}}}}]
       ["/:link-id" {:name ::link-details
                     :put {:handler board-handlers/update-link-handler
                           :parameters {:path {:id pos-int?
