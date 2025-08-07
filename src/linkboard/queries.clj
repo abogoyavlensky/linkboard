@@ -50,6 +50,24 @@
     user
     (create-user-with-session! db session-id)))
 
+(defn get-board-by-id-and-user-id
+  "Get a board by ID if it belongs to the specified user."
+  [db board-id user-id]
+  (->> {:select [:*]
+        :from [:board]
+        :where [:and
+                [:= :id board-id]
+                [:= :user-id user-id]]}
+       (db/exec-one! db)))
+
+(defn user-owns-board?
+  "Check if the user owns the board."
+  [db {:keys [board-id session-id]}]
+  (some->> (get-user-by-session-id db session-id)
+           :id
+           (get-board-by-id-and-user-id db board-id)
+           (boolean)))
+
 (defn delete-link!
   "Delete a link from the database."
   [db {:keys [link-id board-id]}]

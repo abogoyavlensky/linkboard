@@ -43,13 +43,19 @@
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    :keys [errors parameters]
+    :keys [errors parameters session]
     router :reitit.core/router
     :as request}]
-  ; TODO: add validation for user ownership of the board
-  (if (seq errors)
+  (cond
+    (seq errors)
     (-> (views/link-form-fields request)
         (ext/render-html))
+
+    (not (q/user-owns-board? db {:board-id (get-in parameters [:path :id])
+                                 :session-id (:session-id session)}))
+    (response/status 403)
+
+    :else
     (let [board-id (get-in parameters [:path :id])
           board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
           url (:url form)

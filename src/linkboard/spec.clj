@@ -4,5 +4,6 @@
 (def Link [:and [:string {:min 1}]
            [:fn {:error/message "must be a valid URL"}
             #(try
-               (uri/uri %)
+               (let [parsed (uri/uri %)]
+                 (boolean (:host parsed)))
                (catch Exception _ false))]])
