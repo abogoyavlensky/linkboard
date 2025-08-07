@@ -76,19 +76,19 @@
     router :reitit.core/router
     :as request}]
   (cond
-    (not (q/user-owns-board? db {:board-id (-> path :id parse-long)
+    (not (q/user-owns-board? db {:board-id (-> path :id)
                                  :session-id (:session-id session)}))
     (-> (response/response "Board not found or access denied")
         (response/status 403))
 
     (seq errors)
-    (-> (views/link-form-fields request)
+    (-> (views/link-edit-form-fields request {:link form})
         (ext/render-html))
 
     :else
-    (let [board-id (-> path :id parse-long)
+    (let [board-id (-> path :id)
           board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
-          link-id (-> path :link-id parse-long)
+          link-id (-> path :link-id)
           title (:title form)
           url (:url form)
           metadata (fetch/fetch-page-metadata url)]

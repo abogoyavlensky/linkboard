@@ -5,8 +5,40 @@
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
 
+(defn link-edit-form-fields
+  [request {:keys [link]}]
+  (let [errors (get-in request [:errors :humanized])]
+    [:div
+     {:id "link-edit-form-fields"}
+     [:div.mb-4
+      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "title"} "Title"]
+      [:input
+       {:type "text"
+        :name "title"
+        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
+                       (when (seq (:title errors))
+                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+        :id "title"
+        :value (or (:title link) "")
+        :placeholder "Link title"}]]
+     (for [error (:title errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     [:div
+      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "url"} "URL"]
+      [:input
+       {:type "text"
+        :name "url"
+        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
+                       (when (seq (:title errors))
+                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+        :id "url"
+        :value (:url link)
+        :placeholder "https://example.com"}]]
+     (for [error (:url errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+
 (defn- link-list-item
-  [{:keys [router link board]}]
+  [{:keys [request router link board]}]
   [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
    [:a {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]
@@ -28,30 +60,14 @@
       {:open-btn-text (icons/edit)
        :title "Edit link"
        :submit-btn-title "Save changes"
-       :form-fields [:div
-                     [:div.mb-4
-                      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "title"} "Title"]
-                      [:input.w-full.px-3.py-2.border.rounded-md.text-sm
-                       {:type "text"
-                        :name "title"
-                        :id "title"
-                        :value (or (:title link) "")
-                        :placeholder "Link title"}]]
-                     [:div
-                      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "url"} "URL"]
-                      [:input.w-full.px-3.py-2.border.rounded-md.text-sm
-                       {:type "text"
-                        :name "url"
-                        :id "url"
-                        :value (:url link)
-                        :placeholder "https://example.com"}]]]
+       :form-fields (link-edit-form-fields request {:link link})
        :form-attrs {:hx-put (reitit-extras/get-route
                               router
                               ::r/link-details
                               {:path {:id (:id board)
                                       :link-id (:id link)}})
                     :hx-headers (reitit-extras/csrf-token-json)
-                    :hx-target "#content"}})
+                    :hx-target "#link-edit-form-fields"}})
     (c/modal
       {:open-btn-text icons/bin
        :title "Delete link"
@@ -153,6 +169,7 @@
        [:div {:class ["flex-1"]}
         (for [link links]
           (link-list-item {:router router
+                           :request request
                            :link link
                            :board board}))])
      ; Empty state

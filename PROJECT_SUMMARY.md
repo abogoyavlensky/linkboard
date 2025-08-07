@@ -53,10 +53,13 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Malli schema validation for request parameters
 
 #### Handlers
-- **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, and account management
-- **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards
-- **Session-based user management**: All handlers validate session and auto-create users as needed
+- **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, account management, and login/logout
+- **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards with comprehensive security validation
+- **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
+- **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
+- **Error handling**: Form validation with error display and user-friendly 403 responses for unauthorized access
+- **Conditional logic**: Handlers use `cond` for clean multi-branch decision making (validation, authorization, success)
 
 #### Link Metadata Fetching (`src/linkboard/board/fetch.clj`)
 - Automatic title and icon extraction from URLs
@@ -69,6 +72,9 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Account registration**: Users can later register with account numbers for persistence
 - **Secure password storage**: Account numbers hashed with bcrypt+sha512 algorithm
 - **User isolation**: All boards/links scoped to individual users automatically
+- **Authorization validation**: `user-owns-board?` function ensures users can only access their own boards
+- **Comprehensive security**: All CRUD operations (add/update/delete) validate board ownership before execution
+- **Anonymous user notifications**: UI displays "Using temporary session" for non-registered users
 
 #### Account Management (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
 - Client-side account number generation using `crypto.randomUUID()`
@@ -88,10 +94,11 @@ metosin/reitit-ring "0.9.1"           ; Routing
 ring/ring-jetty-adapter "1.14.2"      ; Web server
 org.xerial/sqlite-jdbc "3.50.3.0"     ; SQLite driver
 com.github.seancorfield/next.jdbc "1.3.1048"  ; Database access
-com.github.seancorfield/honeysql "2.7.1325"   ; SQL DSL
+com.github.seancorfield/honeysql "2.7.1340"   ; SQL DSL
 hikari-cp/hikari-cp "3.3.0"           ; Connection pooling
 clj-http/clj-http "3.13.1"            ; HTTP client
 org.clj-commons/hickory "0.7.7"       ; HTML parsing
+lambdaisland/uri "1.19.155"           ; Modern URI parsing and validation
 ```
 
 ### Development Tools
@@ -129,15 +136,16 @@ src/linkboard/
 ├── handlers.clj         # Default error handlers
 ├── routes.clj           # Route definitions
 ├── queries.clj          # Database queries (user management, boards, links)
+├── spec.clj             # Malli schemas for validation (Link URL validation)
 ├── home/               # Home page functionality
-│   ├── handlers.clj
+│   ├── handlers.clj     # Board listing, account creation, login/logout
 │   └── views.clj
 ├── board/              # Board management
-│   ├── handlers.clj
-│   ├── views.clj
-│   └── fetch.clj       # Link metadata fetching
+│   ├── handlers.clj     # Link CRUD with security validation
+│   ├── views.clj        # Board and link forms with error handling
+│   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
-│   ├── components.clj
+│   ├── components.clj   # Base layout, modals, login forms, error handling
 │   └── icons.clj
 └── utils/
 
@@ -174,10 +182,25 @@ test/                  # Test files
 ### User Management (`src/linkboard/queries.clj`)
 ```clojure
 (get-user-by-session-id db session-id)           ; Retrieve user by session
+(get-user-by-account-number db account-number)   ; Retrieve user by account number
 (create-user-with-session! db session-id)        ; Create user with session only  
 (create-user! db session-id hashed-account-number) ; Create user with account
 (update-user-account-number! db user-id hash)    ; Add account to existing user
 (ensure-user-exists! db session-id)              ; Get or create user helper
+(get-board-by-id-and-user-id db board-id user-id) ; Get board if owned by user
+(user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
+(delete-link! db {:link-id link-id :board-id board-id}) ; Delete link from board
+```
+
+### URL Validation (`src/linkboard/spec.clj`)
+```clojure
+; Link schema with lambdaisland/uri validation
+(def Link [:and [:string {:min 1}]
+           [:fn {:error/message "must be a valid URL"}
+            #(try
+               (let [parsed (uri/uri %)]
+                 (boolean (:host parsed)))
+               (catch Exception _ false))]])
 ```
 
 ### Account Creation Workflow
@@ -247,9 +270,13 @@ bb clj-repl              # Start REPL with dev profile
 
 ### Code Style
 - Use single semicolon (;) for Clojure comments
-- Run `bb lint` after changes
+- Run `bb lint` after changes (automatic formatting with pre-commit hooks)
 - Run `bb test` for validation
 - Follow existing kebab-case naming conventions
+- Use `cond` for multi-branch conditional logic instead of nested `if` statements
+- Implement comprehensive error handling with visual feedback in forms
+- Validate user authorization before all board/link operations
+- Use `lambdaisland/uri` for URL validation instead of deprecated `java.net.URL`
 
 ### Testing Strategy
 - Unit tests with eftest

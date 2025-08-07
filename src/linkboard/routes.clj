@@ -62,7 +62,7 @@
                           :parameters {:path {:id pos-int?
                                               :link-id pos-int?}
                                        :form {:title [:string {:min 1}]
-                                              :url [:string {:min 1}]}}}
+                                              :url spec/Link}}}
                     :delete {:handler board-handlers/delete-link-handler
                              :parameters {:path {:id pos-int?
                                                  :link-id pos-int?}}}}]]]]])
