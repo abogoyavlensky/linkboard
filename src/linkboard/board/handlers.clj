@@ -47,13 +47,13 @@
     router :reitit.core/router
     :as request}]
   (cond
-    (seq errors)
-    (-> (views/link-form-fields request)
-        (ext/render-html))
-
     (not (q/user-owns-board? db {:board-id (get-in parameters [:path :id])
                                  :session-id (:session-id session)}))
     (response/status 403)
+
+    (seq errors)
+    (-> (views/link-form-fields request)
+        (ext/render-html))
 
     :else
     (let [board-id (get-in parameters [:path :id])
@@ -71,24 +71,38 @@
 
 (defn update-link-handler
   [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    :keys [path-params]
+    {:keys [form path]} :parameters
+    :keys [session errors]
+    router :reitit.core/router
     :as request}]
-  ; TODO: add validation for user ownership of the board
-  (let [board-id (-> path-params :id parse-long)
-        link-id (-> path-params :link-id parse-long)
-        title (:title form)
-        url (:url form)]
-    ; Update link in the database
-    (->> {:update :link
-          :set {:title title
-                :url url}
-          :where [:and
-                  [:= :id link-id]
-                  [:= :board-id board-id]]}
-         (db/exec-one! db))
-    ; Render updated board content
-    (board-handler (assoc-in request [:parameters :path] {:id board-id}))))
+  (cond
+    (not (q/user-owns-board? db {:board-id (-> path :id parse-long)
+                                 :session-id (:session-id session)}))
+    (-> (response/response "Board not found or access denied")
+        (response/status 403))
+
+    (seq errors)
+    (-> (views/link-form-fields request)
+        (ext/render-html))
+
+    :else
+    (let [board-id (-> path :id parse-long)
+          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
+          link-id (-> path :link-id parse-long)
+          title (:title form)
+          url (:url form)
+          metadata (fetch/fetch-page-metadata url)]
+      ; Update link in the database
+      (->> {:update :link
+            :set {:title title
+                  :url url
+                  :icon (:icon metadata)}
+            :where [:and
+                    [:= :id link-id]
+                    [:= :board-id board-id]]}
+           (db/exec-one! db))
+      (-> (response/response [:div])
+          (response/header "HX-Redirect" board-path)))))
 
 (defn update-board-handler
   [{{:keys [db]} :context
@@ -124,10 +138,16 @@
         (response/header "HX-Redirect" "/"))))
 
 (defn delete-link-handler
-  [{:keys [path-params context]}]
-  ; TODO: add validation for user ownership of the board
+  [{:keys [path-params context session]}]
   (let [board-id (-> path-params :id parse-long)]
-    ; Delete link (validates user ownership through board-id)
-    (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
-                                   :board-id board-id})
-    (response/response nil)))
+    (cond
+      (not (q/user-owns-board? (:db context) {:board-id board-id
+                                              :session-id (:session-id session)}))
+      (-> (response/response "Board not found or access denied")
+          (response/status 403))
+
+      :else
+      (do
+        (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
+                                       :board-id board-id})
+        (response/response nil)))))
