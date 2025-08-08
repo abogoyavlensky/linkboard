@@ -1,8 +1,8 @@
 (ns linkboard.routes
   (:require [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
-            [linkboard.spec :as spec]
             [linkboard.limits :as limits]
+            [linkboard.spec :as spec]
             [ring.util.response :as response]))
 
 (defn wrap-auth

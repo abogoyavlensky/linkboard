@@ -28,12 +28,14 @@
     (let [client-ip (get-client-ip request)
           now (System/currentTimeMillis)]
       (swap! rate-limit-store clean-expired-entries window-ms)
-      (let [current-data (get @rate-limit-store client-ip {:count 0 :last-reset now})
+      (let [current-data (get @rate-limit-store client-ip {:count 0
+                                                           :last-reset now})
             time-since-reset (- now (:last-reset current-data))
             should-reset? (>= time-since-reset window-ms)
             new-count (if should-reset? 1 (inc (:count current-data)))
             new-data (if should-reset?
-                       {:count 1 :last-reset now}
+                       {:count 1
+                        :last-reset now}
                        (assoc current-data :count new-count))]
         (if (<= new-count max-requests)
           (do
