@@ -49,8 +49,7 @@
           :get {:handler board-handlers/board-handler
                 :responses {200 {:body string?}}}
           :put {:handler board-handlers/update-board-handler
-                :parameters {:form {:title [:string {:min 1}]}}
-                :responses {200 {:body string?}}}
+                :parameters {:form {:title [:string {:min 1}]}}}
           :delete {:handler board-handlers/delete-board-handler
                    :responses {200 {:body nil?}}}}]
      ["/links"
