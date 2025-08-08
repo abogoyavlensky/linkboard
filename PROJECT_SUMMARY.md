@@ -44,12 +44,14 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `POST /create-account` - Account creation endpoint
+  - `POST /create-account` - Account creation endpoint (rate limited: 3/min per IP)
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
   - `POST /boards/:id/links` - Add link to board
   - `PUT/DELETE` operations for boards and links
+  - `POST /login` - User login endpoint (rate limited: 10/min per IP)
 - `wrap-auth` middleware for automatic session-id generation and persistence
+- **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
 - Malli schema validation for request parameters
 
 #### Handlers
@@ -84,6 +86,14 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - One-time display warning for account security
 - Automatic clipboard copy functionality with visual feedback
 
+#### User Notifications (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
+- **Toast notification system** with bottom-center placement and white design
+- Success notifications with green borders and check mark icons
+- Automatic triggers via HTMX headers (`HX-Trigger`) for registration and board creation
+- Alpine.js state management with 4-second auto-dismiss
+- `showToast(message, type)` utility function for manual toast triggering
+- Smooth slide-up animations with manual close option
+
 ## Dependencies
 
 ### Core Dependencies (deps.edn)
@@ -106,6 +116,7 @@ lambdaisland/uri "1.19.155"           ; Modern URI parsing and validation
 eftest/eftest "0.6.0"                 ; Test runner
 etaoin/etaoin "1.1.43"                ; Browser automation
 cloverage/cloverage "1.2.4"           ; Test coverage
+io.github.borkdude/carve               ; Remove unused code
 ```
 
 ## Development Workflow
@@ -118,6 +129,7 @@ bb lint                     # Code linting with clj-kondo
 bb fmt                      # Code formatting with cljfmt
 bb test                     # Run tests
 bb check                    # Run all checks (fmt, lint, outdated, test)
+bb carve                    # Remove unused code with aggressive cleanup
 bb css-watch               # Watch CSS changes
 bb css-build               # Build minified CSS
 bb fetch-assets            # Download external JS assets
@@ -134,7 +146,8 @@ src/linkboard/
 │   ├── db.clj           # Database component
 │   └── server.clj       # Web server component
 ├── handlers.clj         # Default error handlers
-├── routes.clj           # Route definitions
+├── routes.clj           # Route definitions with rate limiting
+├── limits.clj           # Rate limiting middleware for API protection
 ├── queries.clj          # Database queries (user management, boards, links)
 ├── spec.clj             # Malli schemas for validation (Link URL validation)
 ├── home/               # Home page functionality
@@ -145,7 +158,7 @@ src/linkboard/
 │   ├── views.clj        # Board and link forms with error handling
 │   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
-│   ├── components.clj   # Base layout, modals, login forms, error handling
+│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling
 │   └── icons.clj
 └── utils/
 
@@ -155,7 +168,7 @@ resources/
 └── public/            # Static assets
     ├── css/
     ├── js/
-    │   └── utils.js     # Client-side utilities (account ID generation)
+    │   └── utils.js     # Client-side utilities (account ID generation, toast notifications)
     └── images/
 
 test/                  # Test files
@@ -190,6 +203,21 @@ test/                  # Test files
 (get-board-by-id-and-user-id db board-id user-id) ; Get board if owned by user
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
 (delete-link! db {:link-id link-id :board-id board-id}) ; Delete link from board
+```
+
+### Rate Limiting (`src/linkboard/limits.clj`)
+```clojure
+(wrap-rate-limit handler max-requests window-ms) ; Rate limiting middleware
+(get-client-ip request)                          ; Extract client IP (proxy-aware)
+(clean-expired-entries store window-ms)          ; Cleanup expired rate limit entries
+; Usage: [wrap-rate-limit 10 60000] for 10 requests per minute
+```
+
+### Toast Notifications (`resources/public/js/utils.js`)
+```javascript
+showToast(message, type='success')               // Trigger toast notification
+// Types: 'success', 'error', 'info', 'warning'
+// Example: showToast('Board created successfully!')
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
@@ -264,7 +292,8 @@ bb clj-repl              # Start REPL with dev profile
 - Full-text search with SQLite FTS
 - Link preview generation
 - Bulk operations
-- API rate limiting
+- **API rate limiting** (✅ implemented with configurable per-endpoint limits)
+- Enhanced toast notifications for other user actions (create/update/delete)
 
 ## Development Guidelines
 
