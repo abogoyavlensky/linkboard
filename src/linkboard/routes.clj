@@ -2,6 +2,7 @@
   (:require [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
             [linkboard.spec :as spec]
+            [linkboard.limits :as limits]
             [ring.util.response :as response]))
 
 (defn wrap-auth
@@ -20,17 +21,23 @@
 
 (def routes
   [""
-   {:middleware [wrap-auth]}
+   {:middleware [wrap-auth
+                 ; Global rate limit for all routes - 200 requests per minute per IP
+                 [limits/wrap-rate-limit 200 60000]]}
    ["/" {:name ::home-page
          :get {:handler home-handlers/home-handler
                :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]
    ["/create-account" {:name ::create-account
+                       ; Rate limit login attempts to 3 per minute per IP
+                       :middleware [[limits/wrap-rate-limit 3 60000]]
                        :post {:handler home-handlers/create-account-handler
                               :parameters {:form {:account-number [:string {:min 1}]}}
                               :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
+              ; Rate limit login attempts to 10 per minute per IP
+              :middleware [[limits/wrap-rate-limit 10 60000]]
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
                      :responses {200 {:body string?}}}}]
