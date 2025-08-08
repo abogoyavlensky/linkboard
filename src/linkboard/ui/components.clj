@@ -128,6 +128,56 @@
                   :hx-target "#login-form-fields"}
      :form-fields (login-form-fields request)}))
 
+(defn toast-container
+  "Toast notification container component"
+  []
+  [:div#toast-container
+   {:class ["fixed" "bottom-4" "left-1/2" "transform" "-translate-x-1/2" "z-50" "space-y-2"]
+    :x-data "{ toasts: [] }"
+    :x-on:show-toast.window "
+      const toast = { 
+        id: Date.now(), 
+        message: $event.detail.message, 
+        type: $event.detail.type || 'success' 
+      };
+      toasts.push(toast);
+      setTimeout(() => {
+        toasts = toasts.filter(t => t.id !== toast.id);
+      }, 4000);
+    "}
+   [:template {:x-for "toast in toasts"
+               :key "toast.id"}
+    [:div
+     {:class ["px-4" "py-3" "rounded-lg" "shadow-lg" "bg-white" "border-2" "min-w-80" "max-w-md"]
+      :x-bind:class "{
+        'border-green-500 text-gray-800': toast.type === 'success',
+        'border-red-500 text-gray-800': toast.type === 'error',
+        'border-blue-500 text-gray-800': toast.type === 'info',
+        'border-yellow-500 text-gray-800': toast.type === 'warning'
+      }"
+      :x-transition:enter "transform ease-out duration-300"
+      :x-transition:enter-start "opacity-0 translate-y-full"
+      :x-transition:enter-end "opacity-100 translate-y-0"
+      :x-transition:leave "transition ease-in duration-300"
+      :x-transition:leave-start "opacity-100 translate-y-0"
+      :x-transition:leave-end "opacity-0 translate-y-full"}
+     [:div {:class ["flex" "items-center" "justify-between"]}
+      [:div {:class ["flex" "items-center" "gap-2"]}
+       [:div {:x-show "toast.type === 'success'"
+              :class ["text-green-500"]}
+        ; Green check mark SVG
+        [:svg {:class ["w-5" "h-5"]
+               :fill "currentColor"
+               :viewBox "0 0 20 20"}
+         [:path {:fill-rule "evenodd"
+                 :d "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                 :clip-rule "evenodd"}]]]
+       [:span {:x-text "toast.message"}]]
+      [:button
+       {:x-on:click "toasts = toasts.filter(t => t.id !== toast.id)"
+        :class ["ml-4" "text-gray-500" "hover:text-gray-700"]}
+       "×"]]]]])
+
 (defn- create-account-modal
   [request]
   (modal
@@ -187,7 +237,9 @@
             :rel "stylesheet"}]
     [:title "Linkboard"]]
    [:body
-    {:class ["bg-slate-50"]}
+    {:class ["bg-slate-50"]
+     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
+     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"}
     [:div
      {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
      [:div
@@ -226,7 +278,8 @@
       {:id "content"
        :hx-history-elt true
        :class ["pb-12"]}
-      content]]
+      content]
+     (toast-container)]
     [:script {:type "text/javascript"
               :src (manifest/asset "js/htmx.min.js")}]
     [:script {:type "text/javascript"

@@ -1,4 +1,6 @@
-{:deps {io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.1"}}
+{:deps {io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.1"}
+        io.github.borkdude/carve {:git/url "https://github.com/borkdude/carve"
+                                  :git/sha "fdd1d0bc432f63db69e3a72167ef5e46f10dfba7"}}
  :tasks
  {:init (do
           (def input-css-file "resources/public/css/input.css")

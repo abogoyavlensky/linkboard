@@ -68,3 +68,9 @@ function generateAccountId() {
   const generator = new BrowserAccountGenerator();
   return generator.format(generator.generate(16, 'base32'));
 }
+
+function showToast(message, type = 'success') {
+  window.dispatchEvent(new CustomEvent('show-toast', {
+    detail: { message, type }
+  }));
+}

@@ -52,7 +52,8 @@
                       :user-id (:id user)}]}
            (db/exec-one! db))
       (-> (ext/render-html [:div])
-          (response/header "HX-Redirect" (ext/get-route router ::r/home-page))))))
+          (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+          (response/header "HX-Trigger" "showBoardCreationToast")))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -69,7 +70,8 @@
             identity-data (select-keys created-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))))
+            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+            (response/header "HX-Trigger" "showRegistrationToast")))
 
       (:account-number user)
       (-> (response/response "User already exists with an account number.")
@@ -81,7 +83,8 @@
             identity-data (select-keys updated-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))))))
+            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+            (response/header "HX-Trigger" "showRegistrationToast"))))))
 
 (defn login-handler
   {:malli/schema [:=> [:cat :map] :map]}
