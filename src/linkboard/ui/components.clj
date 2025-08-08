@@ -92,7 +92,8 @@
         :autofocus true
         ;:x-on:click "modalOpen=false"
         :type "submit"}
-       (or submit-btn-title "Save")]]]]])
+       (or submit-btn-title "Save")
+       [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]])
 
 (defn login-form-fields
   [request]
