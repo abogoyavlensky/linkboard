@@ -126,7 +126,7 @@
       ; Render updated board content
       (-> (response/response [:div])
           (response/header "HX-Redirect"
-            (ext/get-route router ::r/board-details {:path {:id board-id}}))))))
+                           (ext/get-route router ::r/board-details {:path {:id board-id}}))))))
 
 (defn delete-board-handler
   [{{:keys [db]} :context
