@@ -38,6 +38,12 @@
   check {:doc "Run all code checks and tests"
          :depends [fmt lint outdated test]}
 
+  carve {:doc "Remove unused code"
+         :requires ([carve.api :as carve])
+         :task (carve/carve! {:paths ["src" "test"]
+                              :interactive false
+                              :aggressive true})}
+
   css-watch {:doc "Rebuild css on file change in watch mode"
              ; Use "exec" to be able to run in the repl
              :task (shell "mise" "exec" "--" "tailwindcss" "-i" input-css-file "-o" output-css-file "--watch")}
