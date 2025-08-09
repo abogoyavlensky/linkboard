@@ -89,10 +89,34 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### User Notifications (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
 - **Toast notification system** with bottom-center placement and white design
 - Success notifications with green borders and check mark icons
-- Automatic triggers via HTMX headers (`HX-Trigger`) for registration and board creation
+- Session-based toast messages: server can add messages to session that display on next page load
+- Client-side toast triggering via `showToast(message, type)` JavaScript function
 - Alpine.js state management with 4-second auto-dismiss
-- `showToast(message, type)` utility function for manual toast triggering
+- Positioned above fixed footer (`bottom-20`) to prevent overlap
 - Smooth slide-up animations with manual close option
+
+#### Modal System (`src/linkboard/ui/components.clj`)
+- **Simplified modal implementation** prevents background flickering during transitions
+- Single container approach with `x-cloak` for flash-of-content prevention
+- Semi-transparent backdrop with blur effect (`backdrop-blur-xs`)
+- CSS rule `[x-cloak] { display: none !important; }` for proper Alpine.js integration
+- Click-outside-to-close with `click.stop` on form content
+- Escape key handling for accessibility
+
+#### Account Number UX (`src/linkboard/ui/components.clj`)
+- **Enhanced copy functionality** prevents checkmark icon from being copied to clipboard
+- External circled checkmark indicator positioned right of account number container
+- Reserved space layout prevents text container from resizing when checkmark appears
+- Satisfying scale animation (`scale-0` to `scale-100`) for visual feedback
+- Improved warning message: "Save this account number now! It's shown only once and cannot be recovered if lost."
+
+#### Fixed Footer (`src/linkboard/ui/components.clj`)
+- **Persistent Add Link button** positioned at bottom-right of screen
+- Glass-morphism design with transparent background (`backdrop-blur-sm`) and semi-transparent border
+- Width matches main content area (`max-w-4xl`) for consistent alignment
+- Positioned above viewport bottom with proper z-index management
+- Content area has bottom padding (`pb-20`) to prevent overlap
+- Ready for integration with add link functionality via modal or navigation
 
 ## Dependencies
 
@@ -158,7 +182,7 @@ src/linkboard/
 │   ├── views.clj        # Board and link forms with error handling
 │   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
-│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling
+│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer
 │   └── icons.clj
 └── utils/
 
@@ -293,6 +317,7 @@ bb clj-repl              # Start REPL with dev profile
 - Link preview generation
 - Bulk operations
 - **API rate limiting** (✅ implemented with configurable per-endpoint limits)
+- **Fixed footer with Add Link button** (✅ implemented with transparent blur background)
 - Enhanced toast notifications for other user actions (create/update/delete)
 
 ## Development Guidelines
@@ -306,6 +331,13 @@ bb clj-repl              # Start REPL with dev profile
 - Implement comprehensive error handling with visual feedback in forms
 - Validate user authorization before all board/link operations
 - Use `lambdaisland/uri` for URL validation instead of deprecated `java.net.URL`
+
+### UI/UX Patterns
+- **Modal Implementation**: Use single container with `x-cloak` and backdrop blur to prevent flickering
+- **Toast Notifications**: Support both session-based (server-side) and client-side triggering
+- **Copy Functionality**: Ensure clipboard operations only copy intended content, exclude UI indicators
+- **Fixed Elements**: Position toast notifications and other overlays to avoid conflicts with fixed footer
+- **Layout Stability**: Reserve space for dynamic elements to prevent layout shifts during animations
 
 ### Testing Strategy
 - Unit tests with eftest
