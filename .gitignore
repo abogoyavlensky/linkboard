@@ -27,3 +27,4 @@ output/
 resources/public/css/output.*
 */manifest.edn
 resources-hashed/
+.claude/
