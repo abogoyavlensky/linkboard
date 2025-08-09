@@ -264,7 +264,7 @@
        :class ["pb-20"]}
       content]
      (toast-container)]
-    
+
     ; Fixed footer with Add Link button
     [:footer
      {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
