@@ -194,22 +194,22 @@
                    [:div {:class ["mb-4"]}
                     [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your Account number"]
                     [:div {:x-data "{copied: false}"
-                           :class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer"
-                                   "flex" "items-center" "justify-center" "gap-2"]
-                           :x-on:click "navigator.clipboard.writeText($el.textContent); copied = true; setTimeout(() => copied = false, 1000)"}
-                     [:span {:x-text "accountId"}]
-                     [:input {:type "hidden"
-                              :name "account-number"
-                              :x-model "accountId"}]
-                     [:div {:x-show "copied"
+                           :class ["flex" "items-center" "gap-3"]}
+                     [:div {:class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer" "flex-1"]
+                            :x-on:click "navigator.clipboard.writeText(accountId); copied = true; setTimeout(() => copied = false, 1000)"}
+                      [:span {:x-text "accountId"}]
+                      [:input {:type "hidden"
+                               :name "account-number"
+                               :x-model "accountId"}]]
+                     [:div {:class ["flex" "items-center" "justify-center" "w-6" "h-6" "rounded-full" "text-sm" "font-bold"]
+                            :x-bind:class "copied ? 'bg-green-500 text-white' : 'bg-transparent'"
                             :x-transition:enter "transform ease-out duration-300"
-                            :x-transition:enter-start "opacity-0 translate-y-2"
-                            :x-transition:enter-end "opacity-100 translate-y-0"
-                            :x-transition:leave "transition ease-in duration-100"
-                            :x-transition:leave-start "opacity-100"
-                            :x-transition:leave-end "opacity-0"
-                            :class ["text-green-500" "absolute" "ml-76"]}
-                      "✓"]]
+                            :x-transition:enter-start "opacity-0 scale-0"
+                            :x-transition:enter-end "opacity-100 scale-100"
+                            :x-transition:leave "transition ease-in duration-200"
+                            :x-transition:leave-start "opacity-100 scale-100"
+                            :x-transition:leave-end "opacity-0 scale-0"}
+                      [:span {:x-show "copied"} "✓"]]]
                     [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
                      "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
 
