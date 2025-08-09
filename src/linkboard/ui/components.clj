@@ -115,7 +115,7 @@
   "Toast notification container component"
   []
   [:div#toast-container
-   {:class ["fixed" "bottom-4" "left-1/2" "transform" "-translate-x-1/2" "z-50" "space-y-2"]
+   {:class ["fixed" "bottom-20" "left-1/2" "transform" "-translate-x-1/2" "z-50" "space-y-2"]
     :x-data "{ toasts: [] }"
     :x-on:show-toast.window "
       const toast = { 
@@ -261,9 +261,19 @@
      [:div
       {:id "content"
        :hx-history-elt true
-       :class ["pb-12"]}
+       :class ["pb-20"]}
       content]
      (toast-container)]
+    
+    ; Fixed footer with Add Link button
+    [:footer
+     {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
+     [:div {:class ["flex" "justify-end"]}
+      [:button
+       {:class ["inline-flex" "items-center" "px-4" "py-2" "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors" "shadow-md" "cursor-pointer"]
+        :type "button"}
+       [:span {:class "mr-1"} icons/plus-circle]
+       "Add Link"]]]
     [:script {:type "text/javascript"
               :src (manifest/asset "js/htmx.min.js")}]
     [:script {:type "text/javascript"
