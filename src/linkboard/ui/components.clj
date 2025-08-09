@@ -23,39 +23,21 @@
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.relative.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
-    :x-on:keydown.escape.window "modalOpen = false"
-    :x-cloak ""}
+    :x-on:keydown.escape.window "modalOpen = false"}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
    [:div
-    {:x-show "modalOpen"
-     :x-cloak ""
-     :style "display: none;"
-     :class ["z-99" "fixed" "top-0" "left-0" "flex" "items-center" "justify-center" "w-screen" "h-screen"]}
-    [:div
-     {:class ["absolute" "inset-0" "w-full" "h-full" "backdrop-blur-xs" "bg-opacity-70" "bg-black/50"]
-      :x-show "modalOpen"
-      :x-transition:enter "ease-out duration-300"
-      :x-transition:enter-start "opacity-0"
-      :x-transition:enter-end "opacity-100"
-      :x-transition:leave "ease-in duration-300"
-      :x-transition:leave-start "opacity-100"
-      :x-transition:leave-end "opacity-0"
-      :x-on:click "modalOpen=false"}]
+    {:x-cloak ""
+     :x-show "modalOpen"
+     :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
+     :x-on:click "modalOpen=false"}
     [:form
      (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
                      "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
-             :x-show "modalOpen"
-             :style "display: none;"
              :x-trap.inert.noscroll "modalOpen"
-             :x-transition:enter "ease-out duration-300"
-             :x-transition:enter-start "opacity-0 -translate-y-2 sm:scale-95"
-             :x-transition:enter-end "opacity-100 translate-y-0 sm:scale-100"
-             :x-transition:leave "ease-in duration-200"
-             :x-transition:leave-start "opacity-100 translate-y-0 sm:scale-100"
-             :x-transition:leave-end "opacity-0 -translate-y-2 sm:scale-95"}
+             :x-on:click.stop ""}
             form-attrs)
      [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
       [:h3 {:class ["text-lg" "font-semibold"]} title]
@@ -236,6 +218,7 @@
     [:link {:type "text/css"
             :href (manifest/asset "css/output.css")
             :rel "stylesheet"}]
+    [:style "[x-cloak] { display: none !important; }"]
     [:title "Linkboard"]]
    [:body
     {:class ["bg-slate-50"]
