@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
-  (:require [linkboard.core.db :as db]
+  (:require [linkboard.board.fetch :as fetch]
+            [linkboard.core.db :as db]
             [linkboard.home.views :as views]
             [linkboard.queries :as queries]
             [linkboard.routes :as-alias r]
@@ -13,10 +14,9 @@
     :keys [session]
     :as request}]
   (let [user (queries/get-user-by-session-id db (:session-id session))
-        all-links-count (->> {:select [[[:count :l.id] :links-count]]
-                              :from [[:board :b]]
-                              :join [[:link :l] [:= :b.id :l.board-id]]
-                              :where [:= :b.user-id (:id user)]}
+        all-links-count (->> {:select [[[:count :id] :links-count]]
+                              :from [:link]
+                              :where [:= :user-id (:id user)]}
                              (db/exec-one! db)
                              :links-count)
         ; TODO: add pagination
@@ -106,6 +106,44 @@
           (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
           (c/login-form-fields)
           (ext/render-html)))))
+
+(defn create-link-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [form]} :parameters
+    :keys [errors session]
+    router :reitit.core/router
+    :as request}]
+  (cond
+    (seq errors)
+    ; Return form validation errors
+    (-> (c/link-form-fields (assoc request :board-id (:board form)))
+        (ext/render-html))
+
+    :else
+    (let [user (queries/ensure-user-exists! db (:session-id session))
+          url (:url form)
+          board-id (:board_id form)
+          metadata (fetch/fetch-page-metadata url)]
+      ; Validate that if board_id is provided, the user owns that board
+      (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
+                                                           :session-id (:session-id session)})))
+        (response/status 403)
+        (do
+          (->> {:insert-into :link
+                :values [{:url url
+                          :title (:title metadata)
+                          :icon (:icon metadata)
+                          :board-id board-id
+                          :user-id (:id user)}]}
+               (db/exec-one! db))
+          ; TODO: show toast message!
+          (if board-id
+            (-> (response/response [:div])
+                (response/header "HX-Redirect"
+                                 (ext/get-route router ::r/board-details {:path {:id board-id}})))
+            (-> (response/response [:div])
+                (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))))))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}

@@ -31,8 +31,27 @@
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
         page-view (views/board-view request {:board board
-                                             :links links})]
+                                             :links links})
+        request* (assoc request :board-id (:id board))]
 
+    (if (c/hx-request? request)
+      (ext/render-html page-view)
+      (->> page-view
+           (c/base request*)
+           (ext/render-html)))))
+
+(defn all-links-handler
+  [{{:keys [db]} :context
+    :keys [session]
+    :as request}]
+  (let [user (q/get-user-by-session-id db (:session-id session))
+        ; TODO: add pagination
+        links (->> {:select [:*]
+                    :from [:link]
+                    :where [:= :user-id (:id user)]
+                    :order-by [[:created-at :desc]]}
+                   (db/exec! db))
+        page-view (views/all-links-view request {:links links})]
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view

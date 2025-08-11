@@ -3,9 +3,13 @@
             [etaoin.api :as etaoin]
             [integrant-extras.tests :as ig-extras]
             [integrant.core :as ig]
-            [linkboard.core.db :as db])
+            [linkboard.core.db :as db]
+            [linkboard.core.server :as server])
   (:import [org.testcontainers Testcontainers]
            [org.testcontainers.containers GenericContainer]))
+
+(def ^:const TEST-CSRF-TOKEN "test-csrf-token")
+(def ^:const TEST-SECRET-KEY "test-secret-key")
 
 (defn- all-tables
   [db]
@@ -49,3 +53,13 @@
   (log/info "[DB] Closing webdriver...")
   ; Do not stop the container to be able to reuse it
   (etaoin/quit driver))
+
+(defn db
+  "Get the database connection from the test system."
+  []
+  (::db/db ig-extras/*test-system*))
+
+(defn server
+  "Get the server instance from the test system."
+  []
+  (::server/server ig-extras/*test-system*))

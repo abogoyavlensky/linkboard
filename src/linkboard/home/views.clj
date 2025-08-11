@@ -76,8 +76,10 @@
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    (c/search-bar)
-   [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs"]
-        :href "#"}
+   [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "cursor-pointer"]
+        :hx-get (reitit-extras/get-route router ::r/links)
+        :hx-target "#content"
+        :hx-push-url "true"}
     [:div {:class ["flex" "items-center" "gap-3"]}
      icons/queue-list
      [:span {:class ["text-lg"]} "All Links"]]

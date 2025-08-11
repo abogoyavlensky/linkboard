@@ -56,6 +56,7 @@
       (:title link)]
      [:p {:class ["text-gray-400" "truncate" "block" "w-full"]} (:url link)]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
+    ; TODO: reimplement edit link endpoint without board required
     (c/modal
       {:open-btn-text (icons/edit)
        :title "Edit link"
@@ -163,14 +164,15 @@
                       [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
                        (:title board)]]
         :form-attrs {:hx-delete (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
-                     :hx-headers (reitit-extras/csrf-token-json)}})
-     (c/modal
-       {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]}
-                                            icons/plus-circle "Add link"]})
-        :title "Add link"
-        :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
-                     :hx-target "#link-form-fields"}
-        :form-fields (link-form-fields request)})]]
+                     :hx-headers (reitit-extras/csrf-token-json)}})]]
+   ; TODO: remove with old route!
+     ;(c/modal
+     ;  {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]}
+     ;                                       icons/plus-circle "Add link"]})
+     ;   :title "Add link"
+     ;   :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
+     ;                :hx-target "#link-form-fields"}
+     ;   :form-fields (link-form-fields request)})]]
 
    (if (seq links)
      (list
@@ -182,6 +184,33 @@
                            :request request
                            :link link
                            :board board}))])
+     ; Empty state
+     [:div {:class ["text-center" "mx-auto" "mt-16"]}
+      [:h2 {:class ["text-2xl" "font-semibold" "text-gray-900" "mb-3"]} "No bookmarks yet"]
+      [:p {:class ["text-gray-600" "mb-8"]} "Start building your collection by adding your first link"]])])
+
+(defn all-links-view
+  [{router :reitit.core/router
+    :as request} {:keys [links]}]
+  [:div {:class ["flex-1" "px-4"]}
+   ; Title, back button and add link button
+   [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     [:a {:class ["text-blue-500" "hover:text-blue-600"]
+          :hx-get (reitit-extras/get-route router ::r/home-page)
+          :hx-target "#content"
+          :hx-push-url "true"}
+      icons/chevron-left]
+     [:h2 {:class ["text-2xl" "font-bold"]} "All Links"]]]
+   (if (seq links)
+     (list
+       (c/search-bar)
+       ; Links
+       [:div {:class ["flex-1"]}
+        (for [link links]
+          (link-list-item {:router router
+                           :request request
+                           :link link}))])
      ; Empty state
      [:div {:class ["text-center" "mx-auto" "mt-16"]}
       [:h2 {:class ["text-2xl" "font-semibold" "text-gray-900" "mb-3"]} "No bookmarks yet"]

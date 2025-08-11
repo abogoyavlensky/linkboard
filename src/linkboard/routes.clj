@@ -44,6 +44,13 @@
    ["/logout" {:name ::logout
                :post {:handler home-handlers/logout-handler
                       :responses {200 {:body string?}}}}]
+   ["/links" {:name ::links
+              :get {:handler board-handlers/all-links-handler
+                    :responses {200 {:body string?}}}
+              :post {:handler home-handlers/create-link-handler
+                     :parameters {:form [:map
+                                         [:url spec/Link]
+                                         [:board_id {:optional true} pos-int?]]}}}]
 
    ["/boards"
     ["" {:name ::board-list

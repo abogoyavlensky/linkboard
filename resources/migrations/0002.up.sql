@@ -33,6 +33,7 @@ CREATE TABLE "link" (
     description TEXT,
     icon TEXT,
     board_id INTEGER NULL,
+    user_id INTEGER NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (board_id) REFERENCES "board" (id) ON DELETE CASCADE

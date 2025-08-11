@@ -21,61 +21,63 @@
 
 (defn modal
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
-  [:div.relative.w-auto.h-auto
+  [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
     :x-on:keydown.escape.window "modalOpen = false"}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
-   [:div
-    {:x-cloak ""
-     :x-show "modalOpen"
-     :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
-     :x-on:click "modalOpen=false"}
-    [:form
-     (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
-                     "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
-             :x-trap.inert.noscroll "modalOpen"
-             :x-on:click.stop ""}
-            form-attrs)
-     [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
-      [:h3 {:class ["text-lg" "font-semibold"]} title]
+   [:template
+    {:x-teleport "body"}
+    [:div
+     {:x-cloak ""
+      :x-show "modalOpen"
+      :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
+      :x-on:click "modalOpen=false"}
+     [:form
+      (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
+                      "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
+              :x-trap.inert.noscroll "modalOpen"
+              :x-on:click.stop ""}
+             form-attrs)
+      [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
+       [:h3 {:class ["text-lg" "font-semibold"]} title]
+       [:div
+        {:class ["absolute" "top-0" "right-0" "flex" "items-center" "justify-center"
+                 "w-8" "h-8" "mt-5" "mr-5" "text-gray-600" "rounded-full" "hover:text-gray-800" "hover:bg-gray-50"]
+         :x-on:click "modalOpen=false"}
+        [:svg {:class ["w-5" "h-5"]
+               :xmlns "http://www.w3.org/2000/svg"
+               :fill "none"
+               :viewBox "0 0 24 24"
+               :stroke-width "1.5"
+               :stroke "currentColor"}
+         [:path {:stroke-linecap "round"
+                 :stroke-linejoin "round"
+                 :d "M6 18L18 6M6 6l12 12"}]]]]
       [:div
-       {:class ["absolute" "top-0" "right-0" "flex" "items-center" "justify-center"
-                "w-8" "h-8" "mt-5" "mr-5" "text-gray-600" "rounded-full" "hover:text-gray-800" "hover:bg-gray-50"]
-        :x-on:click "modalOpen=false"}
-       [:svg {:class ["w-5" "h-5"]
-              :xmlns "http://www.w3.org/2000/svg"
-              :fill "none"
-              :viewBox "0 0 24 24"
-              :stroke-width "1.5"
-              :stroke "currentColor"}
-        [:path {:stroke-linecap "round"
-                :stroke-linejoin "round"
-                :d "M6 18L18 6M6 6l12 12"}]]]]
-     [:div
-      {:class ["relative" "w-auto" "pb-8"]}
+       {:class ["relative" "w-auto" "pb-8"]}
+       [:div
+        {:class ["w-full" "max-w-xs" "mx-auto"]}
+        (ext/csrf-token-html)
+        form-fields]]
       [:div
-       {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (ext/csrf-token-html)
-       form-fields]]
-     [:div
-      {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
-      [:button
-       {:class ["inline-flex" "items-center" "justify-center" "h-10" "px-4" "py-2"
-                "text-sm" "font-medium" "transition-colors" "border" "rounded-md" "cursor-pointer"
-                "focus:outline-hidden" "focus:ring-2" "focus:ring-neutral-100" "focus:ring-offset-2"]
-        :x-on:click "modalOpen=false"
-        :type "button"} "Cancel"]
-      [:button
-       {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
-                "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
-        :autofocus true
-        ;:x-on:click "modalOpen=false"
-        :type "submit"}
-       (or submit-btn-title "Save")
-       [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]])
+       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
+       [:button
+        {:class ["inline-flex" "items-center" "justify-center" "h-10" "px-4" "py-2"
+                 "text-sm" "font-medium" "transition-colors" "border" "rounded-md" "cursor-pointer"
+                 "focus:outline-hidden" "focus:ring-2" "focus:ring-neutral-100" "focus:ring-offset-2"]
+         :x-on:click "modalOpen=false"
+         :type "button"} "Cancel"]
+       [:button
+        {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
+                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
+         :autofocus true
+         ;:x-on:click "modalOpen=false"
+         :type "submit"}
+        (or submit-btn-title "Save")
+        [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]]])
 
 (defn login-form-fields
   [request]
@@ -195,6 +197,44 @@
                     [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
                      "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
 
+(defn link-form-fields
+  [{:keys [board-id]
+    :as request}]
+  (let [errors (get-in request [:errors :humanized])]
+    [:div
+     {:id "link-form-fields"}
+     [:input
+      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                       "ring-offset-background" "placeholder:text-neutral-500"
+                       "focus:border-neutral-300" "focus:outline-hidden"
+                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                      (when (seq (:url errors))
+                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+       :type "text"
+       :name "url"
+       :value (get-in request [:parameters :form :url] nil)
+       :minlength 1
+       :autofocus true
+       :placeholder "Enter link"}]
+     (for [error (:url errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     (when board-id
+       [:input
+        {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                         "bg-white" "border" "rounded-md" "border-neutral-300"
+                         "ring-offset-background" "placeholder:text-neutral-500"
+                         "focus:border-neutral-300" "focus:outline-hidden"
+                         "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                         "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                        (when (seq (:board errors))
+                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+         :name "board"
+         :value board-id}]
+       (for [error (:board errors)]
+         [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)]))]))
+
 (defn base
   "Base component for html page."
   [{user :identity
@@ -269,11 +309,14 @@
     [:footer
      {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
      [:div {:class ["flex" "justify-end"]}
-      [:button
-       {:class ["inline-flex" "items-center" "px-4" "py-2" "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors" "shadow-md" "cursor-pointer"]
-        :type "button"}
-       [:span {:class "mr-1"} icons/plus-circle]
-       "Add Link"]]]
+      (modal
+        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
+                                           icons/plus-circle "Add link"]})
+         :title "Add link"
+         :form-attrs {:hx-post (ext/get-route router ::r/links)
+                      :hx-target "#link-form-fields"}
+         :form-fields (link-form-fields request)})]]
+
     [:script {:type "text/javascript"
               :src (manifest/asset "js/htmx.min.js")}]
     [:script {:type "text/javascript"
