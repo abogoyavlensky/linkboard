@@ -122,16 +122,15 @@
 
     :else
     (let [user (queries/ensure-user-exists! db (:session-id session))
-          url (:url form)
-          board-id (:board_id form)
-          metadata (fetch/fetch-page-metadata url)]
+          board-id (:board form)
+          metadata (fetch/fetch-page-metadata (:url form))]
       ; Validate that if board_id is provided, the user owns that board
       (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
                                                            :session-id (:session-id session)})))
         (response/status 403)
         (do
           (->> {:insert-into :link
-                :values [{:url url
+                :values [{:url (:url form)
                           :title (:title metadata)
                           :icon (:icon metadata)
                           :board-id board-id

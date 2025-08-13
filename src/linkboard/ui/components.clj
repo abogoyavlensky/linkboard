@@ -230,10 +230,9 @@
                          "disabled:cursor-not-allowed" "disabled:opacity-50"]
                         (when (seq (:board errors))
                           ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+         :type "hidden"
          :name "board"
-         :value board-id}]
-       (for [error (:board errors)]
-         [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)]))]))
+         :value board-id}])]))
 
 (defn base
   "Base component for html page."

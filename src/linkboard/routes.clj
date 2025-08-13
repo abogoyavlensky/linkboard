@@ -50,7 +50,7 @@
               :post {:handler home-handlers/create-link-handler
                      :parameters {:form [:map
                                          [:url spec/Link]
-                                         [:board_id {:optional true} pos-int?]]}}}]
+                                         [:board {:optional true} pos-int?]]}}}]
 
    ["/boards"
     ["" {:name ::board-list
