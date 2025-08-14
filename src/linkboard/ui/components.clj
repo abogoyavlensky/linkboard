@@ -76,8 +76,6 @@
         {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
                  "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
          :autofocus true
-         ;:x-on:click "modalOpen=false"
-         ;:hx-on:close-modal "modalOpen=false"
          :type "submit"}
         (or submit-btn-title "Save")
         [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]]])
@@ -248,7 +246,8 @@
     :hx-history-elt true
     :class ["bg-slate-50"]
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
-    :hx-on:show-board-creation-toast "showToast('Board created successfully!')"}
+    :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
+    :hx-on:show-link-creation-toast "showToast('Link added successfully!')"}
    [:div
     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
     [:div
@@ -299,8 +298,8 @@
                                           icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (ext/get-route router ::r/links)
-                     ;:hx-target "#link-form-fields"
-                     :hx-swap "none"}
+                     :hx-target "#link-form-fields"
+                     :hx-swap "innerHTML"}
         :form-fields (link-form-fields request)})]]
 
    [:script {:type "text/javascript"

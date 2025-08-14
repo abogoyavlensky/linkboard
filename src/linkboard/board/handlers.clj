@@ -60,36 +60,6 @@
            (c/base)
            (ext/render-html)))))
 
-(defn add-link-handler
-  {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    :keys [errors parameters session]
-    router :reitit.core/router
-    :as request}]
-  (cond
-    (not (q/user-owns-board? db {:board-id (get-in parameters [:path :id])
-                                 :session-id (:session-id session)}))
-    (response/status 403)
-
-    (seq errors)
-    (-> (views/link-form-fields request)
-        (ext/render-html))
-
-    :else
-    (let [board-id (get-in parameters [:path :id])
-          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
-          url (:url form)
-          metadata (fetch/fetch-page-metadata url)]
-      (->> {:insert-into :link
-            :values [{:url url
-                      :title (:title metadata)
-                      :icon (:icon metadata)
-                      :board-id board-id}]}
-           (db/exec-one! db))
-      (-> (response/response [:div])
-          (response/header "HX-Redirect" board-path)))))
-
 (defn update-link-handler
   [{{:keys [db]} :context
     {:keys [form path]} :parameters

@@ -126,9 +126,7 @@
   (cond
     (seq errors)
     ; Return form validation errors
-    (-> [:div
-         {:hx-swap-oob "innerHTML:#link-form-fields"}
-         (c/link-form-fields (assoc request :board-id (:board form)))]
+    (-> (c/link-form-fields (assoc request :board-id (:board form)))
         (ext/render-html))
 
     :else
@@ -147,21 +145,16 @@
                                    :user-id (:id user)}]
                          :returning [:*]}
                         (db/exec-one! db))]
-          ; TODO: show toast message!
-          (if board-id
-            (ext/render-html (list [:div
-                                    ; Add item to the top of the board list
-                                    {:hx-swap-oob "afterbegin:#link-list"}
-                                    (board-views/link-list-item {:request request
-                                                                 :router router
-                                                                 :link link})]
-                                   ; Clear form
-                                   [:div
-                                    {:hx-swap-oob "innerHTML:#link-form-fields"}
-                                    (c/link-form-fields {})]))
-            ; TODO: check if link was added to the all links list
-            (-> (response/response [:div])
-                (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))))))))
+          (-> (ext/render-html (list (c/link-form-fields {})
+                                     (when board-id
+                                       [:div
+                                        ; Add item to the top of the board list
+                                        {:hx-swap-oob "afterbegin:#link-list"}
+                                        (board-views/link-list-item {:request request
+                                                                     :router router
+                                                                     :link link})])))
+              (response/header "HX-Trigger" "showLinkCreationToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}
