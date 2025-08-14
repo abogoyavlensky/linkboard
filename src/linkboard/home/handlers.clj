@@ -146,13 +146,12 @@
                          :returning [:*]}
                         (db/exec-one! db))]
           (-> (ext/render-html (list (c/link-form-fields {})
-                                     (when board-id
-                                       [:div
-                                        ; Add item to the top of the board list
-                                        {:hx-swap-oob "afterbegin:#link-list"}
-                                        (board-views/link-list-item {:request request
-                                                                     :router router
-                                                                     :link link})])))
+                                     [:div
+                                      ; Add item to the top of the link list
+                                      {:hx-swap-oob "afterbegin:#link-list"}
+                                      (board-views/link-list-item {:request request
+                                                                   :router router
+                                                                   :link link})]))
               (response/header "HX-Trigger" "showLinkCreationToast")
               (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
