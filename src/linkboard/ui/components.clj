@@ -24,7 +24,8 @@
   [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
     :x-on:keydown.escape.window "modalOpen = false"
-    :hx-on:close-modal "modalOpen=false"}
+    :x-on:modal-close.window "modalOpen = false"
+    :hx-on:closeModal "closeModal()"}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}

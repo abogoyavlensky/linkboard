@@ -74,3 +74,8 @@ function showToast(message, type = 'success') {
     detail: { message, type }
   }));
 }
+
+function closeModal() {
+  // Dispatch a custom event that Alpine can listen for
+  window.dispatchEvent(new CustomEvent('modal-close'));
+}

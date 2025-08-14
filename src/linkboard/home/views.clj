@@ -101,7 +101,8 @@
                                           icons/plus-circle "Add board"]})
               :title "Create board"
               :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
-                           :hx-swap "none"}
+                           :hx-target "#board-form-fields"
+                           :hx-swap "innerHTML"}
               :form-fields (board-form-fields request)})]]
     [:div
      {:id "board-list"}

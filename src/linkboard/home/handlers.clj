@@ -45,9 +45,7 @@
     :keys [session errors]
     :as request}]
   (if (seq errors)
-    (-> [:div
-         {:hx-swap-oob "innerHTML:#board-form-fields"}
-         (views/board-form-fields request)]
+    (-> (views/board-form-fields request)
         (ext/render-html))
     (let [user (queries/ensure-user-exists! db (:session-id session))
           ; Create a new board
@@ -56,18 +54,15 @@
                                 :user-id (:id user)}]
                       :returning [:*]}
                      (db/exec-one! db))]
-      (-> (ext/render-html (list [:div
-                                  ; Add item to the top of the board list
+      (-> (ext/render-html (list ; Return fresh form
+                                 (views/board-form-fields {})
+                                 ; Add item to the top of the board list
+                                 [:div
                                   {:hx-swap-oob "afterbegin:#board-list"}
                                   (views/list-item {:router router
-                                                    :board board})]
-                                 ; Clear form
-                                 [:div
-                                  {:hx-swap-oob "innerHTML:#board-form-fields"}
-                                  (views/board-form-fields {})]))
-          ; TODO: Fix closing modal
-          (response/header "HX-Trigger" "closeModal")
-          (response/header "HX-Trigger" "showBoardCreationToast")))))
+                                                    :board board})]))
+          (response/header "HX-Trigger" "showBoardCreationToast")
+          (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
