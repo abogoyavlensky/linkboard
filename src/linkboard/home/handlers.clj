@@ -55,12 +55,12 @@
                       :returning [:*]}
                      (db/exec-one! db))]
       (-> (ext/render-html (list ; Return fresh form
-                                 (views/board-form-fields {})
+                             (views/board-form-fields {})
                                  ; Add item to the top of the board list
-                                 [:div
-                                  {:hx-swap-oob "afterbegin:#board-list"}
-                                  (views/list-item {:router router
-                                                    :board board})]))
+                             [:div
+                              {:hx-swap-oob "afterbegin:#board-list"}
+                              (views/list-item {:router router
+                                                :board board})]))
           (response/header "HX-Trigger" "showBoardCreationToast")
           (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
