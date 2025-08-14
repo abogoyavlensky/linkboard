@@ -37,8 +37,8 @@
      (for [error (:url errors)]
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
-(defn- link-list-item
-  [{:keys [request router link board]}]
+(defn link-list-item
+  [{:keys [request router link]}]
   [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
    [:a {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]
@@ -65,10 +65,11 @@
        :form-attrs {:hx-put (reitit-extras/get-route
                               router
                               ::r/link-details
-                              {:path {:id (:id board)
-                                      :link-id (:id link)}})
+                              {:path {:link-id (:id link)}})
                     :hx-headers (reitit-extras/csrf-token-json)
-                    :hx-target "#link-edit-form-fields"}})
+                    ;:hx-target-400 "#link-edit-form-fields"
+                    :hx-target "closest .link-item"
+                    :hx-swap "outerHTML"}})
     (c/modal
       {:open-btn-text icons/bin
        :title "Delete link"
@@ -81,8 +82,7 @@
        :form-attrs {:hx-delete (reitit-extras/get-route
                                  router
                                  ::r/link-details
-                                 {:path {:id (:id board)
-                                         :link-id (:id link)}})
+                                 {:path {:link-id (:id link)}})
                     :hx-headers (reitit-extras/csrf-token-json)
                     :hx-target "closest .link-item"
                     :hx-swap "outerHTML"}})]])
@@ -165,15 +165,6 @@
                        (:title board)]]
         :form-attrs {:hx-delete (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (reitit-extras/csrf-token-json)}})]]
-   ; TODO: remove with old route!
-     ;(c/modal
-     ;  {:open-btn-text (c/button {:content [:div {:class ["flex" "items-center" "gap-1"]}
-     ;                                       icons/plus-circle "Add link"]})
-     ;   :title "Add link"
-     ;   :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-details-links {:path {:id (:id board)}})
-     ;                :hx-target "#link-form-fields"}
-     ;   :form-fields (link-form-fields request)})]]
-
    (if (seq links)
      (list
        (c/search-bar)
@@ -206,7 +197,9 @@
      (list
        (c/search-bar)
        ; Links
-       [:div {:class ["flex-1"]}
+       [:div
+        {:id "link-list"
+         :class ["flex-1"]}
         (for [link links]
           (link-list-item {:router router
                            :request request

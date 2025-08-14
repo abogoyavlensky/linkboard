@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
   (:require [linkboard.board.fetch :as fetch]
+            [linkboard.board.views :as board-views]
             [linkboard.core.db :as db]
             [linkboard.home.views :as views]
             [linkboard.queries :as queries]
@@ -44,16 +45,28 @@
     :keys [session errors]
     :as request}]
   (if (seq errors)
-    (->> (views/board-form-fields request)
-         (ext/render-html))
-    (let [user (queries/ensure-user-exists! db (:session-id session))]
-      ; Create a new board
-      (->> {:insert-into :board
-            :values [{:title (:title form)
-                      :user-id (:id user)}]}
-           (db/exec-one! db))
-      (-> (ext/render-html [:div])
-          (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+    (-> [:div
+         {:hx-swap-oob "innerHTML:#board-form-fields"}
+         (views/board-form-fields request)]
+        (ext/render-html))
+    (let [user (queries/ensure-user-exists! db (:session-id session))
+          ; Create a new board
+          board (->> {:insert-into :board
+                      :values [{:title (:title form)
+                                :user-id (:id user)}]
+                      :returning [:*]}
+                     (db/exec-one! db))]
+      (-> (ext/render-html (list [:div
+                                  ; Add item to the top of the board list
+                                  {:hx-swap-oob "afterbegin:#board-list"}
+                                  (views/list-item {:router router
+                                                    :board board})]
+                                 ; Clear form
+                                 [:div
+                                  {:hx-swap-oob "innerHTML:#board-form-fields"}
+                                  (views/board-form-fields {})]))
+          ; TODO: Fix closing modal
+          (response/header "HX-Trigger" "closeModal")
           (response/header "HX-Trigger" "showBoardCreationToast")))))
 
 (defn create-account-handler
@@ -118,7 +131,9 @@
   (cond
     (seq errors)
     ; Return form validation errors
-    (-> (c/link-form-fields (assoc request :board-id (:board form)))
+    (-> [:div
+         {:hx-swap-oob "innerHTML:#link-form-fields"}
+         (c/link-form-fields (assoc request :board-id (:board form)))]
         (ext/render-html))
 
     :else
@@ -129,19 +144,27 @@
       (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
                                                            :session-id (:session-id session)})))
         (response/status 403)
-        (do
-          (->> {:insert-into :link
-                :values [{:url (:url form)
-                          :title (:title metadata)
-                          :icon (:icon metadata)
-                          :board-id board-id
-                          :user-id (:id user)}]}
-               (db/exec-one! db))
+        (let [link (->> {:insert-into :link
+                         :values [{:url (:url form)
+                                   :title (:title metadata)
+                                   :icon (:icon metadata)
+                                   :board-id board-id
+                                   :user-id (:id user)}]
+                         :returning [:*]}
+                        (db/exec-one! db))]
           ; TODO: show toast message!
           (if board-id
-            (-> (response/response [:div])
-                (response/header "HX-Redirect"
-                                 (ext/get-route router ::r/board-details {:path {:id board-id}})))
+            (ext/render-html (list [:div
+                                    ; Add item to the top of the board list
+                                    {:hx-swap-oob "afterbegin:#link-list"}
+                                    (board-views/link-list-item {:request request
+                                                                 :router router
+                                                                 :link link})]
+                                   ; Clear form
+                                   [:div
+                                    {:hx-swap-oob "innerHTML:#link-form-fields"}
+                                    (c/link-form-fields {})]))
+            ; TODO: check if link was added to the all links list
             (-> (response/response [:div])
                 (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))))))))
 

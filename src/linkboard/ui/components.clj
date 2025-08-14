@@ -23,7 +23,8 @@
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
-    :x-on:keydown.escape.window "modalOpen = false"}
+    :x-on:keydown.escape.window "modalOpen = false"
+    :hx-on:close-modal "modalOpen=false"}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
@@ -75,6 +76,7 @@
                  "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
          :autofocus true
          ;:x-on:click "modalOpen=false"
+         ;:hx-on:close-modal "modalOpen=false"
          :type "submit"}
         (or submit-btn-title "Save")
         [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]]])
@@ -241,6 +243,7 @@
    content]
   [:body
    {:id "body"
+    :hx-ext "response-targets"
     :hx-history-elt true
     :class ["bg-slate-50"]
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
@@ -295,11 +298,14 @@
                                           icons/plus-circle "Add link"]})
         :title "Add link"
         :form-attrs {:hx-post (ext/get-route router ::r/links)
-                     :hx-target "#link-form-fields"}
+                     ;:hx-target "#link-form-fields"
+                     :hx-swap "none"}
         :form-fields (link-form-fields request)})]]
 
    [:script {:type "text/javascript"
              :src (manifest/asset "js/htmx.min.js")}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/htmx-ext-response-targets.js")}]
    [:script {:type "text/javascript"
              :src (manifest/asset "js/alpinejs.focus.min.js")
              :defer true}]

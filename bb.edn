@@ -59,7 +59,9 @@
                          {:url "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.14.8/dist/cdn.min.js"
                           :filepath "js/alpinejs.focus.min.js"}
                          {:url "https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"
-                          :filepath "js/htmx.min.js"}])}
+                          :filepath "js/htmx.min.js"}
+                         {:url "https://cdn.jsdelivr.net/npm/htmx-ext-response-targets@2.0.2"
+                          :filepath "js/htmx-ext-response-targets.js"}])}
 
   kamal {:doc "Deploy application using Kamal"
          :task (apply shell "kamal" (concat *command-line-args* ["--config-file" ".kamal/deploy.yml"]))}

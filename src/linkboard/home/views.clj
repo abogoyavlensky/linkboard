@@ -5,21 +5,20 @@
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as reitit-extras]))
 
-(defn- list-item
-  [router board]
+(defn list-item
+  [{:keys [router board]}]
   ; TODO: make this component common
   [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
                "justify-between" "shadow-xs" "mt-2" "cursor-pointer"]
        :hx-get (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
        :hx-target "#body"
-       ;:hx-swap "innerHTML"
        :hx-push-url "true"}
    [:div {:class ["flex" "items-center" "gap-3"]}
     icons/folder
     [:span {:class ["text-lg"]} (:title board)]]
    [:div {:class ["flex" "items-center" "gap-2"]}
     [:div icons/menu]
-    [:span {:class ["text-gray-500"]} (:link-count board)]
+    [:span {:class ["text-gray-500"]} (or (:link-count board) 0)]
     [:svg {:class ["w-5" "h-5" "text-gray-400" "rotate-180"]
            :viewBox "0 0 24 24"
            :fill "none"
@@ -31,7 +30,8 @@
   [router {:keys [boards]}]
   (if (seq boards)
     (list (for [board boards]
-            (list-item router board)))
+            (list-item {:router router
+                        :board board})))
     [:div {:class ["flex" "flex-col" "items-center" "justify-center" "py-12" "px-4"]}
      [:div {:class ["w-16" "h-16" "rounded-full" "bg-gray-100" "flex" "items-center" "justify-center" "mb-4"]}
       [:svg {:class ["w-8" "h-8" "text-gray-400"]
@@ -101,7 +101,8 @@
                                           icons/plus-circle "Add board"]})
               :title "Create board"
               :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
-                           :hx-target "#board-form-fields"}
+                           :hx-swap "none"}
               :form-fields (board-form-fields request)})]]
-    [:div#board-list
+    [:div
+     {:id "board-list"}
      (board-list router {:boards boards})]]])

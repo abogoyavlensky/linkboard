@@ -97,33 +97,34 @@
     router :reitit.core/router
     :as request}]
   (cond
-    (not (q/user-owns-board? db {:board-id (-> path :id)
-                                 :session-id (:session-id session)}))
-    (-> (response/response "Board not found or access denied")
+    (not (q/user-owns-link? db {:link-id (-> path :link-id)
+                                :session-id (:session-id session)}))
+    (-> (response/response "Link not found or access denied")
         (response/status 403))
 
     (seq errors)
     (-> (views/link-edit-form-fields request {:link form})
+        (response/status 400)
         (ext/render-html))
 
     :else
-    (let [board-id (-> path :id)
-          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
-          link-id (-> path :link-id)
+    (let [link-id (-> path :link-id)
           title (:title form)
           url (:url form)
-          metadata (fetch/fetch-page-metadata url)]
-      ; Update link in the database
-      (->> {:update :link
-            :set {:title title
-                  :url url
-                  :icon (:icon metadata)}
-            :where [:and
-                    [:= :id link-id]
-                    [:= :board-id board-id]]}
-           (db/exec-one! db))
-      (-> (response/response [:div])
-          (response/header "HX-Redirect" board-path)))))
+          user (q/get-user-by-session-id db (:session-id session))
+          metadata (fetch/fetch-page-metadata url)
+          updated-link (->> {:update :link
+                             :set {:title title
+                                   :url url
+                                   :icon (:icon metadata)}
+                             :where [:and
+                                     [:= :id link-id]
+                                     [:= :user-id (:id user)]]}
+                            (db/exec-one! db))]
+      (-> (views/link-list-item {:request request
+                                 :router router
+                                 :link updated-link})
+          (ext/render-html)))))
 
 (defn update-board-handler
   [{{:keys [db]} :context
@@ -166,15 +167,13 @@
 
 (defn delete-link-handler
   [{:keys [path-params context session]}]
-  (let [board-id (-> path-params :id parse-long)]
-    (cond
-      (not (q/user-owns-board? (:db context) {:board-id board-id
-                                              :session-id (:session-id session)}))
-      (-> (response/response "Board not found or access denied")
-          (response/status 403))
+  (cond
+    (not (q/user-owns-link? (:db context) {:session-id (:session-id session)}))
+    (-> (response/response "Link not found or access denied")
+        (response/status 403))
 
-      :else
-      (do
-        (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
-                                       :board-id board-id})
-        (response/response nil)))))
+    :else
+    (let [user (q/get-user-by-session-id (:db context) (:session-id session))]
+      (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
+                                     :user-id (:id user)})
+      (response/response nil))))
