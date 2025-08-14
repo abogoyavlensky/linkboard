@@ -137,7 +137,7 @@
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:a {:class ["text-blue-500" "hover:text-blue-600"]
           :hx-get (reitit-extras/get-route router ::r/home-page)
-          :hx-target "#content"
+          :hx-target "#body"
           :hx-push-url "true"}
       icons/chevron-left]
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
@@ -198,7 +198,7 @@
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:a {:class ["text-blue-500" "hover:text-blue-600"]
           :hx-get (reitit-extras/get-route router ::r/home-page)
-          :hx-target "#content"
+          :hx-target "#body"
           :hx-push-url "true"}
       icons/chevron-left]
      [:h2 {:class ["text-2xl" "font-bold"]} "All Links"]]]

@@ -30,14 +30,15 @@
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
-        page-view (views/board-view request {:board board
-                                             :links links})
-        request* (assoc request :board-id (:id board))]
+        request* (assoc request :board-id (:id board))
+        page-view (->> (views/board-view request* {:board board
+                                                   :links links})
+                       (c/body request*))]
 
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
-           (c/base request*)
+           (c/base)
            (ext/render-html)))))
 
 (defn all-links-handler
@@ -51,11 +52,12 @@
                     :where [:= :user-id (:id user)]
                     :order-by [[:created-at :desc]]}
                    (db/exec! db))
-        page-view (views/all-links-view request {:links links})]
+        page-view (->> (views/all-links-view request {:links links})
+                       (c/body request))]
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
-           (c/base request)
+           (c/base)
            (ext/render-html)))))
 
 (defn add-link-handler

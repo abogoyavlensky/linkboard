@@ -27,12 +27,13 @@
                              :where [:= :b.user-id (:id user)]
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
-        page-view (views/boards-view request {:boards boards
-                                              :all-links-count all-links-count})]
+        page-view (->> (views/boards-view request {:boards boards
+                                                   :all-links-count all-links-count})
+                       (c/body request))]
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
-           (c/base request)
+           (c/base)
            (ext/render-html)))))
 
 (defn create-board-handler

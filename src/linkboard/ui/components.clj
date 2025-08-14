@@ -173,7 +173,7 @@
                      "Register"]
      :submit-btn-title "Create Account"
      :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/create-account)
-                  :hx-target "#content"}
+                  :hx-target "#body"}
      :form-fields [:div
                    [:div {:class ["mb-4"]}
                     [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your Account number"]
@@ -234,12 +234,84 @@
          :name "board"
          :value board-id}])]))
 
-(defn base
-  "Base component for html page."
+(defn body
   [{user :identity
     router :reitit.core/router
     :as request}
    content]
+  [:body
+   {:id "body"
+    :hx-history-elt true
+    :class ["bg-slate-50"]
+    :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
+    :hx-on:show-board-creation-toast "showToast('Board created successfully!')"}
+   [:div
+    {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
+    [:div
+     {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
+     [:div
+      [:a
+       {:hx-get (ext/get-route router ::r/home-page)
+        :hx-target "#body"
+        :hx-push-url "true"}
+       [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
+      [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
+       [:p "Personal bookmark manager"]
+       [:a
+        {:href PROJECT-GITHUB-LINK
+         :target "_blank"}
+        icons/github]]]
+     [:div {:class ["flex" "gap-4"]}
+      (if user
+        [:div
+         {:class ["flex" "items-center"]}
+         [:button
+          {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+           :hx-post (ext/get-route router ::r/logout)
+           :hx-headers (ext/csrf-token-json)}
+          "Logout"]
+         [:button
+          {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+          "Account"]]
+        [:div
+         {:x-data "{ modalOpen: false, accountId: '' }"
+          :class ["flex" "items-center"]}
+         (login-modal request)
+         (create-account-modal request)])]]
+
+    [:div
+     {:id "content"
+      :hx-history-elt true
+      :class ["pb-20"]}
+     content]
+    (toast-container)]
+
+   ; Fixed footer with Add Link button
+   [:footer
+    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
+    [:div {:class ["flex" "justify-end"]}
+     (modal
+       {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
+                                          icons/plus-circle "Add link"]})
+        :title "Add link"
+        :form-attrs {:hx-post (ext/get-route router ::r/links)
+                     :hx-target "#link-form-fields"}
+        :form-fields (link-form-fields request)})]]
+
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/htmx.min.js")}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/alpinejs.focus.min.js")
+             :defer true}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/alpinejs.min.js")
+             :defer true}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/utils.js")}]])
+
+(defn base
+  "Base component for html page."
+  [content]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -259,78 +331,11 @@
             :rel "stylesheet"}]
     [:style "[x-cloak] { display: none !important; }"]
     [:title "Linkboard"]]
-   [:body
-    {:class ["bg-slate-50"]
-     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
-     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"}
-    [:div
-     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
-     [:div
-      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
-      [:div
-       [:a
-        {:hx-get "/"
-         :hx-target "#content"
-         :hx-push-url "true"}
-        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
-       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
-        [:p "Personal bookmark manager"]
-        [:a
-         {:href PROJECT-GITHUB-LINK
-          :target "_blank"}
-         icons/github]]]
-      [:div {:class ["flex" "gap-4"]}
-       (if user
-         [:div
-          {:class ["flex" "items-center"]}
-          [:button
-           {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
-            :hx-post (ext/get-route router ::r/logout)
-            :hx-headers (ext/csrf-token-json)}
-           "Logout"]
-          [:button
-           {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
-           "Account"]]
-         [:div
-          {:x-data "{ modalOpen: false, accountId: '' }"
-           :class ["flex" "items-center"]}
-          (login-modal request)
-          (create-account-modal request)])]]
-
-     [:div
-      {:id "content"
-       :hx-history-elt true
-       :class ["pb-20"]}
-      content]
-     (toast-container)]
-
-    ; Fixed footer with Add Link button
-    [:footer
-     {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
-     [:div {:class ["flex" "justify-end"]}
-      (modal
-        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
-                                           icons/plus-circle "Add link"]})
-         :title "Add link"
-         :form-attrs {:hx-post (ext/get-route router ::r/links)
-                      :hx-target "#link-form-fields"}
-         :form-fields (link-form-fields request)})]]
-
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/htmx.min.js")}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.focus.min.js")
-              :defer true}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.min.js")
-              :defer true}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/utils.js")}]]])
+   content])
 
 (defn error-page
-  [request text]
+  [text]
   (base
-    request
     [:div {:class ["mt-56"]}
      [:div {:class ["mx-auto" "text-center"]}
       [:h1 {:class ["text-5xl"]} text]]]))

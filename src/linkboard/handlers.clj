@@ -19,6 +19,6 @@
       ; Simple response for DevTools requests to avoid triggering full error page
       (response/status (response/response "") status-code)
       ; Full error page for actual user-facing errors
-      (-> (components/error-page request error-text)
+      (-> (components/error-page error-text)
           (reitit-extras/render-html)
           (response/status status-code)))))
