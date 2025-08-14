@@ -169,7 +169,9 @@
      (list
        (c/search-bar)
        ; Links
-       [:div {:class ["flex-1"]}
+       [:div
+        {:id "link-list"
+         :class ["flex-1"]}
         (for [link links]
           (link-list-item {:router router
                            :request request
