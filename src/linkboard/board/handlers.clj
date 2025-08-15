@@ -136,14 +136,18 @@
         (response/header "HX-Redirect" "/"))))
 
 (defn delete-link-handler
-  [{:keys [path-params context session]}]
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
+    :keys [session]}]
   (cond
-    (not (q/user-owns-link? (:db context) {:session-id (:session-id session)}))
+    (not (q/user-owns-link? db {:link-id (:link-id path)
+                                :session-id (:session-id session)}))
     (-> (response/response "Link not found or access denied")
         (response/status 403))
 
     :else
-    (let [user (q/get-user-by-session-id (:db context) (:session-id session))]
-      (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
-                                     :user-id (:id user)})
-      (response/response nil))))
+    (let [user (q/get-user-by-session-id db (:session-id session))]
+      (q/delete-link! db {:link-id (:link-id path)
+                          :user-id (:id user)})
+      (-> (response/response nil)
+          (response/header "HX-Refresh" "true")))))

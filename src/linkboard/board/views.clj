@@ -81,33 +81,8 @@
        :form-attrs {:hx-delete (ext/get-route
                                  router
                                  ::r/link-details
-                                 {:path {:link-id #p (:id link)}})
-                    :hx-headers (ext/csrf-token-json)
-                    :hx-target "closest .link-item"
-                    :hx-swap "outerHTML"}})]])
-
-(defn link-form-fields
-  [request]
-  (let [errors (get-in request [:errors :humanized :url])]
-    [:div
-     {:id "link-form-fields"}
-     [:input
-      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                       "bg-white" "border" "rounded-md" "border-neutral-300"
-                       "ring-offset-background" "placeholder:text-neutral-500"
-                       "focus:border-neutral-300" "focus:outline-hidden"
-                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                      (when (seq errors)
-                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-       :type "text"
-       :name "url"
-       :value (get-in request [:parameters :form :url] nil)
-       :minlength 1
-       :autofocus true
-       :placeholder "Enter link"}]
-     (for [error errors]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+                                 {:path {:link-id (:id link)}})
+                    :hx-headers (ext/csrf-token-json)}})]])
 
 (defn board-edit-form-fields
   [request {:keys [board]}]
