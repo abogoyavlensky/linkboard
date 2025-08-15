@@ -31,13 +31,13 @@
            :get {:handler (fn [_] (response/response "OK"))}}]
    ["/create-account" {:name ::create-account
                        ; Rate limit login attempts to 3 per minute per IP
-                       :middleware [[limits/wrap-rate-limit 3 60000]]
+                       :middleware [[limits/wrap-rate-limit 5 60000]]
                        :post {:handler home-handlers/create-account-handler
                               :parameters {:form {:account-number [:string {:min 1}]}}
                               :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
               ; Rate limit login attempts to 10 per minute per IP
-              :middleware [[limits/wrap-rate-limit 10 60000]]
+              :middleware [[limits/wrap-rate-limit 20 60000]]
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
                      :responses {200 {:body string?}}}}]

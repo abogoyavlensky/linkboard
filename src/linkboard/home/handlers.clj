@@ -60,7 +60,11 @@
                              [:div
                               {:hx-swap-oob "afterbegin:#board-list"}
                               (views/list-item {:router router
-                                                :board board})]))
+                                                :board board})]
+                             ; Remove empty state
+                             [:div
+                              {:hx-swap-oob "delete:#empty-boards"}]))
+
           (response/header "HX-Trigger" "showBoardCreationToast")
           (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
