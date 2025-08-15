@@ -39,7 +39,8 @@
 
 (defn link-list-item
   [{:keys [request router link]}]
-  [:div.link-item {:class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
+  [:div.link-item {:id (str "link-" (:id link))
+                   :class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
    [:a {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]
         :href (:url link)
@@ -82,7 +83,9 @@
                                  router
                                  ::r/link-details
                                  {:path {:link-id (:id link)}})
-                    :hx-headers (ext/csrf-token-json)}})]])
+                    :hx-headers (ext/csrf-token-json)
+                    :hx-target (str "#link-" (:id link))
+                    :hx-swap "delete"}})]])
 
 (defn board-edit-form-fields
   [request {:keys [board]}]

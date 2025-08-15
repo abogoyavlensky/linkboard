@@ -150,4 +150,4 @@
       (q/delete-link! db {:link-id (:link-id path)
                           :user-id (:id user)})
       (-> (response/response nil)
-          (response/header "HX-Refresh" "true")))))
+          (response/header "HX-Trigger-After-Swap" "modal-close, show-link-deletion-toast")))))
