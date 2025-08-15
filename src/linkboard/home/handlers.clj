@@ -155,7 +155,10 @@
                                       {:hx-swap-oob "afterbegin:#link-list"}
                                       (board-views/link-list-item {:request request
                                                                    :router router
-                                                                   :link link})]))
+                                                                   :link link})]
+                                     ; Remove empty state
+                                     [:div
+                                      {:hx-swap-oob "delete:#empty-links"}]))
               (response/header "HX-Trigger" "showLinkCreationToast")
               (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
