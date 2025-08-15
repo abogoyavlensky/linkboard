@@ -44,12 +44,12 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `POST /create-account` - Account creation endpoint (rate limited: 3/min per IP)
+  - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
-  - `POST /boards/:id/links` - Add link to board
+  - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
-  - `POST /login` - User login endpoint (rate limited: 10/min per IP)
+  - `POST /login` - User login endpoint (rate limited: 20/min per IP)
 - `wrap-auth` middleware for automatic session-id generation and persistence
 - **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
 - Malli schema validation for request parameters
@@ -102,6 +102,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - CSS rule `[x-cloak] { display: none !important; }` for proper Alpine.js integration
 - Click-outside-to-close with `click.stop` on form content
 - Escape key handling for accessibility
+- **Modal closing via HTMX events**: Uses `HX-Trigger-After-Swap: modal-close` to close modals after successful form submissions
+- **Alpine.js event handling**: Listens for `modal-close` window events to set `modalOpen = false`
 
 #### Account Number UX (`src/linkboard/ui/components.clj`)
 - **Enhanced copy functionality** prevents checkmark icon from being copied to clipboard
@@ -226,7 +228,8 @@ test/                  # Test files
 (ensure-user-exists! db session-id)              ; Get or create user helper
 (get-board-by-id-and-user-id db board-id user-id) ; Get board if owned by user
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
-(delete-link! db {:link-id link-id :board-id board-id}) ; Delete link from board
+(user-owns-link? db {:link-id link-id :session-id session-id}) ; Check link ownership via JOIN
+(delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
 ```
 
 ### Rate Limiting (`src/linkboard/limits.clj`)
@@ -242,6 +245,9 @@ test/                  # Test files
 showToast(message, type='success')               // Trigger toast notification
 // Types: 'success', 'error', 'info', 'warning'
 // Example: showToast('Board created successfully!')
+
+closeModal()                                     // Close Alpine.js modals via custom event
+// Dispatches 'modal-close' window event for Alpine.js listeners
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
@@ -272,6 +278,13 @@ showToast(message, type='success')               // Trigger toast notification
 4. Database queries use HoneySQL DSL with proper user isolation
 5. Views render Hiccup-style HTML with user-specific data
 6. HTMX handles partial page updates and form submissions
+
+### HTMX Out-of-Band (OOB) Patterns
+- **Board Creation**: `{:hx-swap-oob "afterbegin:#board-list"}` adds new boards to list top
+- **Link Creation**: `{:hx-swap-oob "afterbegin:#link-list"}` adds new links to All Links page
+- **Empty State Removal**: `{:hx-swap-oob "delete:#empty-boards"}` removes "No boards yet" message
+- **Form Clearing**: Target form fields with `innerHTML` swap to reset forms after submission
+- **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
 
 ### Error Handling
 - Schema validation with Malli
@@ -338,6 +351,9 @@ bb clj-repl              # Start REPL with dev profile
 - **Copy Functionality**: Ensure clipboard operations only copy intended content, exclude UI indicators
 - **Fixed Elements**: Position toast notifications and other overlays to avoid conflicts with fixed footer
 - **Layout Stability**: Reserve space for dynamic elements to prevent layout shifts during animations
+- **HTMX Modal Closing**: Use `HX-Trigger-After-Swap: modal-close` with Alpine.js `x-on:modal-close.window` listeners
+- **Empty State Management**: Remove empty state elements using `hx-swap-oob="delete:#element-id"` when adding first items
+- **Form State Management**: Clear forms using `innerHTML` swap after successful submissions
 
 ### Testing Strategy
 - Unit tests with eftest
