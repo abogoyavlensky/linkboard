@@ -47,7 +47,7 @@
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         ; TODO: add pagination
-        links (->> {:select [:l.* [:b.title :board-title]]
+        links (->> {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
                     :from [[:link :l]]
                     :left-join [[:board :b] [:= :l.board-id :b.id]]
                     :where [:= :l.user-id (:id user)]

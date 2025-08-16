@@ -42,22 +42,37 @@
   [:div.link-item {:id (str "link-" (:id link))
                    :class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
-   [:a {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]
-        :href (:url link)
-        :rel "noopener noreferrer"
-        :target "_blank"}
-    (if (and (:icon link) (seq (:icon link)))
-      [:img {:src (:icon link)
-             :class ["w-5" "h-5" "flex-shrink-0"]
-             :onerror "this.onerror=null; this.src=''; this.classList.add('hidden');"
-             :alt "Site icon"}]
-      icons/bookmark)
+   [:div {:class ["flex" "items-center" "gap-3" "flex-grow" "min-w-0" "mr-4"]}
+    [:a {:href (:url link)
+         :rel "noopener noreferrer"
+         :target "_blank"
+         :class ["flex-shrink-0"]}
+     (if (and (:icon link) (seq (:icon link)))
+       [:img {:src (:icon link)
+              :class ["w-5" "h-5" "flex-shrink-0"]
+              :onerror "this.onerror=null; this.src=''; this.classList.add('hidden');"
+              :alt "Site icon"}]
+       icons/bookmark)]
     [:div {:class ["min-w-0" "flex-grow" "max-w-full"]}
-     [:span {:class ["text-l" "break-words" "block" "w-full"]}
+     [:a {:href (:url link)
+          :rel "noopener noreferrer"
+          :target "_blank"
+          :class ["text-l" "break-words" "block" "w-full" "no-underline"]}
       (:title link)]
-     [:p {:class ["text-gray-400" "truncate" "block" "w-full"]}
+     [:a {:href (:url link)
+          :rel "noopener noreferrer"
+          :target "_blank"
+          :class ["text-gray-400" "truncate" "block" "w-full" "no-underline"]}
       (if (and show-board? (:board-title link))
-        (str (:board-title link) " • " (:url link))
+        [:span
+         [:span {:class ["hover:underline" "cursor-pointer"]
+                 :style "color: inherit;"
+                 :hx-get (ext/get-route router ::r/board-details {:path {:id (:board-id link)}})
+                 :hx-target "#body"
+                 :hx-push-url "true"
+                 :onclick "event.preventDefault(); event.stopPropagation(); return false;"}
+          (:board-title link)]
+         (str " • " (:url link))]
         (:url link))]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
     (c/modal
