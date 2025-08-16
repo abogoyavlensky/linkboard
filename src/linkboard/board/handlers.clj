@@ -74,8 +74,8 @@
 
     (seq errors)
     (-> (views/link-edit-form-fields request {:link form})
-        (response/status 400)
-        (ext/render-html))
+        (ext/render-html)
+        (response/status 400))
 
     :else
     (let [link-id (-> path :link-id)
@@ -83,10 +83,17 @@
           url (:url form)
           user (q/get-user-by-session-id db (:session-id session))
           metadata (fetch/fetch-page-metadata url)
-          updated-link (->> {:update :link
-                             :set {:title title
-                                   :url url
-                                   :icon (:icon metadata)}
+          _ (->> {:update :link
+                  :set {:title title
+                        :url url
+                        :icon (:icon metadata)}
+                  :where [:and
+                          [:= :id link-id]
+                          [:= :user-id (:id user)]]}
+                 (db/exec-one! db))
+          ; Get the complete updated link
+          updated-link (->> {:select [:*]
+                             :from [:link]
                              :where [:and
                                      [:= :id link-id]
                                      [:= :user-id (:id user)]]}
@@ -94,7 +101,8 @@
       (-> (views/link-list-item {:request request
                                  :router router
                                  :link updated-link})
-          (ext/render-html)))))
+          (ext/render-html)
+          (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn update-board-handler
   [{{:keys [db]} :context

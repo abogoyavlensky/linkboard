@@ -57,7 +57,6 @@
       (:title link)]
      [:p {:class ["text-gray-400" "truncate" "block" "w-full"]} (:url link)]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
-    ; TODO: reimplement edit link endpoint without board required
     (c/modal
       {:open-btn-text (icons/edit)
        :title "Edit link"
@@ -68,8 +67,9 @@
                               ::r/link-details
                               {:path {:link-id (:id link)}})
                     :hx-headers (ext/csrf-token-json)
-                    :hx-target "closest .link-item"
-                    :hx-swap "outerHTML"}})
+                    :hx-target (str "#link-" (:id link))
+                    :hx-swap "outerHTML"
+                    :hx-target-error "#link-edit-form-fields"}})
     (c/modal
       {:open-btn-text icons/bin
        :title "Delete link"

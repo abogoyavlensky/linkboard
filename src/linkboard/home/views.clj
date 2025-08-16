@@ -17,7 +17,6 @@
     icons/folder
     [:span {:class ["text-lg"]} (:title board)]]
    [:div {:class ["flex" "items-center" "gap-2"]}
-    [:div icons/menu]
     [:span {:class ["text-gray-500"]} (or (:link-count board) 0)]
     [:svg {:class ["w-5" "h-5" "text-gray-400" "rotate-180"]
            :viewBox "0 0 24 24"
