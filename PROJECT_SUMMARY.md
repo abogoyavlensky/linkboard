@@ -94,6 +94,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Alpine.js state management with 4-second auto-dismiss
 - Positioned above fixed footer (`bottom-20`) to prevent overlap
 - Smooth slide-up animations with manual close option
+- **Comprehensive notifications**: Creation, editing, and deletion actions all trigger appropriate toasts
 
 #### Modal System (`src/linkboard/ui/components.clj`)
 - **Simplified modal implementation** prevents background flickering during transitions
@@ -285,11 +286,15 @@ closeModal()                                     // Close Alpine.js modals via c
 - **Empty State Removal**: `{:hx-swap-oob "delete:#empty-boards"}` removes "No boards yet" message
 - **Form Clearing**: Target form fields with `innerHTML` swap to reset forms after submission
 - **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
+- **Dynamic Content Updates**: Use unique element IDs (`#link-{id}`) for targeted DOM updates
 
 ### Error Handling
 - Schema validation with Malli
 - Default error pages for 404/405/406
 - Integrant component lifecycle management
+- **HTMX Response Targets**: Use `hx-target-error` for form validation errors with proper HTTP status codes
+- **Status Code Routing**: 200 responses target main elements, 400/4xx responses target form fields
+- **Form Validation Flow**: Invalid submissions (400) update form fields, valid ones (200) update content
 
 ## Deployment
 
@@ -354,6 +359,9 @@ bb clj-repl              # Start REPL with dev profile
 - **HTMX Modal Closing**: Use `HX-Trigger-After-Swap: modal-close` with Alpine.js `x-on:modal-close.window` listeners
 - **Empty State Management**: Remove empty state elements using `hx-swap-oob="delete:#element-id"` when adding first items
 - **Form State Management**: Clear forms using `innerHTML` swap after successful submissions
+- **Dynamic Content Handling**: Use `htmx.onLoad()` for Alpine.js reinitialization on dynamically added content
+- **Icon Design**: Bookmark icons for link-related empty states, folder icons for board-related states
+- **Navigation UX**: Enhanced back buttons with icon + text, proper padding for touch targets
 
 ### Testing Strategy
 - Unit tests with eftest

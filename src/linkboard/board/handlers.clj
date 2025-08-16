@@ -102,6 +102,7 @@
                                  :router router
                                  :link updated-link})
           (ext/render-html)
+          (response/header "HX-Trigger" "showLinkEditToast")
           (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn update-board-handler
@@ -126,7 +127,8 @@
       ; Render updated board content
       (-> (response/response [:div])
           (response/header "HX-Redirect"
-                           (ext/get-route router ::r/board-details {:path {:id board-id}}))))))
+                           (ext/get-route router ::r/board-details {:path {:id board-id}}))
+          (response/header "HX-Trigger" "showBoardEditToast")))))
 
 (defn delete-board-handler
   [{{:keys [db]} :context
@@ -141,7 +143,8 @@
          (db/exec-one! db))
     ; Redirect to home page
     (-> (response/response nil)
-        (response/header "HX-Redirect" "/"))))
+        (response/header "HX-Redirect" "/")
+        (response/header "HX-Trigger" "showBoardDeletionToast"))))
 
 (defn delete-link-handler
   [{{:keys [db]} :context

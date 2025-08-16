@@ -247,7 +247,10 @@
     :class ["bg-slate-50"]
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
+    :hx-on:show-board-edit-toast "showToast('Board updated successfully!')"
+    :hx-on:show-board-deletion-toast "showToast('Board deleted successfully!')"
     :hx-on:show-link-creation-toast "showToast('Link added successfully!')"
+    :hx-on:show-link-edit-toast "showToast('Link updated successfully!')"
     :hx-on:show-link-deletion-toast "showToast('Link deleted successfully!')"}
    [:div
     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
