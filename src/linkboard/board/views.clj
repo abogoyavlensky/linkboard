@@ -142,7 +142,7 @@
 
 (defn board-view
   [{router :reitit.core/router
-    :as request} {:keys [board links]}]
+    :as request} {:keys [board links link-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -154,6 +154,8 @@
       icons/chevron-left]
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
+     [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}
+      (str link-count " " (if (= link-count 1) "link" "links"))]
      (c/modal
        {:open-btn-text [:div.ml-2.text-gray-500.hover:text-gray-700.cursor-pointer
                         (icons/edit)]

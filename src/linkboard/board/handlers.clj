@@ -30,9 +30,17 @@
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
+        link-count (->> {:select [[[:count :id] :link-count]]
+                         :from [:link]
+                         :where [:and
+                                 [:= :user-id (:id user)]
+                                 [:= :board-id (:id path)]]}
+                        (db/exec-one! db)
+                        :link-count)
         request* (assoc request :board-id (:id board))
         page-view (->> (views/board-view request* {:board board
-                                                   :links links})
+                                                   :links links
+                                                   :link-count link-count})
                        (c/body request*))]
 
     (if (c/hx-request? request)
