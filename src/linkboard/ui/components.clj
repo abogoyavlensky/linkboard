@@ -295,7 +295,7 @@
 
    ; Fixed footer with Add Link button
    [:footer
-    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "py-3"]}
+    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "pr-4" "py-3"]}
     [:div {:class ["flex" "justify-end"]}
      (modal
        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
