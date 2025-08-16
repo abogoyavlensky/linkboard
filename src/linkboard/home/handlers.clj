@@ -1,5 +1,7 @@
 (ns linkboard.home.handlers
-  (:require [linkboard.core.db :as db]
+  (:require [linkboard.board.fetch :as fetch]
+            [linkboard.board.views :as board-views]
+            [linkboard.core.db :as db]
             [linkboard.home.views :as views]
             [linkboard.queries :as queries]
             [linkboard.routes :as-alias r]
@@ -13,10 +15,9 @@
     :keys [session]
     :as request}]
   (let [user (queries/get-user-by-session-id db (:session-id session))
-        all-links-count (->> {:select [[[:count :l.id] :links-count]]
-                              :from [[:board :b]]
-                              :join [[:link :l] [:= :b.id :l.board-id]]
-                              :where [:= :b.user-id (:id user)]}
+        all-links-count (->> {:select [[[:count :id] :links-count]]
+                              :from [:link]
+                              :where [:= :user-id (:id user)]}
                              (db/exec-one! db)
                              :links-count)
         ; TODO: add pagination
@@ -27,12 +28,13 @@
                              :where [:= :b.user-id (:id user)]
                              :group-by [:b.id :b.title]
                              :order-by [[:b.created_at :desc]]})
-        page-view (views/boards-view request {:boards boards
-                                              :all-links-count all-links-count})]
+        page-view (->> (views/boards-view request {:boards boards
+                                                   :all-links-count all-links-count})
+                       (c/body request))]
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
-           (c/base request)
+           (c/base)
            (ext/render-html)))))
 
 (defn create-board-handler
@@ -43,17 +45,28 @@
     :keys [session errors]
     :as request}]
   (if (seq errors)
-    (->> (views/board-form-fields request)
-         (ext/render-html))
-    (let [user (queries/ensure-user-exists! db (:session-id session))]
-      ; Create a new board
-      (->> {:insert-into :board
-            :values [{:title (:title form)
-                      :user-id (:id user)}]}
-           (db/exec-one! db))
-      (-> (ext/render-html [:div])
-          (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
-          (response/header "HX-Trigger" "showBoardCreationToast")))))
+    (-> (views/board-form-fields request)
+        (ext/render-html))
+    (let [user (queries/ensure-user-exists! db (:session-id session))
+          ; Create a new board
+          board (->> {:insert-into :board
+                      :values [{:title (:title form)
+                                :user-id (:id user)}]
+                      :returning [:*]}
+                     (db/exec-one! db))]
+      (-> (ext/render-html (list ; Return fresh form
+                             (views/board-form-fields {})
+                                 ; Add item to the top of the board list
+                             [:div
+                              {:hx-swap-oob "afterbegin:#board-list"}
+                              (views/list-item {:router router
+                                                :board board})]
+                             ; Remove empty state
+                             [:div
+                              {:hx-swap-oob "delete:#empty-boards"}]))
+
+          (response/header "HX-Trigger" "showBoardCreationToast")
+          (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -106,6 +119,48 @@
           (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
           (c/login-form-fields)
           (ext/render-html)))))
+
+(defn create-link-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [form]} :parameters
+    :keys [errors session]
+    router :reitit.core/router
+    :as request}]
+  (cond
+    (seq errors)
+    ; Return form validation errors
+    (-> (c/link-form-fields (assoc request :board-id (:board form)))
+        (ext/render-html))
+
+    :else
+    (let [user (queries/ensure-user-exists! db (:session-id session))
+          board-id (:board form)
+          metadata (fetch/fetch-page-metadata (:url form))]
+      ; Validate that if board_id is provided, the user owns that board
+      (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
+                                                           :session-id (:session-id session)})))
+        (response/status 403)
+        (let [link (->> {:insert-into :link
+                         :values [{:url (:url form)
+                                   :title (:title metadata)
+                                   :icon (:icon metadata)
+                                   :board-id board-id
+                                   :user-id (:id user)}]
+                         :returning [:*]}
+                        (db/exec-one! db))]
+          (-> (ext/render-html (list (c/link-form-fields {})
+                                     [:div
+                                      ; Add item to the top of the link list
+                                      {:hx-swap-oob "afterbegin:#link-list"}
+                                      (board-views/link-list-item {:request request
+                                                                   :router router
+                                                                   :link link})]
+                                     ; Remove empty state
+                                     [:div
+                                      {:hx-swap-oob "delete:#empty-links"}]))
+              (response/header "HX-Trigger" "showLinkCreationToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}

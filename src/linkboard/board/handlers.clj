@@ -30,44 +30,36 @@
                             [:= :b.id (:id path)]]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
-        page-view (views/board-view request {:board board
-                                             :links links})]
+        request* (assoc request :board-id (:id board))
+        page-view (->> (views/board-view request* {:board board
+                                                   :links links})
+                       (c/body request*))]
 
     (if (c/hx-request? request)
       (ext/render-html page-view)
       (->> page-view
-           (c/base request)
+           (c/base)
            (ext/render-html)))))
 
-(defn add-link-handler
-  {:malli/schema [:=> [:cat :map] :map]}
+(defn all-links-handler
   [{{:keys [db]} :context
-    {:keys [form]} :parameters
-    :keys [errors parameters session]
-    router :reitit.core/router
+    :keys [session]
     :as request}]
-  (cond
-    (not (q/user-owns-board? db {:board-id (get-in parameters [:path :id])
-                                 :session-id (:session-id session)}))
-    (response/status 403)
-
-    (seq errors)
-    (-> (views/link-form-fields request)
-        (ext/render-html))
-
-    :else
-    (let [board-id (get-in parameters [:path :id])
-          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
-          url (:url form)
-          metadata (fetch/fetch-page-metadata url)]
-      (->> {:insert-into :link
-            :values [{:url url
-                      :title (:title metadata)
-                      :icon (:icon metadata)
-                      :board-id board-id}]}
-           (db/exec-one! db))
-      (-> (response/response [:div])
-          (response/header "HX-Redirect" board-path)))))
+  (let [user (q/get-user-by-session-id db (:session-id session))
+        ; TODO: add pagination
+        links (->> {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
+                    :from [[:link :l]]
+                    :left-join [[:board :b] [:= :l.board-id :b.id]]
+                    :where [:= :l.user-id (:id user)]
+                    :order-by [[:l.created-at :desc]]}
+                   (db/exec! db))
+        page-view (->> (views/all-links-view request {:links links})
+                       (c/body request))]
+    (if (c/hx-request? request)
+      (ext/render-html page-view)
+      (->> page-view
+           (c/base)
+           (ext/render-html)))))
 
 (defn update-link-handler
   [{{:keys [db]} :context
@@ -76,33 +68,43 @@
     router :reitit.core/router
     :as request}]
   (cond
-    (not (q/user-owns-board? db {:board-id (-> path :id)
-                                 :session-id (:session-id session)}))
-    (-> (response/response "Board not found or access denied")
+    (not (q/user-owns-link? db {:link-id (-> path :link-id)
+                                :session-id (:session-id session)}))
+    (-> (response/response "Link not found or access denied")
         (response/status 403))
 
     (seq errors)
     (-> (views/link-edit-form-fields request {:link form})
-        (ext/render-html))
+        (ext/render-html)
+        (response/status 400))
 
     :else
-    (let [board-id (-> path :id)
-          board-path (ext/get-route router ::r/board-details {:path {:id board-id}})
-          link-id (-> path :link-id)
+    (let [link-id (-> path :link-id)
           title (:title form)
           url (:url form)
-          metadata (fetch/fetch-page-metadata url)]
-      ; Update link in the database
-      (->> {:update :link
-            :set {:title title
-                  :url url
-                  :icon (:icon metadata)}
-            :where [:and
-                    [:= :id link-id]
-                    [:= :board-id board-id]]}
-           (db/exec-one! db))
-      (-> (response/response [:div])
-          (response/header "HX-Redirect" board-path)))))
+          user (q/get-user-by-session-id db (:session-id session))
+          metadata (fetch/fetch-page-metadata url)
+          _ (->> {:update :link
+                  :set {:title title
+                        :url url
+                        :icon (:icon metadata)}
+                  :where [:and
+                          [:= :id link-id]
+                          [:= :user-id (:id user)]]}
+                 (db/exec-one! db))
+          ; Get the complete updated link
+          updated-link (->> {:select [:*]
+                             :from [:link]
+                             :where [:and
+                                     [:= :id link-id]
+                                     [:= :user-id (:id user)]]}
+                            (db/exec-one! db))]
+      (-> (views/link-list-item {:request request
+                                 :router router
+                                 :link updated-link})
+          (ext/render-html)
+          (response/header "HX-Trigger" "showLinkEditToast")
+          (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn update-board-handler
   [{{:keys [db]} :context
@@ -126,7 +128,8 @@
       ; Render updated board content
       (-> (response/response [:div])
           (response/header "HX-Redirect"
-                           (ext/get-route router ::r/board-details {:path {:id board-id}}))))))
+                           (ext/get-route router ::r/board-details {:path {:id board-id}}))
+          (response/header "HX-Trigger" "showBoardEditToast")))))
 
 (defn delete-board-handler
   [{{:keys [db]} :context
@@ -141,19 +144,22 @@
          (db/exec-one! db))
     ; Redirect to home page
     (-> (response/response nil)
-        (response/header "HX-Redirect" "/"))))
+        (response/header "HX-Redirect" "/")
+        (response/header "HX-Trigger" "showBoardDeletionToast"))))
 
 (defn delete-link-handler
-  [{:keys [path-params context session]}]
-  (let [board-id (-> path-params :id parse-long)]
-    (cond
-      (not (q/user-owns-board? (:db context) {:board-id board-id
-                                              :session-id (:session-id session)}))
-      (-> (response/response "Board not found or access denied")
-          (response/status 403))
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
+    :keys [session]}]
+  (cond
+    (not (q/user-owns-link? db {:link-id (:link-id path)
+                                :session-id (:session-id session)}))
+    (-> (response/response "Link not found or access denied")
+        (response/status 403))
 
-      :else
-      (do
-        (q/delete-link! (:db context) {:link-id (-> path-params :link-id parse-long)
-                                       :board-id board-id})
-        (response/response nil)))))
+    :else
+    (let [user (q/get-user-by-session-id db (:session-id session))]
+      (q/delete-link! db {:link-id (:link-id path)
+                          :user-id (:id user)})
+      (-> (response/response nil)
+          (response/header "HX-Trigger-After-Swap" "modal-close, show-link-deletion-toast")))))

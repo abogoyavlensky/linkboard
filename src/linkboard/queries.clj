@@ -68,11 +68,23 @@
            (get-board-by-id-and-user-id db board-id)
            (boolean)))
 
+(defn user-owns-link?
+  "Check if the user owns the link."
+  [db {:keys [link-id session-id]}]
+  (->> {:select [1]
+        :from [:link]
+        :join [:user [:= :link.user-id :user.id]]
+        :where [:and
+                [:= :link.id link-id]
+                [:= :user.session-id session-id]]}
+       (db/exec-one! db)
+       (boolean)))
+
 (defn delete-link!
   "Delete a link from the database."
-  [db {:keys [link-id board-id]}]
+  [db {:keys [link-id user-id]}]
   (->> {:delete-from :link
         :where [:and
                 [:= :id link-id]
-                [:= :board-id board-id]]}
+                [:= :user-id user-id]]}
        (db/exec-one! db)))

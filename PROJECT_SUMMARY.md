@@ -44,12 +44,12 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `POST /create-account` - Account creation endpoint (rate limited: 3/min per IP)
+  - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
   - `GET /boards/:id` - Board details with links
-  - `POST /boards/:id/links` - Add link to board
+  - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
-  - `POST /login` - User login endpoint (rate limited: 10/min per IP)
+  - `POST /login` - User login endpoint (rate limited: 20/min per IP)
 - `wrap-auth` middleware for automatic session-id generation and persistence
 - **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
 - Malli schema validation for request parameters
@@ -89,10 +89,37 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### User Notifications (`src/linkboard/ui/components.clj` + `resources/public/js/utils.js`)
 - **Toast notification system** with bottom-center placement and white design
 - Success notifications with green borders and check mark icons
-- Automatic triggers via HTMX headers (`HX-Trigger`) for registration and board creation
+- Session-based toast messages: server can add messages to session that display on next page load
+- Client-side toast triggering via `showToast(message, type)` JavaScript function
 - Alpine.js state management with 4-second auto-dismiss
-- `showToast(message, type)` utility function for manual toast triggering
+- Positioned above fixed footer (`bottom-20`) to prevent overlap
 - Smooth slide-up animations with manual close option
+- **Comprehensive notifications**: Creation, editing, and deletion actions all trigger appropriate toasts
+
+#### Modal System (`src/linkboard/ui/components.clj`)
+- **Simplified modal implementation** prevents background flickering during transitions
+- Single container approach with `x-cloak` for flash-of-content prevention
+- Semi-transparent backdrop with blur effect (`backdrop-blur-xs`)
+- CSS rule `[x-cloak] { display: none !important; }` for proper Alpine.js integration
+- Click-outside-to-close with `click.stop` on form content
+- Escape key handling for accessibility
+- **Modal closing via HTMX events**: Uses `HX-Trigger-After-Swap: modal-close` to close modals after successful form submissions
+- **Alpine.js event handling**: Listens for `modal-close` window events to set `modalOpen = false`
+
+#### Account Number UX (`src/linkboard/ui/components.clj`)
+- **Enhanced copy functionality** prevents checkmark icon from being copied to clipboard
+- External circled checkmark indicator positioned right of account number container
+- Reserved space layout prevents text container from resizing when checkmark appears
+- Satisfying scale animation (`scale-0` to `scale-100`) for visual feedback
+- Improved warning message: "Save this account number now! It's shown only once and cannot be recovered if lost."
+
+#### Fixed Footer (`src/linkboard/ui/components.clj`)
+- **Persistent Add Link button** positioned at bottom-right of screen
+- Glass-morphism design with transparent background (`backdrop-blur-sm`) and semi-transparent border
+- Width matches main content area (`max-w-4xl`) for consistent alignment
+- Positioned above viewport bottom with proper z-index management
+- Content area has bottom padding (`pb-20`) to prevent overlap
+- Ready for integration with add link functionality via modal or navigation
 
 ## Dependencies
 
@@ -158,7 +185,7 @@ src/linkboard/
 │   ├── views.clj        # Board and link forms with error handling
 │   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
-│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling
+│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer
 │   └── icons.clj
 └── utils/
 
@@ -202,7 +229,8 @@ test/                  # Test files
 (ensure-user-exists! db session-id)              ; Get or create user helper
 (get-board-by-id-and-user-id db board-id user-id) ; Get board if owned by user
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
-(delete-link! db {:link-id link-id :board-id board-id}) ; Delete link from board
+(user-owns-link? db {:link-id link-id :session-id session-id}) ; Check link ownership via JOIN
+(delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
 ```
 
 ### Rate Limiting (`src/linkboard/limits.clj`)
@@ -218,6 +246,9 @@ test/                  # Test files
 showToast(message, type='success')               // Trigger toast notification
 // Types: 'success', 'error', 'info', 'warning'
 // Example: showToast('Board created successfully!')
+
+closeModal()                                     // Close Alpine.js modals via custom event
+// Dispatches 'modal-close' window event for Alpine.js listeners
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
@@ -249,10 +280,21 @@ showToast(message, type='success')               // Trigger toast notification
 5. Views render Hiccup-style HTML with user-specific data
 6. HTMX handles partial page updates and form submissions
 
+### HTMX Out-of-Band (OOB) Patterns
+- **Board Creation**: `{:hx-swap-oob "afterbegin:#board-list"}` adds new boards to list top
+- **Link Creation**: `{:hx-swap-oob "afterbegin:#link-list"}` adds new links to All Links page
+- **Empty State Removal**: `{:hx-swap-oob "delete:#empty-boards"}` removes "No boards yet" message
+- **Form Clearing**: Target form fields with `innerHTML` swap to reset forms after submission
+- **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
+- **Dynamic Content Updates**: Use unique element IDs (`#link-{id}`) for targeted DOM updates
+
 ### Error Handling
 - Schema validation with Malli
 - Default error pages for 404/405/406
 - Integrant component lifecycle management
+- **HTMX Response Targets**: Use `hx-target-error` for form validation errors with proper HTTP status codes
+- **Status Code Routing**: 200 responses target main elements, 400/4xx responses target form fields
+- **Form Validation Flow**: Invalid submissions (400) update form fields, valid ones (200) update content
 
 ## Deployment
 
@@ -293,6 +335,7 @@ bb clj-repl              # Start REPL with dev profile
 - Link preview generation
 - Bulk operations
 - **API rate limiting** (✅ implemented with configurable per-endpoint limits)
+- **Fixed footer with Add Link button** (✅ implemented with transparent blur background)
 - Enhanced toast notifications for other user actions (create/update/delete)
 
 ## Development Guidelines
@@ -306,6 +349,19 @@ bb clj-repl              # Start REPL with dev profile
 - Implement comprehensive error handling with visual feedback in forms
 - Validate user authorization before all board/link operations
 - Use `lambdaisland/uri` for URL validation instead of deprecated `java.net.URL`
+
+### UI/UX Patterns
+- **Modal Implementation**: Use single container with `x-cloak` and backdrop blur to prevent flickering
+- **Toast Notifications**: Support both session-based (server-side) and client-side triggering
+- **Copy Functionality**: Ensure clipboard operations only copy intended content, exclude UI indicators
+- **Fixed Elements**: Position toast notifications and other overlays to avoid conflicts with fixed footer
+- **Layout Stability**: Reserve space for dynamic elements to prevent layout shifts during animations
+- **HTMX Modal Closing**: Use `HX-Trigger-After-Swap: modal-close` with Alpine.js `x-on:modal-close.window` listeners
+- **Empty State Management**: Remove empty state elements using `hx-swap-oob="delete:#element-id"` when adding first items
+- **Form State Management**: Clear forms using `innerHTML` swap after successful submissions
+- **Dynamic Content Handling**: Use `htmx.onLoad()` for Alpine.js reinitialization on dynamically added content
+- **Icon Design**: Bookmark icons for link-related empty states, folder icons for board-related states
+- **Navigation UX**: Enhanced back buttons with icon + text, proper padding for touch targets
 
 ### Testing Strategy
 - Unit tests with eftest

@@ -21,61 +21,64 @@
 
 (defn modal
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
-  [:div.relative.w-auto.h-auto
+  [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
-    :x-on:keydown.escape.window "modalOpen = false"}
+    :x-on:keydown.escape.window "modalOpen = false"
+    :x-on:modal-close.window "modalOpen = false"
+    :hx-on:closeModal "closeModal()"}
    [:button
     {:x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
-   [:div
-    {:x-cloak ""
-     :x-show "modalOpen"
-     :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
-     :x-on:click "modalOpen=false"}
-    [:form
-     (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
-                     "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
-             :x-trap.inert.noscroll "modalOpen"
-             :x-on:click.stop ""}
-            form-attrs)
-     [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
-      [:h3 {:class ["text-lg" "font-semibold"]} title]
+   [:template
+    {:x-teleport "body"}
+    [:div
+     {:x-cloak ""
+      :x-show "modalOpen"
+      :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
+      :x-on:click "modalOpen=false"}
+     [:form
+      (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
+                      "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
+              :x-trap.inert.noscroll "modalOpen"
+              :x-on:click.stop ""}
+             form-attrs)
+      [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
+       [:h3 {:class ["text-lg" "font-semibold"]} title]
+       [:div
+        {:class ["absolute" "top-0" "right-0" "flex" "items-center" "justify-center"
+                 "w-8" "h-8" "mt-5" "mr-5" "text-gray-600" "rounded-full" "hover:text-gray-800" "hover:bg-gray-50"]
+         :x-on:click "modalOpen=false"}
+        [:svg {:class ["w-5" "h-5"]
+               :xmlns "http://www.w3.org/2000/svg"
+               :fill "none"
+               :viewBox "0 0 24 24"
+               :stroke-width "1.5"
+               :stroke "currentColor"}
+         [:path {:stroke-linecap "round"
+                 :stroke-linejoin "round"
+                 :d "M6 18L18 6M6 6l12 12"}]]]]
       [:div
-       {:class ["absolute" "top-0" "right-0" "flex" "items-center" "justify-center"
-                "w-8" "h-8" "mt-5" "mr-5" "text-gray-600" "rounded-full" "hover:text-gray-800" "hover:bg-gray-50"]
-        :x-on:click "modalOpen=false"}
-       [:svg {:class ["w-5" "h-5"]
-              :xmlns "http://www.w3.org/2000/svg"
-              :fill "none"
-              :viewBox "0 0 24 24"
-              :stroke-width "1.5"
-              :stroke "currentColor"}
-        [:path {:stroke-linecap "round"
-                :stroke-linejoin "round"
-                :d "M6 18L18 6M6 6l12 12"}]]]]
-     [:div
-      {:class ["relative" "w-auto" "pb-8"]}
+       {:class ["relative" "w-auto" "pb-8"]}
+       [:div
+        {:class ["w-full" "max-w-xs" "mx-auto"]}
+        (ext/csrf-token-html)
+        form-fields]]
       [:div
-       {:class ["w-full" "max-w-xs" "mx-auto"]}
-       (ext/csrf-token-html)
-       form-fields]]
-     [:div
-      {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
-      [:button
-       {:class ["inline-flex" "items-center" "justify-center" "h-10" "px-4" "py-2"
-                "text-sm" "font-medium" "transition-colors" "border" "rounded-md" "cursor-pointer"
-                "focus:outline-hidden" "focus:ring-2" "focus:ring-neutral-100" "focus:ring-offset-2"]
-        :x-on:click "modalOpen=false"
-        :type "button"} "Cancel"]
-      [:button
-       {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
-                "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
-        :autofocus true
-        ;:x-on:click "modalOpen=false"
-        :type "submit"}
-       (or submit-btn-title "Save")
-       [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]])
+       {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
+       [:button
+        {:class ["inline-flex" "items-center" "justify-center" "h-10" "px-4" "py-2"
+                 "text-sm" "font-medium" "transition-colors" "border" "rounded-md" "cursor-pointer"
+                 "focus:outline-hidden" "focus:ring-2" "focus:ring-neutral-100" "focus:ring-offset-2"]
+         :x-on:click "modalOpen=false"
+         :type "button"} "Cancel"]
+       [:button
+        {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
+                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
+         :autofocus true
+         :type "submit"}
+        (or submit-btn-title "Save")
+        [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]]])
 
 (defn login-form-fields
   [request]
@@ -115,7 +118,7 @@
   "Toast notification container component"
   []
   [:div#toast-container
-   {:class ["fixed" "bottom-4" "left-1/2" "transform" "-translate-x-1/2" "z-50" "space-y-2"]
+   {:class ["fixed" "bottom-20" "left-1/2" "transform" "-translate-x-1/2" "z-50" "space-y-2"]
     :x-data "{ toasts: [] }"
     :x-on:show-toast.window "
       const toast = { 
@@ -171,7 +174,7 @@
                      "Register"]
      :submit-btn-title "Create Account"
      :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/create-account)
-                  :hx-target "#content"}
+                  :hx-target "#body"}
      :form-fields [:div
                    [:div {:class ["mb-4"]}
                     [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Your Account number"]
@@ -195,12 +198,130 @@
                     [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
                      "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
 
-(defn base
-  "Base component for html page."
+(defn link-form-fields
+  [{:keys [board-id]
+    :as request}]
+  (let [errors (get-in request [:errors :humanized])]
+    [:div
+     {:id "link-form-fields"}
+     [:input
+      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                       "ring-offset-background" "placeholder:text-neutral-500"
+                       "focus:border-neutral-300" "focus:outline-hidden"
+                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                      (when (seq (:url errors))
+                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+       :type "text"
+       :name "url"
+       :value (get-in request [:parameters :form :url] nil)
+       :minlength 1
+       :autofocus true
+       :placeholder "Enter link"}]
+     (for [error (:url errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     (when board-id
+       [:input
+        {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                         "bg-white" "border" "rounded-md" "border-neutral-300"
+                         "ring-offset-background" "placeholder:text-neutral-500"
+                         "focus:border-neutral-300" "focus:outline-hidden"
+                         "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                         "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                        (when (seq (:board errors))
+                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+         :type "hidden"
+         :name "board"
+         :value board-id}])]))
+
+(defn body
   [{user :identity
     router :reitit.core/router
     :as request}
    content]
+  [:body
+   {:id "body"
+    :hx-ext "response-targets"
+    :hx-history-elt true
+    :class ["bg-slate-50"]
+    :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
+    :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
+    :hx-on:show-board-edit-toast "showToast('Board updated successfully!')"
+    :hx-on:show-board-deletion-toast "showToast('Board deleted successfully!')"
+    :hx-on:show-link-creation-toast "showToast('Link added successfully!')"
+    :hx-on:show-link-edit-toast "showToast('Link updated successfully!')"
+    :hx-on:show-link-deletion-toast "showToast('Link deleted successfully!')"}
+   [:div
+    {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
+    [:div
+     {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
+     [:div
+      [:a
+       {:hx-get (ext/get-route router ::r/home-page)
+        :hx-target "#body"
+        :hx-push-url "true"}
+       [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
+      [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
+       [:p "Personal bookmark manager"]
+       [:a
+        {:href PROJECT-GITHUB-LINK
+         :target "_blank"}
+        icons/github]]]
+     [:div {:class ["flex" "gap-4"]}
+      (if user
+        [:div
+         {:class ["flex" "items-center"]}
+         [:button
+          {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+           :hx-post (ext/get-route router ::r/logout)
+           :hx-headers (ext/csrf-token-json)}
+          "Logout"]
+         [:button
+          {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+          "Account"]]
+        [:div
+         {:x-data "{ modalOpen: false, accountId: '' }"
+          :class ["flex" "items-center"]}
+         (login-modal request)
+         (create-account-modal request)])]]
+
+    [:div
+     {:id "content"
+      :hx-history-elt true
+      :class ["pb-20"]}
+     content]
+    (toast-container)]
+
+   ; Fixed footer with Add Link button
+   [:footer
+    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl" "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "py-3"]}
+    [:div {:class ["flex" "justify-end"]}
+     (modal
+       {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
+                                          icons/plus-circle "Add link"]})
+        :title "Add link"
+        :form-attrs {:hx-post (ext/get-route router ::r/links)
+                     :hx-target "#link-form-fields"
+                     :hx-swap "innerHTML"}
+        :form-fields (link-form-fields request)})]]
+
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/htmx.min.js")}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/htmx-ext-response-targets.js")}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/alpinejs.focus.min.js")
+             :defer true}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/alpinejs.min.js")
+             :defer true}]
+   [:script {:type "text/javascript"
+             :src (manifest/asset "js/utils.js")}]])
+
+(defn base
+  "Base component for html page."
+  [content]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -220,65 +341,11 @@
             :rel "stylesheet"}]
     [:style "[x-cloak] { display: none !important; }"]
     [:title "Linkboard"]]
-   [:body
-    {:class ["bg-slate-50"]
-     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
-     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"}
-    [:div
-     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
-     [:div
-      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
-      [:div
-       [:a
-        {:hx-get "/"
-         :hx-target "#content"
-         :hx-push-url "true"}
-        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
-       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
-        [:p "Personal bookmark manager"]
-        [:a
-         {:href PROJECT-GITHUB-LINK
-          :target "_blank"}
-         icons/github]]]
-      [:div {:class ["flex" "gap-4"]}
-       (if user
-         [:div
-          {:class ["flex" "items-center"]}
-          [:button
-           {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
-            :hx-post (ext/get-route router ::r/logout)
-            :hx-headers (ext/csrf-token-json)}
-           "Logout"]
-          [:button
-           {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
-           "Account"]]
-         [:div
-          {:x-data "{ modalOpen: false, accountId: '' }"
-           :class ["flex" "items-center"]}
-          (login-modal request)
-          (create-account-modal request)])]]
-
-     [:div
-      {:id "content"
-       :hx-history-elt true
-       :class ["pb-12"]}
-      content]
-     (toast-container)]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/htmx.min.js")}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.focus.min.js")
-              :defer true}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/alpinejs.min.js")
-              :defer true}]
-    [:script {:type "text/javascript"
-              :src (manifest/asset "js/utils.js")}]]])
+   content])
 
 (defn error-page
-  [request text]
+  [text]
   (base
-    request
     [:div {:class ["mt-56"]}
      [:div {:class ["mx-auto" "text-center"]}
       [:h1 {:class ["text-5xl"]} text]]]))

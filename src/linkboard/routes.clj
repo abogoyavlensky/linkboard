@@ -31,19 +31,34 @@
            :get {:handler (fn [_] (response/response "OK"))}}]
    ["/create-account" {:name ::create-account
                        ; Rate limit login attempts to 3 per minute per IP
-                       :middleware [[limits/wrap-rate-limit 3 60000]]
+                       :middleware [[limits/wrap-rate-limit 10 60000]]
                        :post {:handler home-handlers/create-account-handler
                               :parameters {:form {:account-number [:string {:min 1}]}}
                               :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
               ; Rate limit login attempts to 10 per minute per IP
-              :middleware [[limits/wrap-rate-limit 10 60000]]
+              :middleware [[limits/wrap-rate-limit 20 60000]]
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
                      :responses {200 {:body string?}}}}]
    ["/logout" {:name ::logout
                :post {:handler home-handlers/logout-handler
                       :responses {200 {:body string?}}}}]
+   ["/links"
+    ["" {:name ::links
+         :get {:handler board-handlers/all-links-handler
+               :responses {200 {:body string?}}}
+         :post {:handler home-handlers/create-link-handler
+                :parameters {:form [:map
+                                    [:url spec/Link]
+                                    [:board {:optional true} pos-int?]]}}}]
+    ["/:link-id" {:name ::link-details
+                  :put {:handler board-handlers/update-link-handler
+                        :parameters {:path {:link-id pos-int?}
+                                     :form {:title [:string {:min 1}]
+                                            :url spec/Link}}}
+                  :delete {:handler board-handlers/delete-link-handler
+                           :parameters {:path {:link-id pos-int?}}}}]]
 
    ["/boards"
     ["" {:name ::board-list
@@ -58,17 +73,4 @@
           :put {:handler board-handlers/update-board-handler
                 :parameters {:form {:title [:string {:min 1}]}}}
           :delete {:handler board-handlers/delete-board-handler
-                   :responses {200 {:body nil?}}}}]
-     ["/links"
-      ["" {:name ::board-details-links
-           :post {:handler board-handlers/add-link-handler
-                  :parameters {:form {:url spec/Link}}}}]
-      ["/:link-id" {:name ::link-details
-                    :put {:handler board-handlers/update-link-handler
-                          :parameters {:path {:id pos-int?
-                                              :link-id pos-int?}
-                                       :form {:title [:string {:min 1}]
-                                              :url spec/Link}}}
-                    :delete {:handler board-handlers/delete-link-handler
-                             :parameters {:path {:id pos-int?
-                                                 :link-id pos-int?}}}}]]]]])
+                   :responses {200 {:body nil?}}}}]]]])
