@@ -6,6 +6,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 ## Key Features
 - Personal bookmark management with board organization
 - Automatic link metadata extraction (title, icons)
+- **Board names on All Links page** with clickable navigation and bullet separator (•)
+- **Link count badges** displayed in board and All Links page headers
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -44,9 +46,10 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
+  - `GET /all-links` - All Links page with board names and link counts
   - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
-  - `GET /boards/:id` - Board details with links
+  - `GET /boards/:id` - Board details with links and link counts
   - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
@@ -57,6 +60,9 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Handlers
 - **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, account management, and login/logout
 - **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards with comprehensive security validation
+  - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries
+  - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts
+  - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -287,6 +293,7 @@ closeModal()                                     // Close Alpine.js modals via c
 - **Form Clearing**: Target form fields with `innerHTML` swap to reset forms after submission
 - **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
 - **Dynamic Content Updates**: Use unique element IDs (`#link-{id}`) for targeted DOM updates
+- **Clickable Board Names**: Event handling with `event.preventDefault()` and `event.stopPropagation()` to prevent link conflicts
 
 ### Error Handling
 - Schema validation with Malli
@@ -362,6 +369,10 @@ bb clj-repl              # Start REPL with dev profile
 - **Dynamic Content Handling**: Use `htmx.onLoad()` for Alpine.js reinitialization on dynamically added content
 - **Icon Design**: Bookmark icons for link-related empty states, folder icons for board-related states
 - **Navigation UX**: Enhanced back buttons with icon + text, proper padding for touch targets
+- **Link Count Badges**: Rounded badges with gray background positioned on right side of headers
+- **Board Name Integration**: Clickable board names on All Links page with bullet separator (•) and proper event handling
+- **Extended Click Areas**: URL areas extend to edit buttons while maintaining visual clarity
+- **Flexbox Alignment**: Use TailwindCSS flexbox utilities for proper left-alignment and responsive layouts
 
 ### Testing Strategy
 - Unit tests with eftest
@@ -374,3 +385,5 @@ bb clj-repl              # Start REPL with dev profile
 - HikariCP connection pooling
 - Static asset caching in production
 - Minified CSS/JS builds
+- **Efficient SQL COUNT queries**: Use database-level counting instead of in-memory collection counting for link counts
+- **LEFT JOIN optimization**: Fetch board information with links in single queries for All Links page
