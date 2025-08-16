@@ -61,7 +61,13 @@
                     :where [:= :l.user-id (:id user)]
                     :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
-        page-view (->> (views/all-links-view request {:links links})
+        link-count (->> {:select [[[:count :id] :link-count]]
+                         :from [:link]
+                         :where [:= :user-id (:id user)]}
+                        (db/exec-one! db)
+                        :link-count)
+        page-view (->> (views/all-links-view request {:links links
+                                                      :link-count link-count})
                        (c/body request))]
     (if (c/hx-request? request)
       (ext/render-html page-view)

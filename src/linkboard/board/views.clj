@@ -193,7 +193,7 @@
 
 (defn all-links-view
   [{router :reitit.core/router
-    :as request} {:keys [links]}]
+    :as request} {:keys [links link-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -203,7 +203,10 @@
           :hx-target "#body"
           :hx-push-url "true"}
       icons/chevron-left]
-     [:h2 {:class ["text-2xl" "font-bold"]} "All Links"]]]
+     [:h2 {:class ["text-2xl" "font-bold"]} "All Links"]]
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}
+      (str link-count " " (if (= link-count 1) "link" "links"))]]]
    (list
      (c/search-bar)
      [:div
