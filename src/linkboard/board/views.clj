@@ -38,7 +38,7 @@
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
 (defn link-list-item
-  [{:keys [request router link]}]
+  [{:keys [request router link show-board?]}]
   [:div.link-item {:id (str "link-" (:id link))
                    :class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
@@ -55,7 +55,10 @@
     [:div {:class ["min-w-0" "flex-grow" "max-w-full"]}
      [:span {:class ["text-l" "break-words" "block" "w-full"]}
       (:title link)]
-     [:p {:class ["text-gray-400" "truncate" "block" "w-full"]} (:url link)]]]
+     [:p {:class ["text-gray-400" "truncate" "block" "w-full"]}
+      (if (and show-board? (:board-title link))
+        (str (:board-title link) " • " (:url link))
+        (:url link))]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
     (c/modal
       {:open-btn-text (icons/edit)
@@ -168,8 +171,7 @@
         (for [link links]
           (link-list-item {:router router
                            :request request
-                           :link link
-                           :board board}))
+                           :link link}))
         (empty-links))])])
 
 (defn all-links-view
@@ -194,5 +196,6 @@
         (for [link links]
           (link-list-item {:router router
                            :request request
-                           :link link}))
+                           :link link
+                           :show-board? true}))
         (empty-links))])])

@@ -47,10 +47,11 @@
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         ; TODO: add pagination
-        links (->> {:select [:*]
-                    :from [:link]
-                    :where [:= :user-id (:id user)]
-                    :order-by [[:created-at :desc]]}
+        links (->> {:select [:l.* [:b.title :board-title]]
+                    :from [[:link :l]]
+                    :left-join [[:board :b] [:= :l.board-id :b.id]]
+                    :where [:= :l.user-id (:id user)]
+                    :order-by [[:l.created-at :desc]]}
                    (db/exec! db))
         page-view (->> (views/all-links-view request {:links links})
                        (c/body request))]
