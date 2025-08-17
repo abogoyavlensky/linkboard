@@ -185,7 +185,7 @@
       {:id "link-list"
        :class ["flex-1"]}
       (if (seq links)
-        (c/paginated-links 
+        (c/paginated-links
           links
           has-more?
           route
@@ -200,7 +200,7 @@
   [{router :reitit.core/router
     :as request} {:keys [links has-more? route page]}]
   ; Only render new links + infinite scroll trigger for pagination requests
-  (c/paginated-links 
+  (c/paginated-links
     links
     has-more?
     route
@@ -232,7 +232,7 @@
       {:id "link-list"
        :class ["flex-1"]}
       (if (seq links)
-        (c/paginated-links 
+        (c/paginated-links
           links
           has-more?
           route
@@ -248,7 +248,7 @@
   [{router :reitit.core/router
     :as request} {:keys [links has-more? route page]}]
   ; Only render new links + infinite scroll trigger for pagination requests
-  (c/paginated-links 
+  (c/paginated-links
     links
     has-more?
     route

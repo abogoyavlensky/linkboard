@@ -393,7 +393,7 @@
     ;; Render all links
     (for [link links]
       (link-item-fn link))
-    
+
     ;; Add infinite scroll trigger if more pages exist
     (when has-more?
       (infinite-scroll-trigger route (inc current-page)))))
