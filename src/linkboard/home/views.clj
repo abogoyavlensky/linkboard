@@ -85,7 +85,6 @@
     :as request} {:keys [boards all-links-count has-more? route page]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
-   (c/search-bar)
    [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "cursor-pointer"]
         :hx-get (reitit-extras/get-route router ::r/links)
         :hx-target "#body"
