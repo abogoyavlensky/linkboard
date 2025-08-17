@@ -8,6 +8,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Automatic link metadata extraction (title, icons)
 - **Board names on All Links page** with clickable navigation and bullet separator (•)
 - **Link count badges** displayed in board and All Links page headers
+- **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page)
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -46,15 +47,16 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /` - Home page with board list
-  - `GET /all-links` - All Links page with board names and link counts
+  - `GET /links?page=X` - All Links page with board names, link counts, and infinite scroll pagination
   - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
-  - `GET /boards/:id` - Board details with links and link counts
+  - `GET /boards/:id?page=X` - Board details with links, link counts, and infinite scroll pagination
   - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
 - `wrap-auth` middleware for automatic session-id generation and persistence
 - **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
+- **Pagination support**: Optional `page` query parameters with automatic HTMX infinite scroll
 - Malli schema validation for request parameters
 
 #### Handlers
@@ -63,6 +65,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries
   - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts
   - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance
+  - **Infinite scroll pagination**: Both handlers support 3 response types (full page, HTMX page, pagination fragment) with automatic 25-item pages
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -188,10 +191,11 @@ src/linkboard/
 │   └── views.clj
 ├── board/              # Board management
 │   ├── handlers.clj     # Link CRUD with security validation
-│   ├── views.clj        # Board and link forms with error handling
+│   ├── views.clj        # Board and link forms with error handling  
+│   ├── pagination.clj   # Infinite scroll pagination utilities
 │   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
-│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer
+│   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer, infinite scroll
 │   └── icons.clj
 └── utils/
 
@@ -239,6 +243,15 @@ test/                  # Test files
 (delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
 ```
 
+### Pagination Utilities (`src/linkboard/board/pagination.clj`)
+```clojure
+(add-pagination query page)                      ; Adds LIMIT/OFFSET to HoneySQL query (25 per page)
+(has-more-pages? total-count page)               ; Determines if more pages exist
+(get-page-param request)                         ; Extracts page param from request (defaults to 1)
+(pagination-request? request)                    ; Detects HTMX pagination requests (page > 1)
+; Example: (->> query (add-pagination 2) (db/exec! db)) ; Gets page 2 with 25 items
+```
+
 ### Rate Limiting (`src/linkboard/limits.clj`)
 ```clojure
 (wrap-rate-limit handler max-requests window-ms) ; Rate limiting middleware
@@ -255,6 +268,13 @@ showToast(message, type='success')               // Trigger toast notification
 
 closeModal()                                     // Close Alpine.js modals via custom event
 // Dispatches 'modal-close' window event for Alpine.js listeners
+```
+
+### Infinite Scroll Components (`src/linkboard/ui/components.clj`)
+```clojure
+(infinite-scroll-trigger route next-page)        ; HTMX trigger with hx-trigger="revealed"
+(paginated-links links has-more? route page fn)  ; Renders links + optional infinite scroll trigger
+; Example: (paginated-links links true "/boards/1" 2 link-list-item-fn)
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
@@ -294,6 +314,14 @@ closeModal()                                     // Close Alpine.js modals via c
 - **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
 - **Dynamic Content Updates**: Use unique element IDs (`#link-{id}`) for targeted DOM updates
 - **Clickable Board Names**: Event handling with `event.preventDefault()` and `event.stopPropagation()` to prevent link conflicts
+- **Infinite Scroll**: Use `hx-trigger="revealed"` and `hx-swap="outerHTML"` for seamless pagination loading
+
+### HTMX Infinite Scroll Pattern
+- **Trigger Element**: `hx-trigger="revealed"` detects when element enters viewport
+- **Pagination Endpoint**: Same URL with `?page=X` parameter appends more content
+- **Swap Strategy**: `hx-swap="outerHTML"` replaces trigger with new links + new trigger
+- **Response Types**: Handlers detect pagination requests and return link fragments instead of full pages
+- **No URL State**: Infinite scroll doesn't change browser URL or history
 
 ### Error Handling
 - Schema validation with Malli
@@ -330,7 +358,7 @@ bb clj-repl              # Start REPL with dev profile
 - Complete user isolation across all operations
 
 ### Features
-- Pagination for large link collections
+- **Infinite scroll pagination** (✅ implemented with HTMX revealed triggers and 25-item pages)
 - Search functionality
 - Link categorization/tagging
 - Import/export capabilities
@@ -387,3 +415,4 @@ bb clj-repl              # Start REPL with dev profile
 - Minified CSS/JS builds
 - **Efficient SQL COUNT queries**: Use database-level counting instead of in-memory collection counting for link counts
 - **LEFT JOIN optimization**: Fetch board information with links in single queries for All Links page
+- **Pagination Performance**: LIMIT/OFFSET queries with existing link-count calculations for smooth infinite scroll
