@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
   (:require [linkboard.board.fetch :as fetch]
+            [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as board-views]
             [linkboard.core.db :as db]
             [linkboard.home.views :as views]
@@ -20,21 +21,51 @@
                               :where [:= :user-id (:id user)]}
                              (db/exec-one! db)
                              :links-count)
-        ; TODO: add pagination
-        boards (db/exec! db {:select [:b.*
+        page (pagination/get-page-param request)
+        boards-query {:select [:b.*
                                       [[:count :l.id] :link-count]]
                              :from [[:board :b]]
                              :left-join [[:link :l] [:= :b.id :l.board-id]]
                              :where [:= :b.user-id (:id user)]
                              :group-by [:b.id :b.title]
-                             :order-by [[:b.created_at :desc]]})
-        page-view (->> (views/boards-view request {:boards boards
-                                                   :all-links-count all-links-count})
-                       (c/body request))]
-    (if (c/hx-request? request)
-      (ext/render-html page-view)
-      (->> page-view
+                             :order-by [[:b.created-at :desc]]}
+        boards (->> (pagination/add-pagination boards-query page)
+                    (db/exec! db))
+        board-count (->> {:select [[[:count :id] :board-count]]
+                          :from [:board]
+                          :where [:= :user-id (:id user)]}
+                         (db/exec-one! db)
+                         :board-count)
+        has-more? (pagination/has-more-pages? board-count page)
+        route "/"]
+    (cond
+      (not (c/hx-request? request))
+      ; Full page response
+      (->> (views/boards-view request {:boards boards
+                                       :all-links-count all-links-count
+                                       :has-more? has-more?
+                                       :route route
+                                       :page page})
+           (c/body request)
            (c/base)
+           (ext/render-html))
+
+      (pagination/pagination-request? request)
+      ; Pagination response - just boards + trigger fragment
+      (->> (views/board-pagination-view request {:boards boards
+                                                 :has-more? has-more?
+                                                 :route route
+                                                 :page page})
+           (ext/render-html))
+
+      :else
+      ; Standard HTMX page response
+      (->> (views/boards-view request {:boards boards
+                                       :all-links-count all-links-count
+                                       :has-more? has-more?
+                                       :route route
+                                       :page page})
+           (c/body request)
            (ext/render-html)))))
 
 (defn create-board-handler

@@ -43,11 +43,16 @@
     "Get started by creating your first board to organize your bookmarks"]])
 
 (defn board-list
-  [router {:keys [boards]}]
+  [router {:keys [boards has-more? route page]}]
   (if (seq boards)
-    (list (for [board boards]
-            (list-item {:router router
-                        :board board})))
+    (c/paginated-links 
+      boards
+      has-more?
+      route
+      page
+      (fn [board]
+        (list-item {:router router
+                    :board board})))
     (empty-boards)))
 
 (defn board-form-fields
@@ -77,7 +82,7 @@
 
 (defn boards-view
   [{router :reitit.core/router
-    :as request} {:keys [boards all-links-count]}]
+    :as request} {:keys [boards all-links-count has-more? route page]}]
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    (c/search-bar)
@@ -108,4 +113,15 @@
               :form-fields (board-form-fields request)})]]
     [:div
      {:id "board-list"}
-     (board-list router {:boards boards})]]])
+     (board-list router {:boards boards
+                         :has-more? has-more?
+                         :route route
+                         :page page})]]])
+
+(defn board-pagination-view
+  [{router :reitit.core/router} {:keys [boards has-more? route page]}]
+  ; Only render new boards + infinite scroll trigger for pagination requests
+  (board-list router {:boards boards
+                      :has-more? has-more?
+                      :route route
+                      :page page}))

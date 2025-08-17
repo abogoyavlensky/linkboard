@@ -25,6 +25,7 @@
                  ; Global rate limit for all routes - 200 requests per minute per IP
                  [limits/wrap-rate-limit 200 60000]]}
    ["/" {:name ::home-page
+         :parameters {:query [:map [:page {:optional true} pos-int?]]}
          :get {:handler home-handlers/home-handler
                :responses {200 {:body string?}}}}]
    ["/up" {:name ::health-check

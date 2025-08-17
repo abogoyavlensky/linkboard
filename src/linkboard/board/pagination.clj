@@ -1,7 +1,7 @@
 (ns linkboard.board.pagination
   (:require [linkboard.ui.components :as c]))
 
-(def default-page-size 25)
+(def default-page-size 10)
 
 (defn add-pagination
   "Adds LIMIT and OFFSET clauses to a HoneySQL query map for pagination.

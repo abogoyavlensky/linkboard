@@ -168,6 +168,7 @@
                                  :router router
                                  :link updated-link})
           (ext/render-html)
+          (response/header "HX-Refresh" "true")
           (response/header "HX-Trigger" "showLinkEditToast")
           (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
