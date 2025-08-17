@@ -23,12 +23,12 @@
                              :links-count)
         page (pagination/get-page-param request)
         boards-query {:select [:b.*
-                                      [[:count :l.id] :link-count]]
-                             :from [[:board :b]]
-                             :left-join [[:link :l] [:= :b.id :l.board-id]]
-                             :where [:= :b.user-id (:id user)]
-                             :group-by [:b.id :b.title]
-                             :order-by [[:b.created-at :desc]]}
+                               [[:count :l.id] :link-count]]
+                      :from [[:board :b]]
+                      :left-join [[:link :l] [:= :b.id :l.board-id]]
+                      :where [:= :b.user-id (:id user)]
+                      :group-by [:b.id :b.title]
+                      :order-by [[:b.created-at :desc]]}
         boards (->> (pagination/add-pagination boards-query page)
                     (db/exec! db))
         board-count (->> {:select [[[:count :id] :board-count]]

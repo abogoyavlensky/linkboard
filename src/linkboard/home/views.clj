@@ -45,7 +45,7 @@
 (defn board-list
   [router {:keys [boards has-more? route page]}]
   (if (seq boards)
-    (c/paginated-links 
+    (c/paginated-links
       boards
       has-more?
       route
