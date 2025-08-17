@@ -8,7 +8,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Automatic link metadata extraction (title, icons)
 - **Board names on All Links page** with clickable navigation and bullet separator (•)
 - **Link count badges** displayed in board and All Links page headers
-- **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page)
+- **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page, 10 per page for testing)
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -46,7 +46,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
-  - `GET /` - Home page with board list
+  - `GET /?page=X` - Home page with board list and infinite scroll pagination
   - `GET /links?page=X` - All Links page with board names, link counts, and infinite scroll pagination
   - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
@@ -61,11 +61,12 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 
 #### Handlers
 - **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, account management, and login/logout
+  - **Board list pagination**: Home handler supports infinite scroll for board lists with 3 response types
 - **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards with comprehensive security validation
   - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries
   - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts
   - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance
-  - **Infinite scroll pagination**: Both handlers support 3 response types (full page, HTMX page, pagination fragment) with automatic 25-item pages
+  - **Infinite scroll pagination**: All handlers support 3 response types (full page, HTMX page, pagination fragment) with configurable page sizes
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -224,8 +225,8 @@ test/                  # Test files
 ### Migrations
 - `0001.up.sql`: Initial schema
 - `0002.up.sql`: User table creation with indexes
-- `0003.up.sql`: Sample data insertion
-- `0004.up.sql`: Performance indexes for session_id and account_number
+- `0003.up.sql`: Sample data insertion (2 boards, 7 links)
+- `0004.up.sql`: Pagination test data (30 boards, 150 links across 5 categories)
 
 ## Available Functions and Queries
 
