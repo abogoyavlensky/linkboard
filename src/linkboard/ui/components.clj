@@ -358,3 +358,42 @@
     [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
              :type "text"
              :placeholder "Search"}]]])
+
+(defn infinite-scroll-trigger
+  "Creates an HTMX infinite scroll trigger element.
+   
+   Args:
+     route - The route URL to call for the next page
+     next-page - The page number to load next
+   
+   Returns:
+     Hiccup markup for the infinite scroll trigger"
+  [route next-page]
+  [:div {:id (str "page-" next-page "-trigger")
+         :hx-trigger "revealed"
+         :hx-get (str route "?page=" next-page)
+         :hx-swap "outerHTML"
+         :class ["p-4" "text-center" "text-gray-500" "text-sm"]}
+   "Loading more links..."])
+
+(defn paginated-links
+  "Renders a list of links with optional infinite scroll trigger.
+   
+   Args:
+     links - Collection of links to render
+     has-more? - Boolean indicating if more pages exist
+     route - Base route for pagination (without query params)
+     current-page - Current page number
+     link-item-fn - Function to render individual link items
+   
+   Returns:
+     Hiccup markup for links + optional trigger"
+  [links has-more? route current-page link-item-fn]
+  (list
+    ;; Render all links
+    (for [link links]
+      (link-item-fn link))
+    
+    ;; Add infinite scroll trigger if more pages exist
+    (when has-more?
+      (infinite-scroll-trigger route (inc current-page)))))

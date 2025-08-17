@@ -1,5 +1,6 @@
 (ns linkboard.board.handlers
   (:require [linkboard.board.fetch :as fetch]
+            [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as views]
             [linkboard.core.db :as db]
             [linkboard.queries :as q]
@@ -21,14 +22,15 @@
                             [:= :id (:id path)]
                             [:= :user-id (:id user)]]}
                    (db/exec-one! db))
-        ; TODO: add pagination
-        links (->> {:select [:l.*]
-                    :from [[:link :l]]
-                    :join [[:board :b] [:= :l.board-id :b.id]]
-                    :where [:and
-                            [:= :b.user-id (:id user)]
-                            [:= :b.id (:id path)]]
-                    :order-by [[:l.created-at :desc]]}
+        page (pagination/get-page-param request)
+        links-query {:select [:l.*]
+                     :from [[:link :l]]
+                     :join [[:board :b] [:= :l.board-id :b.id]]
+                     :where [:and
+                             [:= :b.user-id (:id user)]
+                             [:= :b.id (:id path)]]
+                     :order-by [[:l.created-at :desc]]}
+        links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
         link-count (->> {:select [[[:count :id] :link-count]]
                          :from [:link]
@@ -37,16 +39,40 @@
                                  [:= :board-id (:id path)]]}
                         (db/exec-one! db)
                         :link-count)
-        request* (assoc request :board-id (:id board))
-        page-view (->> (views/board-view request* {:board board
-                                                   :links links
-                                                   :link-count link-count})
-                       (c/body request*))]
+        has-more? (pagination/has-more-pages? link-count page)
+        route (str "/boards/" (:id path))
+        request* (assoc request :board-id (:id board))]
 
-    (if (c/hx-request? request)
-      (ext/render-html page-view)
-      (->> page-view
+    (cond
+      (not (c/hx-request? request))
+      ; Full page response
+      (->> (views/board-view request* {:board board
+                                       :links links
+                                       :link-count link-count
+                                       :has-more? has-more?
+                                       :route route
+                                       :page page})
+           (c/body request*)
            (c/base)
+           (ext/render-html))
+
+      (pagination/pagination-request? request)
+      ; Pagination response - just links + trigger fragment
+      (->> (views/board-pagination-view request* {:links links
+                                                  :has-more? has-more?
+                                                  :route route
+                                                  :page page})
+           (ext/render-html))
+
+      :else
+      ; Standard HTMX page response
+      (->> (views/board-view request* {:board board
+                                       :links links
+                                       :link-count link-count
+                                       :has-more? has-more?
+                                       :route route
+                                       :page page})
+           (c/body request*)
            (ext/render-html)))))
 
 (defn all-links-handler
@@ -54,25 +80,50 @@
     :keys [session]
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
-        ; TODO: add pagination
-        links (->> {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
-                    :from [[:link :l]]
-                    :left-join [[:board :b] [:= :l.board-id :b.id]]
-                    :where [:= :l.user-id (:id user)]
-                    :order-by [[:l.created-at :desc]]}
+        page (pagination/get-page-param request)
+        links-query {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
+                     :from [[:link :l]]
+                     :left-join [[:board :b] [:= :l.board-id :b.id]]
+                     :where [:= :l.user-id (:id user)]
+                     :order-by [[:l.created-at :desc]]}
+        links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
         link-count (->> {:select [[[:count :id] :link-count]]
                          :from [:link]
                          :where [:= :user-id (:id user)]}
                         (db/exec-one! db)
                         :link-count)
-        page-view (->> (views/all-links-view request {:links links
-                                                      :link-count link-count})
-                       (c/body request))]
-    (if (c/hx-request? request)
-      (ext/render-html page-view)
-      (->> page-view
+        has-more? (pagination/has-more-pages? link-count page)
+        route "/links"]
+
+    (cond
+      (not (c/hx-request? request))
+      ; Full page response
+      (->> (views/all-links-view request {:links links
+                                          :link-count link-count
+                                          :has-more? has-more?
+                                          :route route
+                                          :page page})
+           (c/body request)
            (c/base)
+           (ext/render-html))
+
+      (pagination/pagination-request? request)
+      ; Pagination response - just links + trigger fragment
+      (->> (views/all-links-pagination-view request {:links links
+                                                     :has-more? has-more?
+                                                     :route route
+                                                     :page page})
+           (ext/render-html))
+
+      :else
+      ; Standard HTMX page response
+      (->> (views/all-links-view request {:links links
+                                          :link-count link-count
+                                          :has-more? has-more?
+                                          :route route
+                                          :page page})
+           (c/body request)
            (ext/render-html)))))
 
 (defn update-link-handler

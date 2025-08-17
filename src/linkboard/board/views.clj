@@ -142,7 +142,7 @@
 
 (defn board-view
   [{router :reitit.core/router
-    :as request} {:keys [board links link-count]}]
+    :as request} {:keys [board links link-count has-more? route page]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -185,15 +185,34 @@
       {:id "link-list"
        :class ["flex-1"]}
       (if (seq links)
-        (for [link links]
-          (link-list-item {:router router
-                           :request request
-                           :link link}))
+        (c/paginated-links 
+          links
+          has-more?
+          route
+          page
+          (fn [link]
+            (link-list-item {:router router
+                             :request request
+                             :link link})))
         (empty-links))])])
+
+(defn board-pagination-view
+  [{router :reitit.core/router
+    :as request} {:keys [links has-more? route page]}]
+  ; Only render new links + infinite scroll trigger for pagination requests
+  (c/paginated-links 
+    links
+    has-more?
+    route
+    page
+    (fn [link]
+      (link-list-item {:router router
+                       :request request
+                       :link link}))))
 
 (defn all-links-view
   [{router :reitit.core/router
-    :as request} {:keys [links link-count]}]
+    :as request} {:keys [links link-count has-more? route page]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -213,9 +232,29 @@
       {:id "link-list"
        :class ["flex-1"]}
       (if (seq links)
-        (for [link links]
-          (link-list-item {:router router
-                           :request request
-                           :link link
-                           :show-board? true}))
+        (c/paginated-links 
+          links
+          has-more?
+          route
+          page
+          (fn [link]
+            (link-list-item {:router router
+                             :request request
+                             :link link
+                             :show-board? true})))
         (empty-links))])])
+
+(defn all-links-pagination-view
+  [{router :reitit.core/router
+    :as request} {:keys [links has-more? route page]}]
+  ; Only render new links + infinite scroll trigger for pagination requests
+  (c/paginated-links 
+    links
+    has-more?
+    route
+    page
+    (fn [link]
+      (link-list-item {:router router
+                       :request request
+                       :link link
+                       :show-board? true}))))

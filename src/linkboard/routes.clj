@@ -46,6 +46,7 @@
                       :responses {200 {:body string?}}}}]
    ["/links"
     ["" {:name ::links
+         :parameters {:query [:map [:page {:optional true} pos-int?]]}
          :get {:handler board-handlers/all-links-handler
                :responses {200 {:body string?}}}
          :post {:handler home-handlers/create-link-handler
@@ -66,7 +67,8 @@
                 :parameters {:form {:title [:string {:min 1}]}}
                 :responses {200 {:body string?}}}}]
     ["/:id"
-     {:parameters {:path {:id pos-int?}}}
+     {:parameters {:path {:id pos-int?}
+                   :query [:map [:page {:optional true} pos-int?]]}}
      ["" {:name ::board-details
           :get {:handler board-handlers/board-handler
                 :responses {200 {:body string?}}}

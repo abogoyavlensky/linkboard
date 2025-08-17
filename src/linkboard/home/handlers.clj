@@ -159,6 +159,7 @@
                                      ; Remove empty state
                                      [:div
                                       {:hx-swap-oob "delete:#empty-links"}]))
+              (response/header "HX-Refresh" "true")
               (response/header "HX-Trigger" "showLinkCreationToast")
               (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
