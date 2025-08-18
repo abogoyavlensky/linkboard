@@ -142,7 +142,7 @@
 
 (defn board-view
   [{router :reitit.core/router
-    :as request} {:keys [board links link-count has-more? route page]}]
+    :as request} {:keys [board links link-count has-more? route page search-term]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -180,7 +180,8 @@
         :form-attrs {:hx-delete (ext/get-route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (ext/csrf-token-json)}})]]
    (list
-     (c/search-bar)
+     (c/search-bar {:search-term search-term
+                    :route route})
      [:div
       {:id "link-list"
        :class ["flex-1"]}
@@ -212,7 +213,7 @@
 
 (defn all-links-view
   [{router :reitit.core/router
-    :as request} {:keys [links link-count has-more? route page]}]
+    :as request} {:keys [links link-count has-more? route page search-term]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -227,7 +228,8 @@
      [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}
       (str link-count " " (if (= link-count 1) "link" "links"))]]]
    (list
-     (c/search-bar)
+     (c/search-bar {:search-term search-term
+                    :route route})
      [:div
       {:id "link-list"
        :class ["flex-1"]}

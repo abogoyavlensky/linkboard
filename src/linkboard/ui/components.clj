@@ -352,12 +352,22 @@
       [:h1 {:class ["text-5xl"]} text]]]))
 
 (defn search-bar
-  []
-  [:div {:class ["pb-4"]}
-   [:div {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]}
+  [{:keys [search-term route]}]
+  [:div {:class ["pb-4"]
+         :x-data ""
+         :x-on:keydown.window "if($event.key === '/' || (($event.ctrlKey || $event.metaKey) && $event.key === 'k')) { $refs.search.focus(); $event.preventDefault(); }"}
+   [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
+           :hx-get route
+           :hx-trigger "submit"
+           :hx-target "#body"
+           :hx-push-url "true"
+           :method "get"}
     [:div {:class ["mr-2"]} icons/search]
     [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
              :type "text"
+             :name "q"
+             :x-ref "search"
+             :value (or search-term nil)
              :placeholder "Search"}]]])
 
 (defn infinite-scroll-trigger

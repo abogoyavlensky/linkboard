@@ -50,6 +50,7 @@
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
         route (if search-term
+                ; TODO: update to ext/get-route
                 (str "/boards/" (:id path) "?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
                 (str "/boards/" (:id path)))
         request* (assoc request :board-id (:id board))]
@@ -118,6 +119,7 @@
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
         route (if search-term
+                ; TODO: update to ext/get-route
                 (str "/links?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
                 "/links")]
 

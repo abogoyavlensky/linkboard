@@ -34,6 +34,10 @@
   - `hx-include="[name='q']"` for search input
   - `hx-push-url="true"` for URL state management
 
+- Fixes:
+  - pagination with search term
+  - following search after the first call
+
 ### Search Integration (`src/linkboard/board/views.clj`)
 - Enhance existing views to display search context when `q` parameter exists
 - Add search result count and "clear search" functionality
