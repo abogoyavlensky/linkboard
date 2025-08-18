@@ -4,49 +4,49 @@
 
 (deftest test-preprocess-search-query
   (testing "Basic token processing with wildcards"
-    (is (= "hello* world*" 
+    (is (= "hello* world*"
            (preprocess-search-query "hello world")))
-    (is (= "test*" 
+    (is (= "test*"
            (preprocess-search-query "test"))))
 
   (testing "Special character quoting"
-    (is (= "\"openai.com\"* cool* stuff*" 
+    (is (= "\"openai.com\"* cool* stuff*"
            (preprocess-search-query "openai.com cool stuff")))
-    (is (= "\"user@domain.com\"*" 
+    (is (= "\"user@domain.com\"*"
            (preprocess-search-query "user@domain.com")))
-    (is (= "\"api/v1/users\"*" 
+    (is (= "\"api/v1/users\"*"
            (preprocess-search-query "api/v1/users")))
-    (is (= "\"some-file.txt\"*" 
+    (is (= "\"some-file.txt\"*"
            (preprocess-search-query "some-file.txt")))
-    (is (= "\"config:value\"*" 
+    (is (= "\"config:value\"*"
            (preprocess-search-query "config:value"))))
 
   (testing "FTS5 operators preserved without wildcards"
-    (is (= "github* and code*" 
+    (is (= "github* and code*"
            (preprocess-search-query "github AND code")))
-    (is (= "react* or vue*" 
+    (is (= "react* or vue*"
            (preprocess-search-query "react OR vue")))
-    (is (= "not spam*" 
+    (is (= "not spam*"
            (preprocess-search-query "NOT spam")))
-    (is (= "near search*" 
+    (is (= "near search*"
            (preprocess-search-query "NEAR search"))))
 
   (testing "Case normalization"
-    (is (= "github* and code*" 
+    (is (= "github* and code*"
            (preprocess-search-query "GitHub AND Code")))
-    (is (= "\"openai.com\"*" 
+    (is (= "\"openai.com\"*"
            (preprocess-search-query "OpenAI.COM"))))
 
   (testing "Punctuation stripping"
-    (is (= "hello* world*" 
+    (is (= "hello* world*"
            (preprocess-search-query "hello() world{}")))
-    (is (= "test* data*" 
+    (is (= "test* data*"
            (preprocess-search-query "test[,] data;"))))
 
   (testing "Whitespace handling"
-    (is (= "multiple* spaces*" 
+    (is (= "multiple* spaces*"
            (preprocess-search-query "  multiple    spaces  ")))
-    (is (= "tab* separated*" 
+    (is (= "tab* separated*"
            (preprocess-search-query "tab\tseparated"))))
 
   (testing "Empty and invalid inputs"
@@ -56,42 +56,42 @@
     (is (nil? (preprocess-search-query nil))))
 
   (testing "Mixed operators and special chars"
-    (is (= "\"api.github.com\"* and \"docs/readme.md\"*" 
+    (is (= "\"api.github.com\"* and \"docs/readme.md\"*"
            (preprocess-search-query "api.github.com AND docs/readme.md")))
-    (is (= "\"user@example.com\"* or \"admin:password\"*" 
+    (is (= "\"user@example.com\"* or \"admin:password\"*"
            (preprocess-search-query "user@example.com OR admin:password"))))
 
   (testing "Edge cases with only punctuation"
     (is (nil? (preprocess-search-query "(){}[]")))
-    (is (= "\"...\"*" 
+    (is (= "\"...\"*"
            (preprocess-search-query "..."))))
 
   (testing "Complex real-world examples"
-    (is (= "\"stackoverflow.com\"* javascript* tutorial*" 
+    (is (= "\"stackoverflow.com\"* javascript* tutorial*"
            (preprocess-search-query "stackoverflow.com javascript tutorial")))
-    (is (= "\"react-router\"* and typescript*" 
+    (is (= "\"react-router\"* and typescript*"
            (preprocess-search-query "react-router AND typescript")))
-    (is (= "\"localhost:3000\"* api* endpoint*" 
+    (is (= "\"localhost:3000\"* api* endpoint*"
            (preprocess-search-query "localhost:3000 API endpoint")))))
 
 (deftest test-preprocess-search-query-integration
   (testing "Integration with common search patterns"
     ; Domain searches
-    (is (= "\"github.com\"*" 
+    (is (= "\"github.com\"*"
            (preprocess-search-query "github.com")))
-    
+
     ; Technology searches
-    (is (= "clojure* and tutorial*" 
+    (is (= "clojure* and tutorial*"
            (preprocess-search-query "clojure AND tutorial")))
-    
+
     ; File path searches  
-    (is (= "\"src/main.js\"*" 
+    (is (= "\"src/main.js\"*"
            (preprocess-search-query "src/main.js")))
-    
+
     ; Email searches
-    (is (= "\"contact@company.com\"*" 
+    (is (= "\"contact@company.com\"*"
            (preprocess-search-query "contact@company.com")))
-    
+
     ; Version searches
-    (is (= "\"v1.2.3\"*" 
+    (is (= "\"v1.2.3\"*"
            (preprocess-search-query "v1.2.3")))))
