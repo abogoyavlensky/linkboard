@@ -12,7 +12,7 @@
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
-    {:keys [path]} :parameters
+    {:keys [path query]} :parameters
     :keys [session]
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
@@ -23,24 +23,35 @@
                             [:= :user-id (:id user)]]}
                    (db/exec-one! db))
         page (pagination/get-page-param request)
-        links-query {:select [:l.*]
-                     :from [[:link :l]]
-                     :join [[:board :b] [:= :l.board-id :b.id]]
-                     :where [:and
-                             [:= :b.user-id (:id user)]
-                             [:= :b.id (:id path)]]
-                     :order-by [[:l.created-at :desc]]}
+        search-term (:q query)
+        links-query (q/get-board-links-query (:id user) (:id path) search-term)
         links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
-        link-count (->> {:select [[[:count :id] :link-count]]
-                         :from [:link]
-                         :where [:and
-                                 [:= :user-id (:id user)]
-                                 [:= :board-id (:id path)]]}
-                        (db/exec-one! db)
-                        :link-count)
+        link-count (if-let [processed-search (and search-term (q/preprocess-search-query search-term))]
+                     ; Count search results within board using FTS5
+                     (->> {:select [[[:count :*] :link-count]]
+                           :from [[:link :l]]
+                           :join [[:link-search :ls] [:= :l.id :ls.rowid]
+                                  [:board :b] [:= :l.board-id :b.id]]
+                           :where [:and
+                                   [:= :l.user-id (:id user)]
+                                   [:= :b.id (:id path)]
+                                   [:= :b.user-id (:id user)]
+                                   [:raw "link_search MATCH " [processed-search]]]}
+                          (db/exec-one! db)
+                          :link-count)
+                     ; Count all links in board (no search)
+                     (->> {:select [[[:count :id] :link-count]]
+                           :from [:link]
+                           :where [:and
+                                   [:= :user-id (:id user)]
+                                   [:= :board-id (:id path)]]}
+                          (db/exec-one! db)
+                          :link-count))
         has-more? (pagination/has-more-pages? link-count page)
-        route (str "/boards/" (:id path))
+        route (if search-term
+                (str "/boards/" (:id path) "?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
+                (str "/boards/" (:id path)))
         request* (assoc request :board-id (:id board))]
 
     (cond
@@ -51,7 +62,8 @@
                                        :link-count link-count
                                        :has-more? has-more?
                                        :route route
-                                       :page page})
+                                       :page page
+                                       :search-term search-term})
            (c/body request*)
            (c/base)
            (ext/render-html))
@@ -61,7 +73,8 @@
       (->> (views/board-pagination-view request* {:links links
                                                   :has-more? has-more?
                                                   :route route
-                                                  :page page})
+                                                  :page page
+                                                  :search-term search-term})
            (ext/render-html))
 
       :else
@@ -71,30 +84,42 @@
                                        :link-count link-count
                                        :has-more? has-more?
                                        :route route
-                                       :page page})
+                                       :page page
+                                       :search-term search-term})
            (c/body request*)
            (ext/render-html)))))
 
 (defn all-links-handler
   [{{:keys [db]} :context
+    {:keys [query]} :parameters
     :keys [session]
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         page (pagination/get-page-param request)
-        links-query {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
-                     :from [[:link :l]]
-                     :left-join [[:board :b] [:= :l.board-id :b.id]]
-                     :where [:= :l.user-id (:id user)]
-                     :order-by [[:l.created-at :desc]]}
+        search-term (:q query)
+        links-query (q/get-all-links-query (:id user) search-term)
         links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
-        link-count (->> {:select [[[:count :id] :link-count]]
-                         :from [:link]
-                         :where [:= :user-id (:id user)]}
-                        (db/exec-one! db)
-                        :link-count)
+        link-count (if-let [processed-search (and search-term (q/preprocess-search-query search-term))]
+                     ; Count search results using FTS5
+                     (->> {:select [[[:count :*] :link-count]]
+                           :from [[:link :l]]
+                           :join [[:link-search :ls] [:= :l.id :ls.rowid]]
+                           :where [:and
+                                   [:= :l.user-id (:id user)]
+                                   [:raw "link_search MATCH " [processed-search]]]}
+                          (db/exec-one! db)
+                          :link-count)
+                     ; Count all user links (no search)
+                     (->> {:select [[[:count :id] :link-count]]
+                           :from [:link]
+                           :where [:= :user-id (:id user)]}
+                          (db/exec-one! db)
+                          :link-count))
         has-more? (pagination/has-more-pages? link-count page)
-        route "/links"]
+        route (if search-term
+                (str "/links?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
+                "/links")]
 
     (cond
       (not (c/hx-request? request))
@@ -103,7 +128,8 @@
                                           :link-count link-count
                                           :has-more? has-more?
                                           :route route
-                                          :page page})
+                                          :page page
+                                          :search-term search-term})
            (c/body request)
            (c/base)
            (ext/render-html))
@@ -113,7 +139,8 @@
       (->> (views/all-links-pagination-view request {:links links
                                                      :has-more? has-more?
                                                      :route route
-                                                     :page page})
+                                                     :page page
+                                                     :search-term search-term})
            (ext/render-html))
 
       :else
@@ -122,7 +149,8 @@
                                           :link-count link-count
                                           :has-more? has-more?
                                           :route route
-                                          :page page})
+                                          :page page
+                                          :search-term search-term})
            (c/body request)
            (ext/render-html)))))
 
