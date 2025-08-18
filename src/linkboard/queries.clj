@@ -1,6 +1,6 @@
 (ns linkboard.queries
-  (:require [linkboard.core.db :as db]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [linkboard.core.db :as db]))
 
 (defn get-user-by-session-id
   "Get a user by session_id."
@@ -108,38 +108,38 @@
   (when (and raw-query (not (str/blank? raw-query)))
     (let [; Step 1: Split into tokens
           tokens (str/split (str/trim raw-query) #"\s+")
-          
+
           ; Step 4: Normalize - lowercase and strip extra punctuation
           normalize-token (fn [token]
-                           (-> token
-                               str/lower-case
-                               (str/replace #"[(){}\[\],;]+" "")))
-          
+                            (-> token
+                                str/lower-case
+                                (str/replace #"[(){}\[\],;]+" "")))
+
           ; Step 2: Quote tokens with special chars and Step 3: Add wildcards
           process-token (fn [token]
-                         (let [normalized (normalize-token token)
+                          (let [normalized (normalize-token token)
                                ; Don't quote FTS5 operators
-                               is-operator? (contains? #{"and" "or" "not" "near"} normalized)
+                                is-operator? (contains? #{"and" "or" "not" "near"} normalized)
                                ; Check if token needs quoting (contains special chars)
-                               needs-quoting? (re-find #"[.@/\-:\"*]" normalized)]
-                           (cond
+                                needs-quoting? (re-find #"[.@/\-:\"*]" normalized)]
+                            (cond
                              ; Empty token after normalization
-                             (str/blank? normalized) nil
-                             
+                              (str/blank? normalized) nil
+
                              ; FTS5 operators - keep as is, no wildcard
-                             is-operator? normalized
-                             
+                              is-operator? normalized
+
                              ; Token with special chars - quote and add wildcard
-                             needs-quoting? (str "\"" normalized "\"*")
-                             
+                              needs-quoting? (str "\"" normalized "\"*")
+
                              ; Regular token - just add wildcard
-                             :else (str normalized "*"))))
-          
+                              :else (str normalized "*"))))
+
           ; Process all tokens and filter out nils
           processed-tokens (->> tokens
-                               (map process-token)
-                               (filter some?))]
-      
+                                (map process-token)
+                                (filter some?))]
+
       ; Return processed query or nil if no valid tokens
       (when (seq processed-tokens)
         (str/join " " processed-tokens)))))
@@ -202,14 +202,14 @@
   ; Test search preprocessing
   (preprocess-search-query "openai.com cool stuff")
   ; => "\"openai.com\"* cool* stuff*"
-  
+
   (preprocess-search-query "github AND code")
   (preprocess-search-query "gog")
   ; => "github* and code*"
-  
+
   (preprocess-search-query "   ")
   ; => nil
-  
+
   ; Test with database
   (require '[integrant.repl.state :as state])
   (let [db (:linkboard.core.db/db state/system)]
