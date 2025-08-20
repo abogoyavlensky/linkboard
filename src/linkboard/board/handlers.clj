@@ -1,5 +1,6 @@
 (ns linkboard.board.handlers
-  (:require [linkboard.board.fetch :as fetch]
+  (:require [clojure.string :as str]
+            [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as views]
             [linkboard.core.db :as db]
@@ -7,7 +8,15 @@
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [reitit-extras.core :as ext]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import [java.net URLEncoder]))
+
+(defn- build-route-with-search
+  "Build a route URL with optional search query parameter."
+  [base-route search-term]
+  (if (and search-term (not (str/blank? search-term)))
+    (str base-route "?q=" (URLEncoder/encode search-term "UTF-8"))
+    base-route))
 
 (defn board-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -49,10 +58,7 @@
                           (db/exec-one! db)
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
-        route (if search-term
-                ; TODO: update to ext/get-route
-                (str "/boards/" (:id path) "?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
-                (str "/boards/" (:id path)))
+        route (build-route-with-search (str "/boards/" (:id path)) search-term)
         request* (assoc request :board-id (:id board))]
 
     (cond
@@ -118,10 +124,7 @@
                           (db/exec-one! db)
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
-        route (if search-term
-                ; TODO: update to ext/get-route
-                (str "/links?q=" (java.net.URLEncoder/encode search-term "UTF-8"))
-                "/links")]
+        route (build-route-with-search "/links" search-term)]
 
     (cond
       (not (c/hx-request? request))

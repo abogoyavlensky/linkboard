@@ -353,39 +353,44 @@
 
 (defn search-bar
   [{:keys [search-term route]}]
-  [:div {:class ["pb-4"]
-         :x-data ""
-         :x-on:keydown.window "if($event.key === '/' || (($event.ctrlKey || $event.metaKey) && $event.key === 'k')) { $refs.search.focus(); $event.preventDefault(); }"}
-   [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
-           :hx-get route
-           :hx-trigger "submit"
-           :hx-target "#body"
-           :hx-push-url "true"
-           :method "get"}
-    [:div {:class ["mr-2"]} icons/search]
-    [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
-             :type "text"
-             :name "q"
-             :x-ref "search"
-             :value (or search-term nil)
-             :placeholder "Search"}]]])
+  (let [base-route (first (str/split route #"\?"))]
+    [:div {:class ["pb-4"]
+           :x-data ""
+           :x-on:keydown.window "if($event.key === '/' || (($event.ctrlKey || $event.metaKey) && $event.key === 'k')) { $refs.search.focus(); $event.preventDefault(); }"}
+     [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
+             :hx-get base-route
+             :hx-trigger "input changed delay:300ms, search"
+             :hx-target "#body"
+             :hx-push-url "true"
+             :method "get"}
+      [:div {:class ["mr-2"]} icons/search]
+      [:input {:class ["bg-transparent" "flex-1" "outline-hidden" "text-gray-700"]
+               :type "text"
+               :name "q"
+               :x-ref "search"
+               :autofocus true
+               :value (or search-term nil)
+               :placeholder "Search..."
+               :x-init "if($el.value) { $el.setSelectionRange($el.value.length, $el.value.length); }"}]]]))
 
 (defn infinite-scroll-trigger
   "Creates an HTMX infinite scroll trigger element.
    
    Args:
-     route - The route URL to call for the next page
+     route - The route URL to call for the next page (may include existing query params)
      next-page - The page number to load next
    
    Returns:
      Hiccup markup for the infinite scroll trigger"
   [route next-page]
-  [:div {:id (str "page-" next-page "-trigger")
-         :hx-trigger "revealed"
-         :hx-get (str route "?page=" next-page)
-         :hx-swap "outerHTML"
-         :class ["p-4" "text-center" "text-gray-500" "text-sm"]}
-   "Loading more links..."])
+  (let [separator (if (str/includes? route "?") "&" "?")
+        pagination-url (str route separator "page=" next-page)]
+    [:div {:id (str "page-" next-page "-trigger")
+           :hx-trigger "revealed"
+           :hx-get pagination-url
+           :hx-swap "outerHTML"
+           :class ["p-4" "text-center" "text-gray-500" "text-sm"]}
+     "Loading more links..."]))
 
 (defn paginated-links
   "Renders a list of links with optional infinite scroll trigger.
