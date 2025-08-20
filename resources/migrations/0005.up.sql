@@ -7,7 +7,8 @@ CREATE VIRTUAL TABLE link_search USING fts5(
     title,
     url,
     content='',
-    content_rowid='id'
+    content_rowid='id',
+    tokenize='trigram'
 );
 --;;
 -- Trigger to maintain FTS5 index on INSERT

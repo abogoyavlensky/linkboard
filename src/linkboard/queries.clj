@@ -158,7 +158,7 @@
    :order-by [[:search-rank :asc] [:l.created-at :desc]]})
 
 (defn search-board-links-query
-  "Build query for searching links within a specific board using FTS5.
+  "Build query for searching links within a specific board using FTS5 or LIKE for short terms.
    Returns HoneySQL query map that can be used with pagination."
   [user-id board-id search-term]
   {:select [:l.* [[:bm25 :link-search] :search-rank]]

@@ -37,19 +37,10 @@
         links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
         link-count (if (and search-term (not (str/blank? search-term)))
-                     ; Count search results within board using FTS5
-                     (let [processed-search (q/preprocess-search-query search-term)]
-                       (->> {:select [[[:count :*] :link-count]]
-                             :from [[:link :l]]
-                             :join [[:link-search :ls] [:= :l.id :ls.rowid]
-                                    [:board :b] [:= :l.board-id :b.id]]
-                             :where [:and
-                                     [:= :l.user-id (:id user)]
-                                     [:= :b.id (:id path)]
-                                     [:= :b.user-id (:id user)]
-                                     [:raw "link_search MATCH " [processed-search]]]}
-                            (db/exec-one! db)
-                            :link-count))
+                     ; Count search results within board using hybrid approach  
+                     (->> (dissoc (assoc links-query :select [[[:count :*] :link-count]]) :left-join :order-by)
+                          (db/exec-one! db)
+                          :link-count)
                      ; Count all links in board (no search)
                      (->> {:select [[[:count :id] :link-count]]
                            :from [:link]
@@ -110,15 +101,9 @@
                    (db/exec! db))
         link-count (if (and search-term (not (str/blank? search-term)))
                      ; Count search results using FTS5
-                     (let [processed-search (q/preprocess-search-query search-term)]
-                       (->> {:select [[[:count :*] :link-count]]
-                             :from [[:link :l]]
-                             :join [[:link-search :ls] [:= :l.id :ls.rowid]]
-                             :where [:and
-                                     [:= :l.user-id (:id user)]
-                                     [:raw "link_search MATCH " [processed-search]]]}
-                            (db/exec-one! db)
-                            :link-count))
+                     (->> (dissoc (assoc links-query :select [[[:count :*] :link-count]]) :left-join :order-by)
+                          (db/exec-one! db)
+                          :link-count)
                      ; Count all user links (no search)
                      (->> {:select [[[:count :id] :link-count]]
                            :from [:link]
