@@ -165,17 +165,25 @@
 (defn search-board-links-query
   "Build query for searching links within a specific board using FTS5 or LIKE for short terms.
    Returns HoneySQL query map that can be used with pagination."
-  [user-id board-id search-term]
-  {:select [:l.* [[:bm25 :link-search] :search-rank]]
-   :from [[:link :l]]
-   :join [[:link-search :ls] [:= :l.id :ls.rowid]
-          [:board :b] [:= :l.board-id :b.id]]
-   :where [:and
-           [:= :l.user-id user-id]
-           [:= :b.id board-id]
-           [:= :b.user-id user-id]
-           [:raw "link_search MATCH " [search-term]]]
-   :order-by [[:search-rank :asc] [:l.created-at :desc]]})
+  [user-id board-id search-term raw-search-term]
+  (cond-> {:from [[:link :l]]
+           :join [[:board :b] [:= :l.board-id :b.id]]}
+    (>= (count raw-search-term) 3) (assoc :select [:l.* [[:bm25 :link-search] :search-rank]]
+                                          :join [[:link-search :ls] [:= :l.id :ls.rowid]
+                                                 [:board :b] [:= :l.board-id :b.id]]
+                                          :where [:and
+                                                  [:= :l.user-id user-id]
+                                                  [:= :b.id board-id]
+                                                  [:= :b.user-id user-id]
+                                                  [:raw "link_search MATCH " [search-term]]]
+                                          :order-by [[:search-rank :asc] [:l.created-at :desc]])
+    (< (count raw-search-term) 3) (assoc :select [:l.*]
+                                         :where [:and
+                                                 [:= :l.user-id user-id]
+                                                 [:= :b.id board-id]
+                                                 [:= :b.user-id user-id]
+                                                 [:like :l.title (str "%" raw-search-term "%")]]
+                                         :order-by [[:l.created-at :desc]])))
 
 (defn get-all-links-query
   "Build query for getting all user links, optionally with search.
@@ -194,7 +202,7 @@
    Returns HoneySQL query map that can be used with pagination."
   [user-id board-id search-term]
   (if-let [processed-search (and search-term (preprocess-search-query search-term))]
-    (search-board-links-query user-id board-id processed-search)
+    (search-board-links-query user-id board-id processed-search search-term)
     {:select [:l.*]
      :from [[:link :l]]
      :join [[:board :b] [:= :l.board-id :b.id]]
