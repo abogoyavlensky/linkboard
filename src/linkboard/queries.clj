@@ -147,15 +147,20 @@
 (defn search-all-links-query
   "Build query for searching all user links using FTS5.
    Returns HoneySQL query map that can be used with pagination."
-  [user-id search-term]
-  {:select [:l.* [:b.title :board-title] [:b.id :board-id] [[:bm25 :link-search] :search-rank]]
-   :from [[:link :l]]
-   :join [[:link-search :ls] [:= :l.id :ls.rowid]]
-   :left-join [[:board :b] [:= :l.board-id :b.id]]
-   :where [:and
-           [:= :l.user-id user-id]
-           [:raw "link_search MATCH " [search-term]]]
-   :order-by [[:search-rank :asc] [:l.created-at :desc]]})
+  [user-id search-term raw-search-term]
+  (cond-> {:from [[:link :l]]
+           :left-join [[:board :b] [:= :l.board-id :b.id]]}
+    (>= (count raw-search-term) 3) (assoc :select [:l.* [:b.title :board-title] [:b.id :board-id] [[:bm25 :link-search] :search-rank]]
+                                          :join [[:link-search :ls] [:= :l.id :ls.rowid]]
+                                          :where [:and
+                                                  [:= :l.user-id user-id]
+                                                  [:raw "link_search MATCH " [search-term]]]
+                                          :order-by [[:search-rank :asc] [:l.created-at :desc]])
+    (< (count raw-search-term) 3) (assoc :select [:l.* [:b.title :board-title] [:b.id :board-id]]
+                                         :where [:and
+                                                 [:= :l.user-id user-id]
+                                                 [:like :l.title (str "%" raw-search-term "%")]]
+                                         :order-by [[:l.created-at :desc]])))
 
 (defn search-board-links-query
   "Build query for searching links within a specific board using FTS5 or LIKE for short terms.
@@ -177,7 +182,7 @@
    Returns HoneySQL query map that can be used with pagination."
   [user-id search-term]
   (if-let [processed-search (and search-term (preprocess-search-query search-term))]
-    (search-all-links-query user-id processed-search)
+    (search-all-links-query user-id processed-search search-term)
     {:select [:l.* [:b.title :board-title] [:b.id :board-id]]
      :from [[:link :l]]
      :left-join [[:board :b] [:= :l.board-id :b.id]]
