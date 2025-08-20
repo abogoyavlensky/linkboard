@@ -36,19 +36,20 @@
         links-query (q/get-board-links-query (:id user) (:id path) search-term)
         links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
-        link-count (if-let [processed-search (and search-term (q/preprocess-search-query search-term))]
+        link-count (if (and search-term (not (str/blank? search-term)))
                      ; Count search results within board using FTS5
-                     (->> {:select [[[:count :*] :link-count]]
-                           :from [[:link :l]]
-                           :join [[:link-search :ls] [:= :l.id :ls.rowid]
-                                  [:board :b] [:= :l.board-id :b.id]]
-                           :where [:and
-                                   [:= :l.user-id (:id user)]
-                                   [:= :b.id (:id path)]
-                                   [:= :b.user-id (:id user)]
-                                   [:raw "link_search MATCH " [processed-search]]]}
-                          (db/exec-one! db)
-                          :link-count)
+                     (let [processed-search (q/preprocess-search-query search-term)]
+                       (->> {:select [[[:count :*] :link-count]]
+                             :from [[:link :l]]
+                             :join [[:link-search :ls] [:= :l.id :ls.rowid]
+                                    [:board :b] [:= :l.board-id :b.id]]
+                             :where [:and
+                                     [:= :l.user-id (:id user)]
+                                     [:= :b.id (:id path)]
+                                     [:= :b.user-id (:id user)]
+                                     [:raw "link_search MATCH " [processed-search]]]}
+                            (db/exec-one! db)
+                            :link-count))
                      ; Count all links in board (no search)
                      (->> {:select [[[:count :id] :link-count]]
                            :from [:link]
@@ -107,16 +108,17 @@
         links-query (q/get-all-links-query (:id user) search-term)
         links (->> (pagination/add-pagination links-query page)
                    (db/exec! db))
-        link-count (if-let [processed-search (and search-term (q/preprocess-search-query search-term))]
+        link-count (if (and search-term (not (str/blank? search-term)))
                      ; Count search results using FTS5
-                     (->> {:select [[[:count :*] :link-count]]
-                           :from [[:link :l]]
-                           :join [[:link-search :ls] [:= :l.id :ls.rowid]]
-                           :where [:and
-                                   [:= :l.user-id (:id user)]
-                                   [:raw "link_search MATCH " [processed-search]]]}
-                          (db/exec-one! db)
-                          :link-count)
+                     (let [processed-search (q/preprocess-search-query search-term)]
+                       (->> {:select [[[:count :*] :link-count]]
+                             :from [[:link :l]]
+                             :join [[:link-search :ls] [:= :l.id :ls.rowid]]
+                             :where [:and
+                                     [:= :l.user-id (:id user)]
+                                     [:raw "link_search MATCH " [processed-search]]]}
+                            (db/exec-one! db)
+                            :link-count))
                      ; Count all user links (no search)
                      (->> {:select [[[:count :id] :link-count]]
                            :from [:link]
