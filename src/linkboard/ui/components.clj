@@ -356,7 +356,7 @@
   (let [base-route (first (str/split route #"\?"))]
     [:div {:class ["pb-4"]
            :x-data ""
-           :x-on:keydown.window "if($event.key === '/' || (($event.ctrlKey || $event.metaKey) && $event.key === 'k')) { $refs.search.focus(); $event.preventDefault(); }"}
+           :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'k') { $refs.search.focus(); $event.preventDefault(); }"}
      [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
              :hx-get base-route
              :hx-trigger "input changed delay:300ms, search"
