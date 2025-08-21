@@ -359,7 +359,7 @@
            :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'k') { $refs.search.focus(); $event.preventDefault(); } else if($event.key === 'Escape' && document.activeElement === $refs.search) { $refs.search.value = ''; $refs.search.dispatchEvent(new Event('input', { bubbles: true })); }"}
      [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
              :hx-get base-route
-             :hx-trigger "input changed delay:300ms, search"
+             :hx-trigger "input changed delay:500ms, search"
              :hx-target "#body"
              :hx-push-url "true"
              :method "get"}
