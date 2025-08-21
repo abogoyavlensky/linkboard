@@ -22,6 +22,43 @@
   [:div {:class ["bg-white" "rounded-xl" "p-6" "mb-6" "shadow-xs"]}
    [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Account Information"]
    [:div {:class ["space-y-3"]}
+
+    ; Account Number Row
+    [:div {:class ["flex" "justify-between" "items-center"]}
+     [:span {:class ["text-sm" "text-gray-600"]} "Account Number"]
+     [:div {:class ["flex" "items-center" "gap-2"]
+            :x-data (str "{ showAccountNumber: false, copySuccess: false, accountNumber: '" (:account-number user) "' }")}
+      ; Account number display (dots or actual number)
+      [:span {:class ["text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none"]
+              :x-show "!showAccountNumber"
+              :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
+       "••••••••"]
+      [:span {:class ["text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none"]
+              :x-show "showAccountNumber"
+              :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
+       (:account-number user)]
+
+      ; Eye toggle button
+      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
+                :x-show "!showAccountNumber"
+                :x-on:click "showAccountNumber = true"}
+       icons/eye]
+      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
+                :x-show "showAccountNumber"
+                :x-on:click "showAccountNumber = false"}
+       icons/eye-slash]
+
+      ; Copy button / Success indicator
+      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
+                :x-show "!copySuccess"
+                :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
+       icons/copy]
+      [:button {:class ["p-1" "rounded"]
+                :x-show "copySuccess"
+                :disabled true}
+       icons/check-circle]]]
+
+    ; Member Since Row
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Member Since"]
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}

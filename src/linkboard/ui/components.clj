@@ -195,8 +195,19 @@
                             :x-transition:leave-start "opacity-100 scale-100"
                             :x-transition:leave-end "opacity-0 scale-0"}
                       [:span {:x-show "copied"} "✓"]]]
-                    [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
-                     "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
+                    [:div {:class ["bg-red-50" "border" "border-red-200" "rounded-lg" "p-4" "mt-4"]}
+                     [:div {:class ["flex" "items-start"]}
+                      [:div {:class ["flex-shrink-0"]}
+                       [:svg {:class ["h-5" "w-5" "text-red-400"]
+                              :viewBox "0 0 20 20"
+                              :fill "currentColor"}
+                        [:path {:fill-rule "evenodd"
+                                :d "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                :clip-rule "evenodd"}]]]
+                      [:div {:class ["ml-3"]}
+                       [:h3 {:class ["text-sm" "font-medium" "text-red-800"]} "Warning"]
+                       [:div {:class ["mt-2" "text-sm" "text-red-700"]}
+                        [:p "Please store it safely - you cannot restore your account if account number is lost."]]]]]]]}))
 
 (defn link-form-fields
   [{:keys [board-id]
