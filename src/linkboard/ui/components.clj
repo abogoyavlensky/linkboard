@@ -273,12 +273,10 @@
         [:div
          {:class ["flex" "items-center"]}
          [:button
-          {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
-           :hx-post (ext/get-route router ::r/logout)
-           :hx-headers (ext/csrf-token-json)}
-          "Logout"]
-         [:button
-          {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+          {:class ["text-blue-500" "text-lg" "cursor-pointer"]
+           :hx-get (ext/get-route router ::r/account)
+           :hx-target "#body"
+           :hx-push-url "true"}
           "Account"]]
         [:div
          {:x-data "{ modalOpen: false, accountId: '' }"
