@@ -356,7 +356,7 @@
   (let [base-route (first (str/split route #"\?"))]
     [:div {:class ["pb-4"]
            :x-data ""
-           :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'k') { $refs.search.focus(); $event.preventDefault(); }"}
+           :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'k') { $refs.search.focus(); $event.preventDefault(); } else if($event.key === 'Escape' && document.activeElement === $refs.search) { $refs.search.value = ''; $refs.search.dispatchEvent(new Event('input', { bubbles: true })); }"}
      [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
              :hx-get base-route
              :hx-trigger "input changed delay:300ms, search"
@@ -371,7 +371,12 @@
                :autofocus true
                :value (or search-term nil)
                :placeholder "Search..."
-               :x-init "if($el.value) { $el.setSelectionRange($el.value.length, $el.value.length); }"}]]]))
+               :x-init "if($el.value) { $el.setSelectionRange($el.value.length, $el.value.length); }"}]
+      (when (and search-term (not (str/blank? search-term)))
+        [:button {:type "button"
+                  :class ["ml-2" "text-gray-500" "hover:text-gray-700" "cursor-pointer"]
+                  :x-on:click "$refs.search.value = ''; $refs.search.dispatchEvent(new Event('input', { bubbles: true })); $refs.search.focus();"}
+         icons/x-mark])]]))
 
 (defn infinite-scroll-trigger
   "Creates an HTMX infinite scroll trigger element.
