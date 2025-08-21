@@ -10,6 +10,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Link count badges** displayed in board and All Links page headers
 - **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page, 10 per page for testing)
 - **Full-text search** with SQLite FTS5 for fast link searching by title and URL
+- **Hybrid search system** with FTS5 for terms ≥3 characters and LIKE for shorter terms
+- **Clear search functionality** with X button and ESC keyboard shortcut
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -69,7 +71,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts, supports full-text search
   - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance, includes search result counting
   - **Infinite scroll pagination**: All handlers support 3 response types (full page, HTMX page, pagination fragment) with configurable page sizes
-  - **Search integration**: FTS5-powered search with BM25 ranking, proper query preprocessing, and search term preservation in pagination
+  - **Search integration**: Hybrid FTS5/LIKE search system with BM25 ranking, proper query preprocessing, and search term preservation in pagination
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -200,7 +202,7 @@ src/linkboard/
 │   └── fetch.clj        # Link metadata fetching
 ├── ui/                 # UI components
 │   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer, infinite scroll
-│   └── icons.clj
+│   └── icons.clj        # UI icons including search, edit, delete, x-mark for clear functionality
 └── utils/
 
 resources/
@@ -230,7 +232,7 @@ test/                  # Test files
 - `0002.up.sql`: User table creation with indexes
 - `0003.up.sql`: Sample data insertion (2 boards, 7 links)
 - `0004.up.sql`: Pagination test data (30 boards, 150 links across 5 categories)
-- `0005.up.sql`: FTS5 full-text search setup with contentless virtual table and triggers
+- `0005.up.sql`: FTS5 full-text search setup with contentless virtual table and triggers (fixed for proper DELETE/UPDATE operations)
 
 ## Available Functions and Queries
 
@@ -251,11 +253,12 @@ test/                  # Test files
 ### Full-Text Search (`src/linkboard/queries.clj`)
 ```clojure
 (preprocess-search-query raw-query)              ; Preprocess user input for FTS5 MATCH queries
-(search-all-links-query user-id search-term)     ; Build FTS5 query for all user links with BM25 ranking
-(search-board-links-query user-id board-id search-term) ; Build FTS5 query for board-specific links
+(search-all-links-query user-id search-term raw-search-term)     ; Build hybrid query (FTS5 or LIKE) for all user links
+(search-board-links-query user-id board-id search-term raw-search-term) ; Build hybrid query for board-specific links
 (get-all-links-query user-id search-term)        ; Unified query function (search or regular)
 (get-board-links-query user-id board-id search-term) ; Unified board query function (search or regular)
-; Example: (get-all-links-query 1 "github") ; Returns FTS5 search results
+; Example: (get-all-links-query 1 "github") ; Returns FTS5 search results for "github"
+; Example: (get-all-links-query 1 "go")     ; Returns LIKE search results for short term
 ; Example: (get-all-links-query 1 nil)     ; Returns all links without search
 ```
 
@@ -290,20 +293,23 @@ closeModal()                                     // Close Alpine.js modals via c
 ```clojure
 (infinite-scroll-trigger route next-page)        ; HTMX trigger with hx-trigger="revealed"
 (paginated-links links has-more? route page fn)  ; Renders links + optional infinite scroll trigger
-(search-bar {:search-term term :route route})    ; Live search bar with HTMX and Alpine.js integration
+(search-bar {:search-term term :route route})    ; Live search bar with HTMX, Alpine.js, and clear functionality
 ; Example: (paginated-links links true "/boards/1?q=search" 2 link-list-item-fn)
-; Example: (search-bar {:search-term "github" :route "/links"})
+; Example: (search-bar {:search-term "github" :route "/links"}) ; Shows X button to clear search
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
 ```clojure
-; Link schema with lambdaisland/uri validation
+; Link schema with lambdaisland/uri validation - accepts URLs with or without schema
 (def Link [:and [:string {:min 1}]
            [:fn {:error/message "must be a valid URL"}
             #(try
-               (let [parsed (uri/uri %)]
+               (let [url (if (re-find #"^[a-zA-Z][a-zA-Z0-9+.-]*:" %) % (str "https://" %))
+                     parsed (uri/uri url)]
                  (boolean (:host parsed)))
                (catch Exception _ false))]])
+; Example: "example.com" -> becomes "https://example.com" and validates
+; Example: "https://secure.site.com" -> validates as-is
 ```
 
 ### Account Creation Workflow
@@ -420,6 +426,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Extended Click Areas**: URL areas extend to edit buttons while maintaining visual clarity
 - **Flexbox Alignment**: Use TailwindCSS flexbox utilities for proper left-alignment and responsive layouts
 - **Search UX**: Live search with 300ms delay, keyboard shortcuts (/ or Ctrl+K), cursor positioning at end of pre-filled text
+- **Clear Search UX**: X button appears when searching, ESC key clears search, smooth transition back to all results
 - **URL State Management**: Search terms preserved in browser URL for bookmarking and sharing search results
 
 ### Testing Strategy
@@ -436,5 +443,6 @@ bb clj-repl              # Start REPL with dev profile
 - **Efficient SQL COUNT queries**: Use database-level counting instead of in-memory collection counting for link counts
 - **LEFT JOIN optimization**: Fetch board information with links in single queries for All Links page
 - **Pagination Performance**: LIMIT/OFFSET queries with existing link-count calculations for smooth infinite scroll
-- **FTS5 Performance**: Contentless virtual table prevents data duplication, BM25 ranking for relevance, automatic index maintenance via triggers
+- **FTS5 Performance**: Contentless virtual table prevents data duplication, BM25 ranking for relevance, automatic index maintenance via triggers with proper DELETE/UPDATE syntax
+- **Hybrid Search Performance**: FTS5 for terms ≥3 characters (better for complex searches), LIKE for shorter terms (better for simple partial matches)
 - **Query Preprocessing**: Smart FTS5 query preprocessing handles special characters, operators, and wildcards for robust search
