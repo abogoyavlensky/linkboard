@@ -59,7 +59,7 @@
       [:h4 {:class ["font-medium" "text-red-900"]} "Delete Account"]
       [:p {:class ["text-sm" "text-red-600"]} "Permanently delete your account and all data"]]
      (c/modal
-       {:open-btn-text [:button {:class ["bg-red-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-red-600" "transition-colors" "cursor-pointer"]}
+       {:open-btn-text [:div {:class ["bg-red-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-red-600" "transition-colors" "cursor-pointer"]}
                         "Delete"]
         :title "Delete Account"
         :submit-btn-title "Delete Account"
