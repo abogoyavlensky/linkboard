@@ -19,14 +19,13 @@ END;
 --;;
 -- Trigger to maintain FTS5 index on UPDATE
 CREATE TRIGGER link_search_update AFTER UPDATE ON link BEGIN
-    UPDATE link_search 
-    SET title = new.title, url = new.url 
-    WHERE rowid = new.id;
+    INSERT INTO link_search(link_search, rowid, title, url) VALUES('delete', old.id, old.title, old.url);
+    INSERT INTO link_search(rowid, title, url) VALUES (new.id, new.title, new.url);
 END;
 --;;
 -- Trigger to maintain FTS5 index on DELETE
 CREATE TRIGGER link_search_delete AFTER DELETE ON link BEGIN
-    DELETE FROM link_search WHERE rowid = old.id;
+    INSERT INTO link_search(link_search, rowid, title, url) VALUES('delete', old.id, old.title, old.url);
 END;
 --;;
 -- Populate FTS5 table with existing link data
