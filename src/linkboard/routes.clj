@@ -47,7 +47,9 @@
                       :responses {200 {:body string?}}}}]
    ["/links"
     ["" {:name ::links
-         :parameters {:query [:map [:page {:optional true} pos-int?]]}
+         :parameters {:query [:map
+                              [:page {:optional true} pos-int?]
+                              [:q {:optional true} [:string {:min 1}]]]}
          :get {:handler board-handlers/all-links-handler
                :responses {200 {:body string?}}}
          :post {:handler home-handlers/create-link-handler
@@ -69,7 +71,9 @@
                 :responses {200 {:body string?}}}}]
     ["/:id"
      {:parameters {:path {:id pos-int?}
-                   :query [:map [:page {:optional true} pos-int?]]}}
+                   :query [:map
+                           [:page {:optional true} pos-int?]
+                           [:q {:optional true} [:string {:min 1}]]]}}
      ["" {:name ::board-details
           :get {:handler board-handlers/board-handler
                 :responses {200 {:body string?}}}

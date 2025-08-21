@@ -9,6 +9,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Board names on All Links page** with clickable navigation and bullet separator (•)
 - **Link count badges** displayed in board and All Links page headers
 - **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page, 10 per page for testing)
+- **Full-text search** with SQLite FTS5 for fast link searching by title and URL
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -47,26 +48,28 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Routing (`src/linkboard/routes.clj`)
 - RESTful API design:
   - `GET /?page=X` - Home page with board list and infinite scroll pagination
-  - `GET /links?page=X` - All Links page with board names, link counts, and infinite scroll pagination
+  - `GET /links?page=X&q=search` - All Links page with board names, link counts, infinite scroll pagination, and optional search
   - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
-  - `GET /boards/:id?page=X` - Board details with links, link counts, and infinite scroll pagination
+  - `GET /boards/:id?page=X&q=search` - Board details with links, link counts, infinite scroll pagination, and optional search
   - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
 - `wrap-auth` middleware for automatic session-id generation and persistence
 - **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
 - **Pagination support**: Optional `page` query parameters with automatic HTMX infinite scroll
+- **Search support**: Optional `q` query parameters for full-text search across link titles and URLs
 - Malli schema validation for request parameters
 
 #### Handlers
 - **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, account management, and login/logout
   - **Board list pagination**: Home handler supports infinite scroll for board lists with 3 response types
 - **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards with comprehensive security validation
-  - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries
-  - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts
-  - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance
+  - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries, supports full-text search
+  - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts, supports full-text search
+  - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance, includes search result counting
   - **Infinite scroll pagination**: All handlers support 3 response types (full page, HTMX page, pagination fragment) with configurable page sizes
+  - **Search integration**: FTS5-powered search with BM25 ranking, proper query preprocessing, and search term preservation in pagination
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -227,6 +230,7 @@ test/                  # Test files
 - `0002.up.sql`: User table creation with indexes
 - `0003.up.sql`: Sample data insertion (2 boards, 7 links)
 - `0004.up.sql`: Pagination test data (30 boards, 150 links across 5 categories)
+- `0005.up.sql`: FTS5 full-text search setup with contentless virtual table and triggers
 
 ## Available Functions and Queries
 
@@ -242,6 +246,17 @@ test/                  # Test files
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
 (user-owns-link? db {:link-id link-id :session-id session-id}) ; Check link ownership via JOIN
 (delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
+```
+
+### Full-Text Search (`src/linkboard/queries.clj`)
+```clojure
+(preprocess-search-query raw-query)              ; Preprocess user input for FTS5 MATCH queries
+(search-all-links-query user-id search-term)     ; Build FTS5 query for all user links with BM25 ranking
+(search-board-links-query user-id board-id search-term) ; Build FTS5 query for board-specific links
+(get-all-links-query user-id search-term)        ; Unified query function (search or regular)
+(get-board-links-query user-id board-id search-term) ; Unified board query function (search or regular)
+; Example: (get-all-links-query 1 "github") ; Returns FTS5 search results
+; Example: (get-all-links-query 1 nil)     ; Returns all links without search
 ```
 
 ### Pagination Utilities (`src/linkboard/board/pagination.clj`)
@@ -275,7 +290,9 @@ closeModal()                                     // Close Alpine.js modals via c
 ```clojure
 (infinite-scroll-trigger route next-page)        ; HTMX trigger with hx-trigger="revealed"
 (paginated-links links has-more? route page fn)  ; Renders links + optional infinite scroll trigger
-; Example: (paginated-links links true "/boards/1" 2 link-list-item-fn)
+(search-bar {:search-term term :route route})    ; Live search bar with HTMX and Alpine.js integration
+; Example: (paginated-links links true "/boards/1?q=search" 2 link-list-item-fn)
+; Example: (search-bar {:search-term "github" :route "/links"})
 ```
 
 ### URL Validation (`src/linkboard/spec.clj`)
@@ -360,18 +377,18 @@ bb clj-repl              # Start REPL with dev profile
 
 ### Features
 - **Infinite scroll pagination** (✅ implemented with HTMX revealed triggers and 25-item pages)
-- Search functionality
+- **Full-text search** (✅ implemented with SQLite FTS5, BM25 ranking, and live search with 300ms delay)
 - Link categorization/tagging
 - Import/export capabilities
 - Link sharing and collaboration
 
 ### Technical Enhancements
 - WebSocket support for real-time updates
-- Full-text search with SQLite FTS
 - Link preview generation
 - Bulk operations
 - **API rate limiting** (✅ implemented with configurable per-endpoint limits)
 - **Fixed footer with Add Link button** (✅ implemented with transparent blur background)
+- **Full-text search** (✅ implemented with SQLite FTS5, contentless virtual table, and BM25 ranking)
 - Enhanced toast notifications for other user actions (create/update/delete)
 
 ## Development Guidelines
@@ -402,6 +419,8 @@ bb clj-repl              # Start REPL with dev profile
 - **Board Name Integration**: Clickable board names on All Links page with bullet separator (•) and proper event handling
 - **Extended Click Areas**: URL areas extend to edit buttons while maintaining visual clarity
 - **Flexbox Alignment**: Use TailwindCSS flexbox utilities for proper left-alignment and responsive layouts
+- **Search UX**: Live search with 300ms delay, keyboard shortcuts (/ or Ctrl+K), cursor positioning at end of pre-filled text
+- **URL State Management**: Search terms preserved in browser URL for bookmarking and sharing search results
 
 ### Testing Strategy
 - Unit tests with eftest
@@ -417,3 +436,5 @@ bb clj-repl              # Start REPL with dev profile
 - **Efficient SQL COUNT queries**: Use database-level counting instead of in-memory collection counting for link counts
 - **LEFT JOIN optimization**: Fetch board information with links in single queries for All Links page
 - **Pagination Performance**: LIMIT/OFFSET queries with existing link-count calculations for smooth infinite scroll
+- **FTS5 Performance**: Contentless virtual table prevents data duplication, BM25 ranking for relevance, automatic index maintenance via triggers
+- **Query Preprocessing**: Smart FTS5 query preprocessing handles special characters, operators, and wildcards for robust search
