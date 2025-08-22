@@ -32,6 +32,7 @@
 
    ; Dropdown menu
    [:div {:class ["absolute" "right-0" "top-8" "mt-1" "w-48" "bg-white" "rounded-lg" "shadow-lg" "border" "border-gray-200" "z-50"]
+          :x-cloak ""
           :x-show "dropdownOpen"
           :x-transition:enter "transition ease-out duration-200"
           :x-transition:enter-start "opacity-0 scale-95"
@@ -39,7 +40,8 @@
           :x-transition:leave "transition ease-in duration-150"
           :x-transition:leave-start "opacity-100 scale-100"
           :x-transition:leave-end "opacity-0 scale-95"}
-    [:div {:class ["py-1"]}
+    [:div {:class ["py-1"]
+           :x-on:click "dropdownOpen = false"}
      (for [item items]
        item)]]])
 
