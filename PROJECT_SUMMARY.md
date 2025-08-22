@@ -15,6 +15,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
+- **Account management page** with export data to CSV, logout, and delete account functionality
+- **Account number display** with password-style dots, show/hide toggle, and clipboard copy functionality
 - Self-hosted deployment with Docker and Kamal
 
 ## Architecture
@@ -57,6 +59,9 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - `POST /links` - Create link (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
+  - `GET /account` - Account management page with user info and actions
+  - `GET /account/export` - Export all user data as CSV download
+  - `DELETE /account` - Delete account and all associated data
 - `wrap-auth` middleware for automatic session-id generation and persistence
 - **Rate limiting middleware** (`src/linkboard/limits.clj`): Global protection (200 requests/min per IP) with endpoint-specific limits
 - **Pagination support**: Optional `page` query parameters with automatic HTMX infinite scroll
@@ -72,6 +77,10 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance, includes search result counting
   - **Infinite scroll pagination**: All handlers support 3 response types (full page, HTMX page, pagination fragment) with configurable page sizes
   - **Search integration**: Hybrid FTS5/LIKE search system with BM25 ranking, proper query preprocessing, and search term preservation in pagination
+- **Account handlers** (`src/linkboard/account/handlers.clj`): Account management functionality
+  - **Account page handler**: Displays user account information with member since date
+  - **Export data handler**: Generates CSV export of all user boards and links with proper HTTP headers
+  - **Delete account handler**: Permanently removes user account and all associated data with CASCADE delete
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
 - **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
@@ -121,12 +130,17 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Modal closing via HTMX events**: Uses `HX-Trigger-After-Swap: modal-close` to close modals after successful form submissions
 - **Alpine.js event handling**: Listens for `modal-close` window events to set `modalOpen = false`
 
-#### Account Number UX (`src/linkboard/ui/components.clj`)
-- **Enhanced copy functionality** prevents checkmark icon from being copied to clipboard
+#### Account Number UX (`src/linkboard/ui/components.clj` + `src/linkboard/account/views.clj`)
+- **Enhanced copy functionality** with consistent copy/check icon transitions in both register modal and account page
+- **Account number display** with password-style dots (••••••••) by default for security
+- **Show/hide toggle** using eye/eye-slash icons with smooth Alpine.js state management
+- **Copy functionality** with clipboard integration and green check-circle success feedback
+- **Mobile-responsive design** with smaller text and wider modals to prevent account number wrapping
+- **Consistent icon sizing** using same button dimensions to prevent content shifting during transitions
 - External circled checkmark indicator positioned right of account number container
 - Reserved space layout prevents text container from resizing when checkmark appears
 - Satisfying scale animation (`scale-0` to `scale-100`) for visual feedback
-- Improved warning message: "Save this account number now! It's shown only once and cannot be recovered if lost."
+- Improved warning message: "Please store account number safely - you cannot restore your account if it is lost."
 
 #### Fixed Footer (`src/linkboard/ui/components.clj`)
 - **Persistent Add Link button** positioned at bottom-right of screen
@@ -200,9 +214,12 @@ src/linkboard/
 │   ├── views.clj        # Board and link forms with error handling  
 │   ├── pagination.clj   # Infinite scroll pagination utilities
 │   └── fetch.clj        # Link metadata fetching
+├── account/            # Account management
+│   ├── handlers.clj     # Account page, export data, delete account
+│   └── views.clj        # Account page UI with account number display
 ├── ui/                 # UI components
 │   ├── components.clj   # Base layout, modals, login forms, toast notifications, error handling, fixed footer, infinite scroll
-│   └── icons.clj        # UI icons including search, edit, delete, x-mark for clear functionality
+│   └── icons.clj        # UI icons including search, edit, delete, x-mark, eye, eye-slash, copy, check-circle
 └── utils/
 
 resources/
@@ -384,8 +401,10 @@ bb clj-repl              # Start REPL with dev profile
 ### Features
 - **Infinite scroll pagination** (✅ implemented with HTMX revealed triggers and 25-item pages)
 - **Full-text search** (✅ implemented with SQLite FTS5, BM25 ranking, and live search with 300ms delay)
+- **Account management** (✅ implemented with account page, data export, and account deletion)
+- **Account number security** (✅ implemented with password-style display, show/hide toggle, and copy functionality)
 - Link categorization/tagging
-- Import/export capabilities
+- Import/export capabilities (✅ CSV export implemented)
 - Link sharing and collaboration
 
 ### Technical Enhancements
@@ -428,6 +447,8 @@ bb clj-repl              # Start REPL with dev profile
 - **Search UX**: Live search with 300ms delay, keyboard shortcuts (/ or Ctrl+K), cursor positioning at end of pre-filled text
 - **Clear Search UX**: X button appears when searching, ESC key clears search, smooth transition back to all results
 - **URL State Management**: Search terms preserved in browser URL for bookmarking and sharing search results
+- **Account Number Security**: Display as password dots by default, eye icons for show/hide toggle, consistent copy/check icon behavior
+- **Mobile Account Number Layout**: Responsive text sizing, monospace fonts, whitespace-nowrap, wider modals to prevent wrapping on mobile screens
 
 ### Testing Strategy
 - Unit tests with eftest
