@@ -92,6 +92,10 @@
                                :hx-target (str "#link-" (:id link))
                                :hx-swap "outerHTML"
                                :hx-target-error "#link-edit-form-fields"}})
+               [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]
+                      :onclick (str "navigator.clipboard.writeText('" (:url link) "').then(() => { showToast('Link copied to clipboard!'); }).catch(() => { const textArea = document.createElement('textarea'); textArea.value = '" (:url link) "'; document.body.appendChild(textArea); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea); showToast('Link copied to clipboard!'); });")}
+                [:div {:class ["flex-shrink-0"]} icons/copy]
+                [:span "Copy Link"]]
                (c/modal
                  {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]}
                                   [:div {:class ["flex-shrink-0"]} icons/bin]
