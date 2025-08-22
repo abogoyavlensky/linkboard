@@ -82,7 +82,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - **Export data handler**: Generates CSV export of all user boards and links with proper HTTP headers
   - **Delete account handler**: Permanently removes user account and all associated data with CASCADE delete
 - **Session-based user management**: All handlers validate session and auto-create users as needed  
-- **Account creation workflow**: Secure registration with bcrypt+sha512 password hashing
+- **Account creation workflow**: Account numbers generated client-side, stored in plain text in backend db, with rate limits to API
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
 - **Error handling**: Form validation with error display and user-friendly 403 responses for unauthorized access
 - **Conditional logic**: Handlers use `cond` for clean multi-branch decision making (validation, authorization, success)
@@ -96,7 +96,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Automatic user creation**: Users created on first interaction with empty account_number
 - **Session-based identification**: All operations tied to session_id from `wrap-auth` middleware
 - **Account registration**: Users can later register with account numbers for persistence
-- **Secure password storage**: Account numbers hashed with bcrypt+sha512 algorithm
+- **Secure password storage**: Account numbers stored in plain text
 - **User isolation**: All boards/links scoped to individual users automatically
 - **Authorization validation**: `user-owns-board?` function ensures users can only access their own boards
 - **Comprehensive security**: All CRUD operations (add/update/delete) validate board ownership before execution
