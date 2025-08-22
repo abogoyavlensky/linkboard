@@ -12,6 +12,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Full-text search** with SQLite FTS5 for fast link searching by title and URL
 - **Hybrid search system** with FTS5 for terms ≥3 characters and LIKE for shorter terms
 - **Clear search functionality** with X button and ESC keyboard shortcut
+- **Static search bar** with HTMX targeting to prevent re-rendering during searches
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
