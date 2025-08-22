@@ -1,5 +1,6 @@
 (ns linkboard.routes
-  (:require [linkboard.board.handlers :as board-handlers]
+  (:require [linkboard.account.handlers :as account-handlers]
+            [linkboard.board.handlers :as board-handlers]
             [linkboard.home.handlers :as home-handlers]
             [linkboard.limits :as limits]
             [linkboard.spec :as spec]
@@ -45,6 +46,14 @@
    ["/logout" {:name ::logout
                :post {:handler home-handlers/logout-handler
                       :responses {200 {:body string?}}}}]
+   ["/account" {:name ::account
+                :get {:handler account-handlers/account-handler
+                      :responses {200 {:body string?}}}
+                :delete {:handler account-handlers/delete-account-handler
+                         :responses {200 {:body nil?}}}}]
+   ["/account/export" {:name ::export-data
+                       :get {:handler account-handlers/export-data-handler
+                             :responses {200 {:body string?}}}}]
    ["/links"
     ["" {:name ::links
          :parameters {:query [:map

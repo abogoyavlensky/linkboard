@@ -1,10 +1,9 @@
 (ns linkboard.spec
-  (:require [lambdaisland.uri :as uri]))
+  (:import [java.net URI]))
 
 (def Link [:and [:string {:min 1}]
            [:fn {:error/message "must be a valid URL"}
             #(try
-               (let [url (if (re-find #"^[a-zA-Z][a-zA-Z0-9+.-]*:" %) % (str "https://" %))
-                     parsed (uri/uri url)]
-                 (boolean (:host parsed)))
+               (let [u (URI. %)]
+                 (and (.getScheme u) (.getHost u)))
                (catch Exception _ false))]])

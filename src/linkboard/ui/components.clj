@@ -39,7 +39,7 @@
       :x-on:click "modalOpen=false"}
      [:form
       (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
-                      "border-neutral-200" "max-w-xs" "md:max-w-md" "rounded-lg"]
+                      "border-neutral-200" "max-w-sm" "md:max-w-md" "rounded-lg"]
               :x-trap.inert.noscroll "modalOpen"
               :x-on:click.stop ""}
              form-attrs)
@@ -181,22 +181,34 @@
                     [:div {:x-data "{copied: false}"
                            :class ["flex" "items-center" "gap-3"]}
                      [:div {:class ["bg-gray-100" "p-3" "rounded-lg" "font-mono" "text-lg" "text-center" "cursor-pointer" "flex-1"]
-                            :x-on:click "navigator.clipboard.writeText(accountId); copied = true; setTimeout(() => copied = false, 1000)"}
+                            :x-on:click "navigator.clipboard.writeText(accountId); copied = true; setTimeout(() => copied = false, 2000)"}
                       [:span {:x-text "accountId"}]
                       [:input {:type "hidden"
                                :name "account-number"
                                :x-model "accountId"}]]
-                     [:div {:class ["flex" "items-center" "justify-center" "w-6" "h-6" "rounded-full" "text-sm" "font-bold"]
-                            :x-bind:class "copied ? 'bg-green-500 text-white' : 'bg-transparent'"
-                            :x-transition:enter "transform ease-out duration-300"
-                            :x-transition:enter-start "opacity-0 scale-0"
-                            :x-transition:enter-end "opacity-100 scale-100"
-                            :x-transition:leave "transition ease-in duration-200"
-                            :x-transition:leave-start "opacity-100 scale-100"
-                            :x-transition:leave-end "opacity-0 scale-0"}
-                      [:span {:x-show "copied"} "✓"]]]
-                    [:p {:class ["text-sm" "text-amber-500" "mt-2" "text-left" "font-medium"]}
-                     "⚠️ This account number is shown only once. Please store it safely - you cannot restore your account if it's lost."]]]}))
+
+                     ; Copy button / Success indicator  
+                     [:div {:class ["p-1" "hover:bg-gray-100" "rounded"]
+                            :x-show "!copied"
+                            :x-on:click "navigator.clipboard.writeText(accountId); copied = true; setTimeout(() => copied = false, 2000)"}
+                      icons/copy]
+                     [:div {:class ["p-1" "rounded"]
+                            :x-show "copied"
+                            :disabled true}
+                      icons/check-circle]]
+                    [:div {:class ["bg-red-50" "border" "border-red-200" "rounded-lg" "p-4" "mt-4"]}
+                     [:div {:class ["flex" "items-start"]}
+                      [:div {:class ["flex-shrink-0"]}
+                       [:svg {:class ["h-5" "w-5" "text-red-400"]
+                              :viewBox "0 0 20 20"
+                              :fill "currentColor"}
+                        [:path {:fill-rule "evenodd"
+                                :d "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                :clip-rule "evenodd"}]]]
+                      [:div {:class ["ml-3"]}
+                       [:h3 {:class ["text-sm" "font-medium" "text-red-800"]} "Warning"]
+                       [:div {:class ["mt-2" "text-sm" "text-red-700"]}
+                        [:p "Please store account number safely - you cannot restore your account if it is lost."]]]]]]]}))
 
 (defn link-form-fields
   [{:keys [board-id]
@@ -273,12 +285,10 @@
         [:div
          {:class ["flex" "items-center"]}
          [:button
-          {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
-           :hx-post (ext/get-route router ::r/logout)
-           :hx-headers (ext/csrf-token-json)}
-          "Logout"]
-         [:button
-          {:class ["text-blue-500" "text-lg" "cursor-pointer"]}
+          {:class ["text-blue-500" "text-lg" "cursor-pointer"]
+           :hx-get (ext/get-route router ::r/account)
+           :hx-target "#body"
+           :hx-push-url "true"}
           "Account"]]
         [:div
          {:x-data "{ modalOpen: false, accountId: '' }"
