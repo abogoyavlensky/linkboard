@@ -75,35 +75,41 @@
          (str " • " (:url link))]
         (:url link))]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
-    (c/modal
-      {:open-btn-text (icons/edit)
-       :title "Edit link"
-       :submit-btn-title "Save changes"
-       :form-fields (link-edit-form-fields request {:link link})
-       :form-attrs {:hx-put (ext/get-route
-                              router
-                              ::r/link-details
-                              {:path {:link-id (:id link)}})
-                    :hx-headers (ext/csrf-token-json)
-                    :hx-target (str "#link-" (:id link))
-                    :hx-swap "outerHTML"
-                    :hx-target-error "#link-edit-form-fields"}})
-    (c/modal
-      {:open-btn-text icons/bin
-       :title "Delete link"
-       :submit-btn-title "Confirm"
-       :form-fields [:div
-                     [:p {:class ["text-md text-gray-600" "mb-2"]}
-                      "Are you sure you want to delete following link?"]
-                     [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
-                      (or (:title link) (:url link))]]
-       :form-attrs {:hx-delete (ext/get-route
-                                 router
-                                 ::r/link-details
-                                 {:path {:link-id (:id link)}})
-                    :hx-headers (ext/csrf-token-json)
-                    :hx-target (str "#link-" (:id link))
-                    :hx-swap "delete"}})]])
+    (c/dropdown-menu
+      {:trigger-icon icons/menu
+       :items [(c/modal
+                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]}
+                                  [:div {:class ["flex-shrink-0"]} (icons/edit)]
+                                  [:span "Edit"]]
+                  :title "Edit link"
+                  :submit-btn-title "Save changes"
+                  :form-fields (link-edit-form-fields request {:link link})
+                  :form-attrs {:hx-put (ext/get-route
+                                         router
+                                         ::r/link-details
+                                         {:path {:link-id (:id link)}})
+                               :hx-headers (ext/csrf-token-json)
+                               :hx-target (str "#link-" (:id link))
+                               :hx-swap "outerHTML"
+                               :hx-target-error "#link-edit-form-fields"}})
+               (c/modal
+                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]}
+                                  [:div {:class ["flex-shrink-0"]} icons/bin]
+                                  [:span "Delete"]]
+                  :title "Delete link"
+                  :submit-btn-title "Confirm"
+                  :form-fields [:div
+                                [:p {:class ["text-md text-gray-600" "mb-2"]}
+                                 "Are you sure you want to delete following link?"]
+                                [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
+                                 (or (:title link) (:url link))]]
+                  :form-attrs {:hx-delete (ext/get-route
+                                            router
+                                            ::r/link-details
+                                            {:path {:link-id (:id link)}})
+                               :hx-headers (ext/csrf-token-json)
+                               :hx-target (str "#link-" (:id link))
+                               :hx-swap "delete"}})]})]])
 
 (defn board-edit-form-fields
   [request {:keys [board]}]

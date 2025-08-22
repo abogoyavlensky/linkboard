@@ -19,6 +19,30 @@
     :type "button"}
    content])
 
+(defn dropdown-menu
+  [{:keys [trigger-icon items]}]
+  [:div {:class ["relative"]
+         :x-data "{ dropdownOpen: false }"
+         :x-on:keydown.escape.window "dropdownOpen = false"
+         :x-on:click.away "dropdownOpen = false"}
+   ; Menu trigger button
+   [:button {:class ["p-1" "text-gray-500" "hover:text-gray-700" "rounded" "cursor-pointer"]
+             :x-on:click "dropdownOpen = !dropdownOpen"}
+    trigger-icon]
+
+   ; Dropdown menu
+   [:div {:class ["absolute" "right-0" "top-8" "mt-1" "w-48" "bg-white" "rounded-lg" "shadow-lg" "border" "border-gray-200" "z-50"]
+          :x-show "dropdownOpen"
+          :x-transition:enter "transition ease-out duration-200"
+          :x-transition:enter-start "opacity-0 scale-95"
+          :x-transition:enter-end "opacity-100 scale-100"
+          :x-transition:leave "transition ease-in duration-150"
+          :x-transition:leave-start "opacity-100 scale-100"
+          :x-transition:leave-end "opacity-0 scale-95"}
+    [:div {:class ["py-1"]}
+     (for [item items]
+       item)]]])
+
 (defn modal
   [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.w-auto.h-auto
