@@ -24,16 +24,16 @@
    [:div {:class ["space-y-3"]}
 
     ; Account Number Row
-    [:div {:class ["flex" "justify-between" "items-center"]}
-     [:span {:class ["text-sm" "text-gray-600"]} "Account Number"]
-     [:div {:class ["flex" "items-center" "gap-2"]
+    [:div {:class ["flex" "justify-between" "items-center" "gap-2"]}
+     [:span {:class ["text-sm" "text-gray-600" "flex-shrink-0"]} "Account Number"]
+     [:div {:class ["flex" "items-center" "gap-1" "flex-shrink" "min-w-0"]
             :x-data (str "{ showAccountNumber: false, copySuccess: false, accountNumber: '" (:account-number user) "' }")}
       ; Account number display (dots or actual number)
-      [:span {:class ["text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none"]
+      [:span {:class ["text-xs" "sm:text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]
               :x-show "!showAccountNumber"
               :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
        "••••••••"]
-      [:span {:class ["text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none"]
+      [:span {:class ["text-xs" "sm:text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]
               :x-show "showAccountNumber"
               :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
        (:account-number user)]
