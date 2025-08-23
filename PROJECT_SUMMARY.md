@@ -5,7 +5,8 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 
 ## Key Features
 - Personal bookmark management with board organization
-- Automatic link metadata extraction (title, icons)
+- **Board and Link Favorites** with star icons (solid/outline) and priority sorting
+- Automatic link metadata extraction (title, icons) with **optional user-provided titles**
 - **Board names on All Links page** with clickable navigation and bullet separator (•)
 - **Link count badges** displayed in board and All Links page headers
 - **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page, 10 per page for testing)
@@ -57,8 +58,10 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - `POST /create-account` - Account creation endpoint (rate limited: 5/min per IP)
   - `POST /boards` - Create new board
   - `GET /boards/:id?page=X&q=search` - Board details with links, link counts, infinite scroll pagination, and optional search
-  - `POST /links` - Create link (can be associated with board or standalone)
+  - `POST /links` - Create link with optional title (can be associated with board or standalone)
   - `PUT/DELETE` operations for boards and links
+  - `PATCH /boards/:id/favorite` - Toggle board favorite status
+  - `PATCH /links/:link-id/favorite` - Toggle link favorite status
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
   - `GET /account` - Account management page with user info and actions
   - `GET /account/export` - Export all user data as CSV download
@@ -241,9 +244,9 @@ test/                  # Test files
 1. **user**: User accounts and sessions
    - id, session_id (indexed), account_number (indexed), created_at
 2. **board**: User's bookmark collections  
-   - id, title, user_id, created_at
+   - id, title, user_id, favorite (boolean), created_at
 3. **link**: Individual bookmarks
-   - id, url, title, icon, board_id, created_at
+   - id, url, title, icon, board_id, user_id, favorite (boolean), created_at
 
 ### Migrations
 - `0001.up.sql`: Initial schema
@@ -251,6 +254,8 @@ test/                  # Test files
 - `0003.up.sql`: Sample data insertion (2 boards, 7 links)
 - `0004.up.sql`: Pagination test data (30 boards, 150 links across 5 categories)
 - `0005.up.sql`: FTS5 full-text search setup with contentless virtual table and triggers (fixed for proper DELETE/UPDATE operations)
+- `0006.up.sql`: Add favorite boolean column to board table with DEFAULT FALSE
+- `0007.up.sql`: Add favorite boolean column to link table with DEFAULT FALSE
 
 ## Available Functions and Queries
 
@@ -266,6 +271,8 @@ test/                  # Test files
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
 (user-owns-link? db {:link-id link-id :session-id session-id}) ; Check link ownership via JOIN
 (delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
+(toggle-board-favorite! db {:board-id board-id :user-id user-id}) ; Toggle board favorite status
+(toggle-link-favorite! db {:link-id link-id :user-id user-id}) ; Toggle link favorite status
 ```
 
 ### Full-Text Search (`src/linkboard/queries.clj`)
@@ -404,6 +411,8 @@ bb clj-repl              # Start REPL with dev profile
 - **Full-text search** (✅ implemented with SQLite FTS5, BM25 ranking, and live search with 300ms delay)
 - **Account management** (✅ implemented with account page, data export, and account deletion)
 - **Account number security** (✅ implemented with password-style display, show/hide toggle, and copy functionality)
+- **Board and Link Favorites** (✅ implemented with star icons, priority sorting, and server-side HTMX toggle)
+- **Optional Link Titles** (✅ implemented with smart conditional metadata fetching)
 - Link categorization/tagging
 - Import/export capabilities (✅ CSV export implemented)
 - Link sharing and collaboration
@@ -450,6 +459,10 @@ bb clj-repl              # Start REPL with dev profile
 - **URL State Management**: Search terms preserved in browser URL for bookmarking and sharing search results
 - **Account Number Security**: Display as password dots by default, eye icons for show/hide toggle, consistent copy/check icon behavior
 - **Mobile Account Number Layout**: Responsive text sizing, monospace fonts, whitespace-nowrap, wider modals to prevent wrapping on mobile screens
+- **Favorite System**: Server-side star toggle with HTMX targeting specific icon containers, no Alpine.js state complexity
+- **Star Icon UX**: Use `x-cloak` to prevent blinking, solid star (yellow) for favorites, outline star (gray) for non-favorites
+- **Optional Form Fields**: Clear placeholder text indicating optional vs required fields, smart conditional processing
+- **Priority Sorting**: Favorite items appear first in all listings (boards and links) with `:favorite :desc` sorting
 
 ### Testing Strategy
 - Unit tests with eftest
@@ -468,3 +481,5 @@ bb clj-repl              # Start REPL with dev profile
 - **FTS5 Performance**: Contentless virtual table prevents data duplication, BM25 ranking for relevance, automatic index maintenance via triggers with proper DELETE/UPDATE syntax
 - **Hybrid Search Performance**: FTS5 for terms ≥3 characters (better for complex searches), LIKE for shorter terms (better for simple partial matches)
 - **Query Preprocessing**: Smart FTS5 query preprocessing handles special characters, operators, and wildcards for robust search
+- **Favorite Sorting Performance**: Efficient ORDER BY clauses with `:favorite :desc` prioritize starred items across all query types
+- **Conditional Metadata Fetching**: Skip network requests when user provides custom titles, improving link creation performance
