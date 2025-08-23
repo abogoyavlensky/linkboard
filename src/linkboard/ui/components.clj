@@ -21,7 +21,7 @@
 
 (defn dropdown-menu
   [{:keys [trigger-icon items]}]
-  [:div {:class ["relative"]
+  [:div {:class ["relative" "mt-1"]
          :x-data "{ dropdownOpen: false }"
          :x-on:keydown.escape.window "dropdownOpen = false"
          :x-on:click.away "dropdownOpen = false"}

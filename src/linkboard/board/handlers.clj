@@ -35,7 +35,8 @@
         search-term (:q query)
         links-query (q/get-board-links-query (:id user) (:id path) search-term)
         links (->> (pagination/add-pagination links-query page)
-                   (db/exec! db))
+                   (db/exec! db)
+                   (mapv (fn [v] (update v :favorite #(> % 0)))))
         link-count (if (and search-term (not (str/blank? search-term)))
                      ; Count search results within board using hybrid approach  
                      (->> (dissoc (assoc links-query :select [[[:count :*] :link-count]]) :left-join :order-by)
@@ -98,7 +99,8 @@
         search-term (:q query)
         links-query (q/get-all-links-query (:id user) search-term)
         links (->> (pagination/add-pagination links-query page)
-                   (db/exec! db))
+                   (db/exec! db)
+                   (mapv (fn [v] (update v :favorite #(> % 0)))))
         link-count (if (and search-term (not (str/blank? search-term)))
                      ; Count search results using FTS5
                      (->> (dissoc (assoc links-query :select [[[:count :*] :link-count]]) :left-join :order-by)
@@ -249,3 +251,19 @@
                           :user-id (:id user)})
       (-> (response/response nil)
           (response/header "HX-Trigger-After-Swap" "modal-close, show-link-deletion-toast")))))
+
+(defn toggle-link-favorite-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
+    :keys [session]
+    :as _request}]
+  (let [link-id (:link-id path)
+        user (q/get-user-by-session-id db (:session-id session))]
+    (if (q/user-owns-link? db {:link-id link-id
+                               :session-id (:session-id session)})
+      (let [updated-link (q/toggle-link-favorite! db {:link-id link-id
+                                                      :user-id (:id user)})]
+        (-> (ext/render-html (views/favorite-link-icon updated-link))
+            (response/header "HX-Trigger" "showFavoriteToggleToast")))
+      (response/status 403))))

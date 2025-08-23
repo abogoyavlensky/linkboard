@@ -93,6 +93,18 @@
                            (db/exec-one! db))]
     (update updated-board :favorite #(> % 0))))
 
+(defn toggle-link-favorite!
+  "Toggle the favorite status of a link."
+  [db {:keys [link-id user-id]}]
+  (let [updated-link (->> {:update :link
+                           :set {:favorite [:not :favorite]}
+                           :where [:and
+                                   [:= :id link-id]
+                                   [:= :user-id user-id]]
+                           :returning [:*]}
+                          (db/exec-one! db))]
+    (update updated-link :favorite #(> % 0))))
+
 (defn delete-link!
   "Delete a link from the database."
   [db {:keys [link-id user-id]}]
@@ -167,12 +179,12 @@
                                           :where [:and
                                                   [:= :l.user-id user-id]
                                                   [:raw "link_search MATCH " [search-term]]]
-                                          :order-by [[:search-rank :asc] [:l.created-at :desc]])
+                                          :order-by [[:search-rank :asc][:l.favorite :desc][:l.created-at :desc]])
     (< (count raw-search-term) 3) (assoc :select [:l.* [:b.title :board-title] [:b.id :board-id]]
                                          :where [:and
                                                  [:= :l.user-id user-id]
                                                  [:like :l.title (str "%" raw-search-term "%")]]
-                                         :order-by [[:l.created-at :desc]])))
+                                         :order-by [[:l.favorite :desc][:l.created-at :desc]])))
 
 (defn search-board-links-query
   "Build query for searching links within a specific board using FTS5 or LIKE for short terms.
@@ -188,14 +200,14 @@
                                                   [:= :b.id board-id]
                                                   [:= :b.user-id user-id]
                                                   [:raw "link_search MATCH " [search-term]]]
-                                          :order-by [[:search-rank :asc] [:l.created-at :desc]])
+                                          :order-by [[:search-rank :asc][:l.favorite :desc][:l.created-at :desc]])
     (< (count raw-search-term) 3) (assoc :select [:l.*]
                                          :where [:and
                                                  [:= :l.user-id user-id]
                                                  [:= :b.id board-id]
                                                  [:= :b.user-id user-id]
                                                  [:like :l.title (str "%" raw-search-term "%")]]
-                                         :order-by [[:l.created-at :desc]])))
+                                         :order-by [[:l.favorite :desc][:l.created-at :desc]])))
 
 (defn get-all-links-query
   "Build query for getting all user links, optionally with search.
@@ -207,7 +219,7 @@
      :from [[:link :l]]
      :left-join [[:board :b] [:= :l.board-id :b.id]]
      :where [:= :l.user-id user-id]
-     :order-by [[:l.created-at :desc]]}))
+     :order-by [[:l.favorite :desc][:l.created-at :desc]]}))
 
 (defn get-board-links-query
   "Build query for getting links within a specific board, optionally with search.
@@ -221,7 +233,7 @@
      :where [:and
              [:= :b.user-id user-id]
              [:= :b.id board-id]]
-     :order-by [[:l.created-at :desc]]}))
+     :order-by [[:l.favorite :desc][:l.created-at :desc]]}))
 
 (comment
   ; Test search preprocessing

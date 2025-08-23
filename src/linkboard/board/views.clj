@@ -5,6 +5,12 @@
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as ext]))
 
+(defn favorite-link-icon
+  [link]
+  [:div
+   {:id (str "favorite-link-icon-" (:id link))}
+   (if (:favorite link) icons/star-solid icons/star)])
+
 (defn link-edit-form-fields
   [request {:keys [link]}]
   (let [errors (get-in request [:errors :humanized])]
@@ -75,6 +81,12 @@
          (str " • " (:url link))]
         (:url link))]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
+    [:div {:onclick "event.stopPropagation()"
+           :hx-patch (ext/route router ::r/toggle-link-favorite {:path {:link-id (:id link)}})
+           :hx-headers (ext/csrf-token-json)
+           :hx-push-url "false"
+           :hx-target (str "#favorite-link-icon-" (:id link))}
+     (favorite-link-icon link)]
     (c/dropdown-menu
       {:trigger-icon icons/menu
        :items [(c/modal

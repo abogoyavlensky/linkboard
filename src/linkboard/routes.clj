@@ -65,13 +65,16 @@
                 :parameters {:form [:map
                                     [:url spec/Link]
                                     [:board {:optional true} pos-int?]]}}}]
-    ["/:link-id" {:name ::link-details
-                  :put {:handler board-handlers/update-link-handler
-                        :parameters {:path {:link-id pos-int?}
-                                     :form {:title [:string {:min 1}]
-                                            :url spec/Link}}}
-                  :delete {:handler board-handlers/delete-link-handler
-                           :parameters {:path {:link-id pos-int?}}}}]]
+    ["/:link-id"
+     {:parameters {:path {:link-id pos-int?}}}
+     ["" {:name ::link-details
+          :put {:handler board-handlers/update-link-handler
+                :parameters {:form {:title [:string {:min 1}]
+                                    :url spec/Link}}}
+          :delete {:handler board-handlers/delete-link-handler}}]
+     ["/favorite" {:name ::toggle-link-favorite
+                   :patch {:handler board-handlers/toggle-link-favorite-handler
+                           :responses {200 {:body string?}}}}]]]
 
    ["/boards"
     ["" {:name ::board-list
