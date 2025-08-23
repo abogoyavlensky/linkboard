@@ -224,5 +224,7 @@
       (let [updated-board (queries/toggle-board-favorite! db {:board-id board-id
                                                               :user-id (:id user)})]
         (-> (ext/render-html (views/favorite-icon updated-board))
-            (response/header "HX-Trigger" "showFavoriteToggleToast")))
+            (response/header "HX-Trigger" (if (:favorite updated-board)
+                                            "showBoardFavoriteAddedToast"
+                                            "showBoardFavoriteRemovedToast"))))
       (response/status 403))))
