@@ -64,6 +64,7 @@
          :post {:handler home-handlers/create-link-handler
                 :parameters {:form [:map
                                     [:url spec/Link]
+                                    [:title {:optional true} :string]
                                     [:board {:optional true} pos-int?]]}}}]
     ["/:link-id"
      {:parameters {:path {:link-id pos-int?}}}

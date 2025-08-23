@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
-  (:require [linkboard.board.fetch :as fetch]
+  (:require [clojure.string :as str]
+            [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as board-views]
             [linkboard.core.db :as db]
@@ -168,14 +169,19 @@
     :else
     (let [user (queries/ensure-user-exists! db (:session-id session))
           board-id (:board form)
-          metadata (fetch/fetch-page-metadata (:url form))]
+          user-title (str/trim (:title form))
+          metadata (fetch/fetch-page-metadata (:url form))
+          ; Use user-provided title or fallback to metadata title
+          final-title (if (and user-title (not (str/blank? user-title)))
+                        user-title
+                        (:title metadata))]
       ; Validate that if board_id is provided, the user owns that board
       (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
                                                            :session-id (:session-id session)})))
         (response/status 403)
         (let [link (->> {:insert-into :link
                          :values [{:url (:url form)
-                                   :title (:title metadata)
+                                   :title final-title
                                    :icon (:icon metadata)
                                    :board-id board-id
                                    :user-id (:id user)}]

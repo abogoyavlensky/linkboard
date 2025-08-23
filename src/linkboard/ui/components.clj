@@ -243,6 +243,21 @@
     [:div
      {:id "link-form-fields"}
      [:input
+      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm" "mb-3"
+                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                       "ring-offset-background" "placeholder:text-neutral-500"
+                       "focus:border-neutral-300" "focus:outline-hidden"
+                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                      (when (seq (:title errors))
+                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+       :type "text"
+       :name "title"
+       :value (get-in request [:parameters :form :title] nil)
+       :placeholder "Title (optional)"}]
+     (for [error (:title errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1" "mb-3"]} (str/capitalize error)])
+     [:input
       {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
                        "bg-white" "border" "rounded-md" "border-neutral-300"
                        "ring-offset-background" "placeholder:text-neutral-500"
