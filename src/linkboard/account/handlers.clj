@@ -91,6 +91,6 @@
 
         ; Clear session and redirect
         (-> (response/response nil)
-            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+            (response/header "HX-Redirect" (ext/route router ::r/home-page))
             (response/header "HX-Trigger" "showAccountDeletionToast")
             (assoc :session nil))))))

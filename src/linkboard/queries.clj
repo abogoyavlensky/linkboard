@@ -81,6 +81,18 @@
        (db/exec-one! db)
        (boolean)))
 
+(defn toggle-board-favorite!
+  "Toggle the favorite status of a board."
+  [db {:keys [board-id user-id]}]
+  (let [updated-board (->> {:update :board
+                            :set {:favorite [:not :favorite]}
+                            :where [:and
+                                    [:= :id board-id]
+                                    [:= :user-id user-id]]
+                            :returning [:*]}
+                           (db/exec-one! db))]
+    (update updated-board :favorite #(> % 0))))
+
 (defn delete-link!
   "Delete a link from the database."
   [db {:keys [link-id user-id]}]

@@ -67,7 +67,7 @@
         [:span
          [:span {:class ["hover:underline" "cursor-pointer"]
                  :style "color: inherit;"
-                 :hx-get (ext/get-route router ::r/board-details {:path {:id (:board-id link)}})
+                 :hx-get (ext/route router ::r/board-details {:path {:id (:board-id link)}})
                  :hx-target "#body"
                  :hx-push-url "true"
                  :onclick "event.preventDefault(); event.stopPropagation(); return false;"}
@@ -84,7 +84,7 @@
                   :title "Edit link"
                   :submit-btn-title "Save changes"
                   :form-fields (link-edit-form-fields request {:link link})
-                  :form-attrs {:hx-put (ext/get-route
+                  :form-attrs {:hx-put (ext/route
                                          router
                                          ::r/link-details
                                          {:path {:link-id (:id link)}})
@@ -107,7 +107,7 @@
                                  "Are you sure you want to delete following link?"]
                                 [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
                                  (or (:title link) (:url link))]]
-                  :form-attrs {:hx-delete (ext/get-route
+                  :form-attrs {:hx-delete (ext/route
                                             router
                                             ::r/link-details
                                             {:path {:link-id (:id link)}})
@@ -158,7 +158,7 @@
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:a {:class ["text-blue-500" "hover:text-blue-600"]
-          :hx-get (ext/get-route router ::r/home-page)
+          :hx-get (ext/route router ::r/home-page)
           :hx-target "#body"
           :hx-push-url "true"}
       icons/chevron-left]
@@ -172,7 +172,7 @@
         :title "Edit board"
         :submit-btn-title "Save changes"
         :form-fields (board-edit-form-fields request {:board board})
-        :form-attrs {:hx-put (ext/get-route router ::r/board-details {:path {:id (:id board)}})
+        :form-attrs {:hx-put (ext/route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (ext/csrf-token-json)
                      :hx-target "#board-edit-form-fields"}})
      (c/modal
@@ -187,7 +187,7 @@
                        "This will permanently delete the board and all its links."]
                       [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
                        (:title board)]]
-        :form-attrs {:hx-delete (ext/get-route router ::r/board-details {:path {:id (:id board)}})
+        :form-attrs {:hx-delete (ext/route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (ext/csrf-token-json)}})]]
    (list
      (c/search-bar {:search-term search-term
@@ -229,7 +229,7 @@
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:a {:class ["text-blue-500" "hover:text-blue-600"]
-          :hx-get (ext/get-route router ::r/home-page)
+          :hx-get (ext/route router ::r/home-page)
           :hx-target "#body"
           :hx-push-url "true"}
       icons/chevron-left]

@@ -77,7 +77,7 @@
       [:h4 {:class ["font-medium" "text-gray-900"]} "Logout"]
       [:p {:class ["text-sm" "text-gray-600"]} "Sign out of your account"]]
      [:button {:class ["bg-gray-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-gray-600" "transition-colors" "cursor-pointer"]
-               :hx-post (ext/get-route router ::r/logout)
+               :hx-post (ext/route router ::r/logout)
                :hx-headers (ext/csrf-token-json)}
       "Logout"]]
 
@@ -86,7 +86,7 @@
      [:div
       [:h4 {:class ["font-medium" "text-gray-900"]} "Export Data"]
       [:p {:class ["text-sm" "text-gray-600"]} "Download all your bookmarks as CSV"]]
-     [:a {:href (ext/get-route router ::r/export-data)
+     [:a {:href (ext/route router ::r/export-data)
           :class ["bg-blue-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-blue-600" "transition-colors"]}
       "Export"]]
 
@@ -120,7 +120,7 @@
                                :class ["w-full" "px-3" "py-2" "border" "rounded-md"]
                                :placeholder "DELETE"
                                :required true}]]
-        :form-attrs {:hx-delete (ext/get-route router ::r/account)
+        :form-attrs {:hx-delete (ext/route router ::r/account)
                      :hx-headers (ext/csrf-token-json)}})]]])
 
 (defn account-view
@@ -131,7 +131,7 @@
    ; Header
    [:div {:class ["flex" "items-center" "gap-2" "mb-6"]}
     [:a {:class ["text-blue-500" "hover:text-blue-600"]
-         :hx-get (ext/get-route router ::r/home-page)
+         :hx-get (ext/route router ::r/home-page)
          :hx-target "#body"
          :hx-push-url "true"}
      icons/chevron-left]

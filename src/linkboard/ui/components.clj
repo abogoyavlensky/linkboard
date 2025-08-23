@@ -136,7 +136,7 @@
                       :x-on:click "modalOpen = true"}
                      "Login"]
      :submit-btn-title "Login"
-     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/login)
+     :form-attrs {:hx-post (ext/route (:reitit.core/router request) ::r/login)
                   :hx-target "#login-form-fields"}
      :form-fields (login-form-fields request)}))
 
@@ -199,7 +199,7 @@
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
                      "Register"]
      :submit-btn-title "Create Account"
-     :form-attrs {:hx-post (ext/get-route (:reitit.core/router request) ::r/create-account)
+     :form-attrs {:hx-post (ext/route (:reitit.core/router request) ::r/create-account)
                   :hx-target "#body"}
      :form-fields [:div
                    [:div {:class ["mb-4"]}
@@ -296,7 +296,7 @@
      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
      [:div
       [:a
-       {:hx-get (ext/get-route router ::r/home-page)
+       {:hx-get (ext/route router ::r/home-page)
         :hx-target "#body"
         :hx-push-url "true"}
        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
@@ -312,7 +312,7 @@
          {:class ["flex" "items-center"]}
          [:button
           {:class ["text-blue-500" "text-lg" "cursor-pointer"]
-           :hx-get (ext/get-route router ::r/account)
+           :hx-get (ext/route router ::r/account)
            :hx-target "#body"
            :hx-push-url "true"}
           "Account"]]
@@ -338,7 +338,7 @@
        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
                                           icons/plus-circle "Add link"]})
         :title "Add link"
-        :form-attrs {:hx-post (ext/get-route router ::r/links)
+        :form-attrs {:hx-post (ext/route router ::r/links)
                      :hx-target "#link-form-fields"
                      :hx-swap "innerHTML"}
         :form-fields (link-form-fields request)})]]

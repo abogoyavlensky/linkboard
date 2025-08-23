@@ -27,10 +27,11 @@
                       :from [[:board :b]]
                       :left-join [[:link :l] [:= :b.id :l.board-id]]
                       :where [:= :b.user-id (:id user)]
-                      :group-by [:b.id :b.title]
-                      :order-by [[:b.created-at :desc]]}
+                      :group-by [:b.id :b.title :b.favorite]
+                      :order-by [[:b.favorite :desc] [:b.created-at :desc]]}
         boards (->> (pagination/add-pagination boards-query page)
-                    (db/exec! db))
+                    (db/exec! db)
+                    (mapv (fn [v] (update v :favorite #(> % 0)))))
         board-count (->> {:select [[[:count :id] :board-count]]
                           :from [:board]
                           :where [:= :user-id (:id user)]}
@@ -114,7 +115,7 @@
             identity-data (select-keys created-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+            (response/header "HX-Redirect" (ext/route router ::r/home-page))
             (response/header "HX-Trigger" "showRegistrationToast")))
 
       (:account-number user)
@@ -127,7 +128,7 @@
             identity-data (select-keys updated-user [:id :session-id])]
         (-> (ext/render-html [:div])
             (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+            (response/header "HX-Redirect" (ext/route router ::r/home-page))
             (response/header "HX-Trigger" "showRegistrationToast"))))))
 
 (defn login-handler
@@ -144,7 +145,7 @@
       (-> (ext/render-html [:div])
           (assoc :session (assoc session :identity (select-keys user [:id :session-id])
                                  :session-id (:session-id user)))
-          (response/header "HX-Redirect" (ext/get-route router ::r/home-page)))
+          (response/header "HX-Redirect" (ext/route router ::r/home-page)))
       ; If user not found, return an error response
       (-> request
           (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
@@ -199,5 +200,21 @@
   [{router :reitit.core/router
     :keys [_session]}]
   (-> (ext/render-html [:div])
-      (response/header "HX-Redirect" (ext/get-route router ::r/home-page))
+      (response/header "HX-Redirect" (ext/route router ::r/home-page))
       (assoc :session nil)))
+
+(defn toggle-board-favorite-handler
+  {:malli/schema [:=> [:cat :map] :map]}
+  [{{:keys [db]} :context
+    {:keys [path]} :parameters
+    :keys [session]
+    :as _request}]
+  (let [board-id (:id path)
+        user (queries/get-user-by-session-id db (:session-id session))]
+    (if (queries/user-owns-board? db {:board-id board-id
+                                      :session-id (:session-id session)})
+      (let [updated-board (queries/toggle-board-favorite! db {:board-id board-id
+                                                              :user-id (:id user)})]
+        (-> (ext/render-html (views/favorite-icon updated-board))
+            (response/header "HX-Trigger" "showFavoriteToggleToast")))
+      (response/status 403))))

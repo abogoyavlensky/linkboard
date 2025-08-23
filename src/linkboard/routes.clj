@@ -89,4 +89,7 @@
           :put {:handler board-handlers/update-board-handler
                 :parameters {:form {:title [:string {:min 1}]}}}
           :delete {:handler board-handlers/delete-board-handler
-                   :responses {200 {:body nil?}}}}]]]])
+                   :responses {200 {:body nil?}}}}]
+     ["/favorite" {:name ::toggle-board-favorite
+                   :patch {:handler home-handlers/toggle-board-favorite-handler
+                           :responses {200 {:body string?}}}}]]]])

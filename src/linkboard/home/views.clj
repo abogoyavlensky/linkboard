@@ -3,21 +3,35 @@
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
-            [reitit-extras.core :as reitit-extras]))
+            [reitit-extras.core :as ext]))
+
+(defn favorite-icon
+  [board]
+  [:div
+   {:id (str "favorite-icon-" (:id board))}
+   (if (:favorite board) icons/star-solid icons/star)])
 
 (defn list-item
   [{:keys [router board]}]
-  ; TODO: make this component common
-  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
-               "justify-between" "shadow-xs" "mt-2" "cursor-pointer"]
-       :hx-get (reitit-extras/get-route router ::r/board-details {:path {:id (:id board)}})
-       :hx-target "#body"
-       :hx-push-url "true"}
-   [:div {:class ["flex" "items-center" "gap-3"]}
-    icons/folder
-    [:span {:class ["text-lg"]} (:title board)]]
+  [:div {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
+                 "justify-between" "shadow-xs" "mt-2"]
+         :id (str "board-" (:id board))}
+   [:a {:class ["flex" "items-center" "gap-3" "flex-1" "cursor-pointer"]
+        :hx-get (ext/route router ::r/board-details {:path {:id (:id board)}})
+        :hx-target "#body"
+        :hx-push-url "true"}
+    [:div {:class ["flex" "items-center" "gap-3"]}
+     icons/folder
+     [:span {:class ["text-lg"]} (:title board)]]]
    [:div {:class ["flex" "items-center" "gap-2"]}
     [:span {:class ["text-gray-500"]} (or (:link-count board) 0)]
+    [:div {:class ["flex" "items-center"]
+           :onclick "event.stopPropagation()"
+           :hx-patch (ext/route router ::r/toggle-board-favorite {:path {:id (:id board)}})
+           :hx-headers (ext/csrf-token-json)
+           :hx-push-url "false"
+           :hx-target (str "#favorite-icon-" (:id board))}
+     (favorite-icon board)]
     [:svg {:class ["w-5" "h-5" "text-gray-400" "rotate-180"]
            :viewBox "0 0 24 24"
            :fill "none"
@@ -86,7 +100,7 @@
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "cursor-pointer"]
-        :hx-get (reitit-extras/get-route router ::r/links)
+        :hx-get (ext/route router ::r/links)
         :hx-target "#body"
         :hx-push-url "true"}
     [:div {:class ["flex" "items-center" "gap-3"]}
@@ -106,7 +120,7 @@
      [:div (c/modal
              {:open-btn-text icons/plus
               :title "Create board"
-              :form-attrs {:hx-post (reitit-extras/get-route router ::r/board-list)
+              :form-attrs {:hx-post (ext/route router ::r/board-list)
                            :hx-target "#board-form-fields"
                            :hx-swap "innerHTML"}
               :form-fields (board-form-fields request)})]]

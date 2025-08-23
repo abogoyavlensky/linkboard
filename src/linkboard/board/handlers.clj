@@ -214,7 +214,7 @@
       ; Render updated board content
       (-> (response/response [:div])
           (response/header "HX-Redirect"
-                           (ext/get-route router ::r/board-details {:path {:id board-id}}))
+                           (ext/route router ::r/board-details {:path {:id board-id}}))
           (response/header "HX-Trigger" "showBoardEditToast")))))
 
 (defn delete-board-handler
