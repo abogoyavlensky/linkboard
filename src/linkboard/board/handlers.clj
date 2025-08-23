@@ -31,6 +31,7 @@
                             [:= :id (:id path)]
                             [:= :user-id (:id user)]]}
                    (db/exec-one! db))
+        boards (q/get-user-boards-minimal db (:id user))
         page (pagination/get-page-param request)
         search-term (:q query)
         links-query (q/get-board-links-query (:id user) (:id path) search-term)
@@ -63,7 +64,8 @@
                                        :has-more? has-more?
                                        :route route
                                        :page page
-                                       :search-term search-term})
+                                       :search-term search-term
+                                       :boards boards})
            (c/body request*)
            (c/base)
            (ext/render-html))
@@ -74,7 +76,8 @@
                                                   :has-more? has-more?
                                                   :route route
                                                   :page page
-                                                  :search-term search-term})
+                                                  :search-term search-term
+                                                  :boards boards})
            (ext/render-html))
 
       :else
@@ -85,7 +88,8 @@
                                        :has-more? has-more?
                                        :route route
                                        :page page
-                                       :search-term search-term})
+                                       :search-term search-term
+                                       :boards boards})
            (c/body request*)
            (ext/render-html)))))
 
@@ -95,6 +99,7 @@
     :keys [session]
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
+        boards (q/get-user-boards-minimal db (:id user))
         page (pagination/get-page-param request)
         search-term (:q query)
         links-query (q/get-all-links-query (:id user) search-term)
@@ -123,7 +128,8 @@
                                           :has-more? has-more?
                                           :route route
                                           :page page
-                                          :search-term search-term})
+                                          :search-term search-term
+                                          :boards boards})
            (c/body request)
            (c/base)
            (ext/render-html))
@@ -134,7 +140,8 @@
                                                      :has-more? has-more?
                                                      :route route
                                                      :page page
-                                                     :search-term search-term})
+                                                     :search-term search-term
+                                                     :boards boards})
            (ext/render-html))
 
       :else
@@ -144,7 +151,8 @@
                                           :has-more? has-more?
                                           :route route
                                           :page page
-                                          :search-term search-term})
+                                          :search-term search-term
+                                          :boards boards})
            (c/body request)
            (ext/render-html)))))
 
@@ -161,38 +169,52 @@
         (response/status 403))
 
     (seq errors)
-    (-> (views/link-edit-form-fields request {:link form})
-        (ext/render-html)
-        (response/status 400))
+    (let [user (q/get-user-by-session-id db (:session-id session))
+          boards (q/get-user-boards-minimal db (:id user))]
+      (-> (views/link-edit-form-fields request {:link form
+                                                :boards boards})
+          (ext/render-html)
+          (response/status 400)))
 
     :else
     (let [link-id (-> path :link-id)
           title (:title form)
           url (:url form)
+          board-id (when-let [bid (:board-id form)]
+                     (when (not (str/blank? (str bid)))
+                       (parse-long (str bid))))
           user (q/get-user-by-session-id db (:session-id session))
-          metadata (fetch/fetch-page-metadata url)
-          _ (->> {:update :link
-                  :set {:title title
-                        :url url
-                        :icon (:icon metadata)}
-                  :where [:and
-                          [:= :id link-id]
-                          [:= :user-id (:id user)]]}
-                 (db/exec-one! db))
-          ; Get the complete updated link
-          updated-link (->> {:select [:*]
-                             :from [:link]
-                             :where [:and
-                                     [:= :id link-id]
-                                     [:= :user-id (:id user)]]}
-                            (db/exec-one! db))]
-      (-> (views/link-list-item {:request request
-                                 :router router
-                                 :link updated-link})
-          (ext/render-html)
-          (response/header "HX-Refresh" "true")
-          (response/header "HX-Trigger" "showLinkEditToast")
-          (response/header "HX-Trigger-After-Swap" "modal-close")))))
+          boards (q/get-user-boards-minimal db (:id user))
+          metadata (fetch/fetch-page-metadata url)]
+      ; Validate board ownership if board-id is provided
+      (if (and board-id (not (q/user-owns-board? db {:board-id board-id
+                                                     :session-id (:session-id session)})))
+        (-> (response/response "Board not found or access denied")
+            (response/status 403))
+        (let [_ (->> {:update :link
+                      :set {:title title
+                            :url url
+                            :icon (:icon metadata)
+                            :board-id board-id}
+                      :where [:and
+                              [:= :id link-id]
+                              [:= :user-id (:id user)]]}
+                     (db/exec-one! db))
+              ; Get the complete updated link
+              updated-link (->> {:select [:*]
+                                 :from [:link]
+                                 :where [:and
+                                         [:= :id link-id]
+                                         [:= :user-id (:id user)]]}
+                                (db/exec-one! db))]
+          (-> (views/link-list-item {:request request
+                                     :router router
+                                     :link updated-link
+                                     :boards boards})
+              (ext/render-html)
+              (response/header "HX-Refresh" "true")
+              (response/header "HX-Trigger" "showLinkEditToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
 (defn update-board-handler
   [{{:keys [db]} :context

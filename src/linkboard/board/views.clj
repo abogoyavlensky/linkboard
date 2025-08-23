@@ -12,7 +12,7 @@
    (if (:favorite link) icons/star-solid icons/star)])
 
 (defn link-edit-form-fields
-  [request {:keys [link]}]
+  [request {:keys [link boards]}]
   (let [errors (get-in request [:errors :humanized])]
     [:div
      {:id "link-edit-form-fields"}
@@ -29,6 +29,22 @@
         :placeholder "Link title"}]]
      (for [error (:title errors)]
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     [:div.mb-4
+      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "board"} "Board"]
+      [:select
+       {:name "board-id"
+        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
+                       (when (seq (:board-id errors))
+                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+        :id "board"}
+       [:option {:value ""
+                 :selected (nil? (:board-id link))} "No board"]
+       (for [board boards]
+         [:option {:value (:id board)
+                   :selected (= (:id board) (:board-id link))}
+          (:title board)])]]
+     (for [error (:board-id errors)]
+       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
      [:div
       [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "url"} "URL"]
       [:input
@@ -44,7 +60,7 @@
        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
 
 (defn link-list-item
-  [{:keys [request router link show-board?]}]
+  [{:keys [request router link show-board? boards]}]
   [:div.link-item {:id (str "link-" (:id link))
                    :class ["w-full" "bg-white" "rounded-xl" "mb-2" "p-4" "flex"
                            "items-center" "shadow-xs"]}
@@ -95,7 +111,8 @@
                                   [:span "Edit"]]
                   :title "Edit link"
                   :submit-btn-title "Save changes"
-                  :form-fields (link-edit-form-fields request {:link link})
+                  :form-fields (link-edit-form-fields request {:link link
+                                                               :boards boards})
                   :form-attrs {:hx-put (ext/route
                                          router
                                          ::r/link-details
@@ -164,7 +181,7 @@
 
 (defn board-view
   [{router :reitit.core/router
-    :as request} {:keys [board links link-count has-more? route page search-term]}]
+    :as request} {:keys [board links link-count has-more? route page search-term boards]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -216,12 +233,13 @@
           (fn [link]
             (link-list-item {:router router
                              :request request
-                             :link link})))
+                             :link link
+                             :boards boards})))
         (empty-links))])])
 
 (defn board-pagination-view
   [{router :reitit.core/router
-    :as request} {:keys [links has-more? route page]}]
+    :as request} {:keys [links has-more? route page boards]}]
   ; Only render new links + infinite scroll trigger for pagination requests
   (c/paginated-links
     links
@@ -231,11 +249,12 @@
     (fn [link]
       (link-list-item {:router router
                        :request request
-                       :link link}))))
+                       :link link
+                       :boards boards}))))
 
 (defn all-links-view
   [{router :reitit.core/router
-    :as request} {:keys [links link-count has-more? route page search-term]}]
+    :as request} {:keys [links link-count has-more? route page search-term boards]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
@@ -265,12 +284,13 @@
             (link-list-item {:router router
                              :request request
                              :link link
-                             :show-board? true})))
+                             :show-board? true
+                             :boards boards})))
         (empty-links))])])
 
 (defn all-links-pagination-view
   [{router :reitit.core/router
-    :as request} {:keys [links has-more? route page]}]
+    :as request} {:keys [links has-more? route page boards]}]
   ; Only render new links + infinite scroll trigger for pagination requests
   (c/paginated-links
     links
@@ -281,4 +301,5 @@
       (link-list-item {:router router
                        :request request
                        :link link
-                       :show-board? true}))))
+                       :show-board? true
+                       :boards boards}))))

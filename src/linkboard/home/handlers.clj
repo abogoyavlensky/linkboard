@@ -179,7 +179,8 @@
       (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
                                                            :session-id (:session-id session)})))
         (response/status 403)
-        (let [link (->> {:insert-into :link
+        (let [boards (queries/get-user-boards-minimal db (:id user))
+              link (->> {:insert-into :link
                          :values [{:url (:url form)
                                    :title final-title
                                    :icon (:icon metadata)
@@ -193,7 +194,8 @@
                                       {:hx-swap-oob "afterbegin:#link-list"}
                                       (board-views/link-list-item {:request request
                                                                    :router router
-                                                                   :link link})]
+                                                                   :link link
+                                                                   :boards boards})]
                                      ; Remove empty state
                                      [:div
                                       {:hx-swap-oob "delete:#empty-links"}]))

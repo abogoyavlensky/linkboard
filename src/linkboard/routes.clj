@@ -70,8 +70,10 @@
      {:parameters {:path {:link-id pos-int?}}}
      ["" {:name ::link-details
           :put {:handler board-handlers/update-link-handler
-                :parameters {:form {:title [:string {:min 1}]
-                                    :url spec/Link}}}
+                :parameters {:form [:map
+                                    [:title [:string {:min 1}]]
+                                    [:url spec/Link]
+                                    [:board-id {:optional true} [:maybe pos-int?]]]}}
           :delete {:handler board-handlers/delete-link-handler}}]
      ["/favorite" {:name ::toggle-link-favorite
                    :patch {:handler board-handlers/toggle-link-favorite-handler

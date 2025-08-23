@@ -235,6 +235,15 @@
              [:= :b.id board-id]]
      :order-by [[:l.favorite :desc] [:l.created-at :desc]]}))
 
+(defn get-user-boards-minimal
+  "Get minimal board data (id and title) for a user, ordered by title."
+  [db user-id]
+  (->> {:select [:id :title]
+        :from [:board]
+        :where [:= :user-id user-id]
+        :order-by [:title]}
+       (db/exec! db)))
+
 (comment
   ; Test search preprocessing
   (preprocess-search-query "openai.com cool stuff")
