@@ -298,6 +298,8 @@
     :hx-ext "response-targets"
     :hx-history-elt true
     :class ["bg-slate-50"]
+    :x-data ""
+    :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'a') { const addButton = document.querySelector('footer button[x-on\\\\:click*=\"modalOpen=true\"]'); if(addButton) { addButton.click(); $event.preventDefault(); } }"
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
     :hx-on:show-board-edit-toast "showToast('Board updated successfully!')"
