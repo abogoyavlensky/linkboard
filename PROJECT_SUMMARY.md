@@ -7,6 +7,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Personal bookmark management with board organization
 - **Board and Link Favorites** with star icons (solid/outline) and priority sorting
 - Automatic link metadata extraction (title, icons) with **optional user-provided titles**
+- **Board selector in link edit forms** with dropdown showing all user boards ordered alphabetically by title
 - **Board names on All Links page** with clickable navigation and bullet separator (•)
 - **Link count badges** displayed in board and All Links page headers
 - **Infinite scroll pagination** with HTMX-powered seamless loading (25 links per page, 10 per page for testing)
@@ -14,6 +15,12 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Hybrid search system** with FTS5 for terms ≥3 characters and LIKE for shorter terms
 - **Clear search functionality** with X button and ESC keyboard shortcut
 - **Static search bar** with HTMX targeting to prevent re-rendering during searches
+- **Global keyboard shortcuts** with cross-platform compatibility (macOS/Windows/Linux):
+  - Ctrl/Cmd + A: Add Link (global)
+  - Ctrl/Cmd + B: Create Board (home page only)
+  - Ctrl/Cmd + Shift + L: Navigate to All Links (global)
+  - Ctrl/Cmd + K: Search (existing, in search contexts)
+- **Smart modal management** prevents stacking by auto-closing existing modals when opening new ones via keyboard shortcuts
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -59,7 +66,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - `POST /boards` - Create new board
   - `GET /boards/:id?page=X&q=search` - Board details with links, link counts, infinite scroll pagination, and optional search
   - `POST /links` - Create link with optional title (can be associated with board or standalone)
-  - `PUT/DELETE` operations for boards and links
+  - `PUT/DELETE` operations for boards and links (link updates now support board reassignment)
   - `PATCH /boards/:id/favorite` - Toggle board favorite status
   - `PATCH /links/:link-id/favorite` - Toggle link favorite status
   - `POST /login` - User login endpoint (rate limited: 20/min per IP)
@@ -268,6 +275,7 @@ test/                  # Test files
 (update-user-account-number! db user-id hash)    ; Add account to existing user
 (ensure-user-exists! db session-id)              ; Get or create user helper
 (get-board-by-id-and-user-id db board-id user-id) ; Get board if owned by user
+(get-user-boards-minimal db user-id)             ; Get minimal board data (id, title) ordered by title
 (user-owns-board? db {:board-id board-id :session-id session-id}) ; Check board ownership
 (user-owns-link? db {:link-id link-id :session-id session-id}) ; Check link ownership via JOIN
 (delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
@@ -413,6 +421,8 @@ bb clj-repl              # Start REPL with dev profile
 - **Account number security** (✅ implemented with password-style display, show/hide toggle, and copy functionality)
 - **Board and Link Favorites** (✅ implemented with star icons, priority sorting, and server-side HTMX toggle)
 - **Optional Link Titles** (✅ implemented with smart conditional metadata fetching)
+- **Board Management in Link Editing** (✅ implemented with dropdown selector, board reassignment, and ownership validation)
+- **Global Keyboard Shortcuts** (✅ implemented with cross-platform support and smart modal management)
 - Link categorization/tagging
 - Import/export capabilities (✅ CSV export implemented)
 - Link sharing and collaboration
@@ -463,6 +473,9 @@ bb clj-repl              # Start REPL with dev profile
 - **Star Icon UX**: Use `x-cloak` to prevent blinking, solid star (yellow) for favorites, outline star (gray) for non-favorites
 - **Optional Form Fields**: Clear placeholder text indicating optional vs required fields, smart conditional processing
 - **Priority Sorting**: Favorite items appear first in all listings (boards and links) with `:favorite :desc` sorting
+- **Keyboard Shortcuts UX**: Use `event.code` instead of `event.key` for reliable cross-platform detection, especially with modifier keys
+- **Modal Management**: Prevent stacking by dispatching `modal-close` events before opening new modals via keyboard shortcuts
+- **Form Enhancement**: Board selectors with alphabetical ordering and "No board" option for standalone links
 
 ### Testing Strategy
 - Unit tests with eftest
