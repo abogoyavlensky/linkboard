@@ -277,25 +277,25 @@
                  :d "M6 18L18 6M6 6l12 12"}]]]]
       [:div {:class ["space-y-3" "text-sm"]}
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
-        [:span "Add Link"] 
+        [:span "Add Link"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + A"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
-        [:span "Create Board"] 
+        [:span "Create Board"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + B"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
-        [:span "Navigate to All Links"] 
+        [:span "Navigate to All Links"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + Shift + L"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
-        [:span "Focus Search"] 
+        [:span "Focus Search"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + K"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
-        [:span "Show Help"] 
+        [:span "Show Help"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + ?"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
         [:span "Clear Search/Close Modals"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "ESC"]]]
       [:div {:class ["mt-4" "pt-3" "border-t" "border-gray-200"]}
-       [:p {:class ["text-xs" "text-gray-500" "text-center"]} 
+       [:p {:class ["text-xs" "text-gray-500" "text-center"]}
         "Cmd is for Mac users, Ctrl is for Windows/Linux users"]]]]]])
 
 (defn link-form-fields
