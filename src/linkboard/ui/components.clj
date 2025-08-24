@@ -242,6 +242,7 @@
    {:x-data "{ helpModalOpen: false }"
     :x-on:keydown.escape.window "helpModalOpen = false"
     :x-on:help-modal-open.window "helpModalOpen = true"
+    :x-on:modal-close.window "helpModalOpen = false"
     :id "help-modal"}
    [:button
     {:x-on:click "helpModalOpen=true"
@@ -290,7 +291,7 @@
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + K"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
         [:span "Show Help"]
-        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + ?"]]
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + /"]]
        [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
         [:span "Clear Search/Close Modals"]
         [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "ESC"]]]
@@ -361,7 +362,9 @@
     :hx-history-elt true
     :class ["bg-slate-50"]
     :x-data ""
-    :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'a') { const addButton = document.querySelector('footer button[x-on\\\\:click*=\"modalOpen=true\"]'); if(addButton) { window.dispatchEvent(new CustomEvent('modal-close')); addButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.key === 'b' && window.location.pathname === '/') { const createBoardButton = Array.from(document.querySelectorAll('button[x-on\\\\:click*=\"modalOpen=true\"]')).find(btn => btn.querySelector('svg') && !btn.closest('footer')); if(createBoardButton) { window.dispatchEvent(new CustomEvent('modal-close')); createBoardButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'KeyL') { window.dispatchEvent(new CustomEvent('modal-close')); window.location.href = '/links'; $event.preventDefault(); } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'Slash') { window.dispatchEvent(new CustomEvent('modal-close')); window.dispatchEvent(new CustomEvent('help-modal-open')); $event.preventDefault(); }"
+    :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'a') { const addButton = document.querySelector('footer button[x-on\\\\:click*=\"modalOpen=true\"]'); if(addButton) { window.dispatchEvent(new CustomEvent('modal-close')); addButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.key === 'b' && window.location.pathname === '/') { const createBoardButton = Array.from(document.querySelectorAll('button[x-on\\\\:click*=\"modalOpen=true\"]')).find(btn => btn.querySelector('svg') && !btn.closest('footer')); if(createBoardButton) { window.dispatchEvent(new CustomEvent('modal-close')); createBoardButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'KeyL') { window.dispatchEvent(new CustomEvent('modal-close')); window.location.href = '/links'; $event.preventDefault(); }"
+    :x-on:keydown.cmd.slash.window "window.dispatchEvent(new CustomEvent('modal-close')); window.dispatchEvent(new CustomEvent('help-modal-open')); $event.preventDefault();"
+    :x-on:keydown.ctrl.slash.window "window.dispatchEvent(new CustomEvent('modal-close')); window.dispatchEvent(new CustomEvent('help-modal-open')); $event.preventDefault();"
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
     :hx-on:show-board-edit-toast "showToast('Board updated successfully!')"
