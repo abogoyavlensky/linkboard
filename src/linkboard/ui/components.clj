@@ -236,6 +236,68 @@
                        [:div {:class ["mt-2" "text-sm" "text-red-700"]}
                         [:p "Please store account number safely - you cannot restore your account if it is lost."]]]]]]]}))
 
+(defn- help-modal
+  []
+  [:div.w-auto.h-auto
+   {:x-data "{ helpModalOpen: false }"
+    :x-on:keydown.escape.window "helpModalOpen = false"
+    :x-on:help-modal-open.window "helpModalOpen = true"
+    :id "help-modal"}
+   [:button
+    {:x-on:click "helpModalOpen=true"
+     :class ["p-2" "text-gray-500" "hover:text-gray-700" "rounded" "cursor-pointer"]
+     :title "Help"}
+    icons/question-circle]
+   [:template
+    {:x-teleport "body"}
+    [:div
+     {:x-cloak ""
+      :x-show "helpModalOpen"
+      :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
+      :x-on:click "helpModalOpen=false"}
+     [:div
+      {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
+               "border-neutral-200" "max-w-lg" "md:max-w-xl" "rounded-lg"]
+       :x-trap.inert.noscroll "helpModalOpen"
+       :x-on:click.stop ""}
+      [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
+       [:h3 {:class ["text-lg" "font-semibold"]} "Keyboard Shortcuts"]
+       [:div
+        {:class ["absolute" "top-0" "right-0" "flex" "items-center" "justify-center"
+                 "w-8" "h-8" "mt-5" "mr-5" "text-gray-600" "rounded-full" "hover:text-gray-800" "hover:bg-gray-50"]
+         :x-on:click "helpModalOpen=false"}
+        [:svg {:class ["w-5" "h-5"]
+               :xmlns "http://www.w3.org/2000/svg"
+               :fill "none"
+               :viewBox "0 0 24 24"
+               :stroke-width "1.5"
+               :stroke "currentColor"}
+         [:path {:stroke-linecap "round"
+                 :stroke-linejoin "round"
+                 :d "M6 18L18 6M6 6l12 12"}]]]]
+      [:div {:class ["space-y-3" "text-sm"]}
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Add Link"] 
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + A"]]
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Create Board"] 
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + B"]]
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Navigate to All Links"] 
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + Shift + L"]]
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Focus Search"] 
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + K"]]
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Show Help"] 
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "Cmd/Ctrl + ?"]]
+       [:div {:class ["flex" "justify-between" "items-center" "py-1"]}
+        [:span "Clear Search/Close Modals"]
+        [:kbd {:class ["px-2" "py-1" "bg-gray-100" "rounded" "font-mono" "text-xs"]} "ESC"]]]
+      [:div {:class ["mt-4" "pt-3" "border-t" "border-gray-200"]}
+       [:p {:class ["text-xs" "text-gray-500" "text-center"]} 
+        "Cmd is for Mac users, Ctrl is for Windows/Linux users"]]]]]])
+
 (defn link-form-fields
   [{:keys [board-id]
     :as request}]
@@ -299,7 +361,7 @@
     :hx-history-elt true
     :class ["bg-slate-50"]
     :x-data ""
-    :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'a') { const addButton = document.querySelector('footer button[x-on\\\\:click*=\"modalOpen=true\"]'); if(addButton) { window.dispatchEvent(new CustomEvent('modal-close')); addButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.key === 'b' && window.location.pathname === '/') { const createBoardButton = Array.from(document.querySelectorAll('button[x-on\\\\:click*=\"modalOpen=true\"]')).find(btn => btn.querySelector('svg') && !btn.closest('footer')); if(createBoardButton) { window.dispatchEvent(new CustomEvent('modal-close')); createBoardButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'KeyL') { window.dispatchEvent(new CustomEvent('modal-close')); window.location.href = '/links'; $event.preventDefault(); }"
+    :x-on:keydown.window "if(($event.ctrlKey || $event.metaKey) && $event.key === 'a') { const addButton = document.querySelector('footer button[x-on\\\\:click*=\"modalOpen=true\"]'); if(addButton) { window.dispatchEvent(new CustomEvent('modal-close')); addButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.key === 'b' && window.location.pathname === '/') { const createBoardButton = Array.from(document.querySelectorAll('button[x-on\\\\:click*=\"modalOpen=true\"]')).find(btn => btn.querySelector('svg') && !btn.closest('footer')); if(createBoardButton) { window.dispatchEvent(new CustomEvent('modal-close')); createBoardButton.click(); $event.preventDefault(); } } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'KeyL') { window.dispatchEvent(new CustomEvent('modal-close')); window.location.href = '/links'; $event.preventDefault(); } else if(($event.ctrlKey || $event.metaKey) && $event.shiftKey && $event.code === 'Slash') { window.dispatchEvent(new CustomEvent('modal-close')); window.dispatchEvent(new CustomEvent('help-modal-open')); $event.preventDefault(); }"
     :hx-on:show-registration-toast "showToast('Account created successfully! Welcome to Linkboard.')"
     :hx-on:show-board-creation-toast "showToast('Board created successfully!')"
     :hx-on:show-board-edit-toast "showToast('Board updated successfully!')"
@@ -350,11 +412,12 @@
      content]
     (toast-container)]
 
-   ; Fixed footer with Add Link button
+   ; Fixed footer with Help and Add Link buttons
    [:footer
     {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl"
-             "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "pr-4" "py-3"]}
-    [:div {:class ["flex" "justify-end" "mb-2"]}
+             "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
+    [:div {:class ["flex" "justify-between" "items-center" "mb-2"]}
+     (help-modal)
      (modal
        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
                                           icons/plus-circle "Add link"]})
