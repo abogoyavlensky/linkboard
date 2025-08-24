@@ -11,6 +11,8 @@
             [reitit-extras.core :as ext]
             [ring.util.response :as response]))
 
+(def ^:const DEFAULT-BOARD-LIMIT 50)
+
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
@@ -81,25 +83,33 @@
     (-> (views/board-form-fields request)
         (ext/render-html))
     (let [user (queries/ensure-user-exists! db (:session-id session))
-          ; Create a new board
-          board (->> {:insert-into :board
-                      :values [{:title (:title form)
-                                :user-id (:id user)}]
-                      :returning [:*]}
-                     (db/exec-one! db))]
-      (-> (ext/render-html (list ; Return fresh form
-                             (views/board-form-fields {})
-                                 ; Add item to the top of the board list
-                             [:div
-                              {:hx-swap-oob "afterbegin:#board-list"}
-                              (views/list-item {:router router
-                                                :board board})]
-                             ; Remove empty state
-                             [:div
-                              {:hx-swap-oob "delete:#empty-boards"}]))
+          board-count (queries/get-user-board-count db (:id user))]
+      (if (>= board-count DEFAULT-BOARD-LIMIT)
+        ; Return 422 status with error message
+        (-> (views/board-form-fields (assoc-in request [:errors :humanized :title] ["Board limit reached. You can have up to 50 boards."]))
+            (ext/render-html)
+            (response/status 200)
+            (response/header "HX-Trigger-After-Swap" "modal-close")
+            (response/header "HX-Trigger" "showBoardLimitReachedToast"))
+        ; Create a new board
+        (let [board (->> {:insert-into :board
+                          :values [{:title (:title form)
+                                    :user-id (:id user)}]
+                          :returning [:*]}
+                         (db/exec-one! db))]
+          (-> (ext/render-html (list ; Return fresh form
+                                 (views/board-form-fields {})
+                                     ; Add item to the top of the board list
+                                 [:div
+                                  {:hx-swap-oob "afterbegin:#board-list"}
+                                  (views/list-item {:router router
+                                                    :board board})]
+                                 ; Remove empty state
+                                 [:div
+                                  {:hx-swap-oob "delete:#empty-boards"}]))
 
-          (response/header "HX-Trigger" "showBoardCreationToast")
-          (response/header "HX-Trigger-After-Swap" "modal-close")))))
+              (response/header "HX-Trigger" "showBoardCreationToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
 (defn create-account-handler
   {:malli/schema [:=> [:cat :map] :map]}

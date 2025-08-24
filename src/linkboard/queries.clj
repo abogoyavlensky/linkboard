@@ -114,6 +114,15 @@
                 [:= :user-id user-id]]}
        (db/exec-one! db)))
 
+(defn get-user-board-count
+  "Get the count of boards for a user."
+  [db user-id]
+  (->> {:select [[[:count :id] :board-count]]
+        :from [:board]
+        :where [:= :user-id user-id]}
+       (db/exec-one! db)
+       :board-count))
+
 (defn preprocess-search-query
   "Preprocess user search input for FTS5 MATCH query.
    
