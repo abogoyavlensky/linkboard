@@ -376,7 +376,8 @@
     :hx-on:show-link-favorite-removed-toast "showToast('Link removed from favorite!')"
     :hx-on:show-board-favorite-added-toast "showToast('Board added to favorite!')"
     :hx-on:show-board-favorite-removed-toast "showToast('Board removed from favorite!')"
-    :hx-on:show-board-limit-reached-toast "showToast('Board limit reached. You can have up to 50 boards.', 'error')"}
+    :hx-on:show-board-limit-reached-toast "showToast('Board limit reached. You can have up to 50 boards.', 'error')"
+    :hx-on:show-link-limit-reached-toast "showToast('Link limit reached. You can have up to 1000 links.', 'error')"}
    [:div
     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
     [:div

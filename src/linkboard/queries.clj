@@ -123,6 +123,15 @@
        (db/exec-one! db)
        :board-count))
 
+(defn get-user-link-count
+  "Get the count of links for a user."
+  [db user-id]
+  (->> {:select [[[:count :id] :link-count]]
+        :from [:link]
+        :where [:= :user-id user-id]}
+       (db/exec-one! db)
+       :link-count))
+
 (defn preprocess-search-query
   "Preprocess user search input for FTS5 MATCH query.
    

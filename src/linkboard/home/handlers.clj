@@ -12,6 +12,7 @@
             [ring.util.response :as response]))
 
 (def ^:const DEFAULT-BOARD-LIMIT 50)
+(def ^:const DEFAULT-LINK-LIMIT 1000)
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -178,40 +179,48 @@
 
     :else
     (let [user (queries/ensure-user-exists! db (:session-id session))
-          board-id (:board form)
-          user-title (str/trim (:title form))
-          metadata (fetch/fetch-page-metadata (:url form))
-          ; Use user-provided title or fallback to metadata title
-          final-title (if (and user-title (not (str/blank? user-title)))
-                        user-title
-                        (:title metadata))]
-      ; Validate that if board_id is provided, the user owns that board
-      (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
-                                                           :session-id (:session-id session)})))
-        (response/status 403)
-        (let [boards (queries/get-user-boards-minimal db (:id user))
-              link (->> {:insert-into :link
-                         :values [{:url (:url form)
-                                   :title final-title
-                                   :icon (:icon metadata)
-                                   :board-id board-id
-                                   :user-id (:id user)}]
-                         :returning [:*]}
-                        (db/exec-one! db))]
-          (-> (ext/render-html (list (c/link-form-fields {})
-                                     [:div
-                                      ; Add item to the top of the link list
-                                      {:hx-swap-oob "afterbegin:#link-list"}
-                                      (board-views/link-list-item {:request request
-                                                                   :router router
-                                                                   :link link
-                                                                   :boards boards})]
-                                     ; Remove empty state
-                                     [:div
-                                      {:hx-swap-oob "delete:#empty-links"}]))
-              (response/header "HX-Refresh" "true")
-              (response/header "HX-Trigger" "showLinkCreationToast")
-              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
+          link-count (queries/get-user-link-count db (:id user))]
+      (if (>= link-count DEFAULT-LINK-LIMIT)
+        ; Return 200 status with error message
+        (-> (c/link-form-fields (assoc-in request [:errors :humanized :url] ["Link limit reached. You can have up to 1000 links."]))
+            (ext/render-html)
+            (response/status 200)
+            (response/header "HX-Trigger-After-Swap" "modal-close")
+            (response/header "HX-Trigger" "showLinkLimitReachedToast"))
+        (let [board-id (:board form)
+              user-title (str/trim (:title form))
+              metadata (fetch/fetch-page-metadata (:url form))
+              ; Use user-provided title or fallback to metadata title
+              final-title (if (and user-title (not (str/blank? user-title)))
+                            user-title
+                            (:title metadata))]
+          ; Validate that if board_id is provided, the user owns that board
+          (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
+                                                               :session-id (:session-id session)})))
+            (response/status 403)
+            (let [boards (queries/get-user-boards-minimal db (:id user))
+                  link (->> {:insert-into :link
+                             :values [{:url (:url form)
+                                       :title final-title
+                                       :icon (:icon metadata)
+                                       :board-id board-id
+                                       :user-id (:id user)}]
+                             :returning [:*]}
+                            (db/exec-one! db))]
+              (-> (ext/render-html (list (c/link-form-fields {})
+                                         [:div
+                                          ; Add item to the top of the link list
+                                          {:hx-swap-oob "afterbegin:#link-list"}
+                                          (board-views/link-list-item {:request request
+                                                                       :router router
+                                                                       :link link
+                                                                       :boards boards})]
+                                         ; Remove empty state
+                                         [:div
+                                          {:hx-swap-oob "delete:#empty-links"}]))
+                  (response/header "HX-Refresh" "true")
+                  (response/header "HX-Trigger" "showLinkCreationToast")
+                  (response/header "HX-Trigger-After-Swap" "modal-close")))))))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}
