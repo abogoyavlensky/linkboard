@@ -21,6 +21,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - Ctrl/Cmd + Shift + L: Navigate to All Links (global)
   - Ctrl/Cmd + K: Search (existing, in search contexts)
 - **Smart modal management** prevents stacking by auto-closing existing modals when opening new ones via keyboard shortcuts
+- **User limits with validation**: 50 boards and 1000 links per user with toast notifications and modal management
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -97,6 +98,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
 - **Error handling**: Form validation with error display and user-friendly 403 responses for unauthorized access
 - **Conditional logic**: Handlers use `cond` for clean multi-branch decision making (validation, authorization, success)
+- **User limits enforcement**: Board creation limited to 50 per user, link creation limited to 1000 per user with validation, toast notifications, and proper error handling
 
 #### Link Metadata Fetching (`src/linkboard/board/fetch.clj`)
 - Automatic title and icon extraction from URLs
@@ -281,6 +283,8 @@ test/                  # Test files
 (delete-link! db {:link-id link-id :user-id user-id}) ; Delete link with user validation
 (toggle-board-favorite! db {:board-id board-id :user-id user-id}) ; Toggle board favorite status
 (toggle-link-favorite! db {:link-id link-id :user-id user-id}) ; Toggle link favorite status
+(get-user-board-count db user-id)                ; Get count of boards for user validation
+(get-user-link-count db user-id)                 ; Get count of links for user validation
 ```
 
 ### Full-Text Search (`src/linkboard/queries.clj`)
@@ -423,6 +427,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Optional Link Titles** (✅ implemented with smart conditional metadata fetching)
 - **Board Management in Link Editing** (✅ implemented with dropdown selector, board reassignment, and ownership validation)
 - **Global Keyboard Shortcuts** (✅ implemented with cross-platform support and smart modal management)
+- **User limits** (✅ implemented with 50 board limit and 1000 link limit per user, including validation and error notifications)
 - Link categorization/tagging
 - Import/export capabilities (✅ CSV export implemented)
 - Link sharing and collaboration
@@ -447,6 +452,7 @@ bb clj-repl              # Start REPL with dev profile
 - Implement comprehensive error handling with visual feedback in forms
 - Validate user authorization before all board/link operations
 - Use `lambdaisland/uri` for URL validation instead of deprecated `java.net.URL`
+- **User limits pattern**: Use constants for limits (`DEFAULT-BOARD-LIMIT`, `DEFAULT-LINK-LIMIT`), validate early in handlers, return 200 status with error toast and modal close for consistent UX
 
 ### UI/UX Patterns
 - **Modal Implementation**: Use single container with `x-cloak` and backdrop blur to prevent flickering
