@@ -104,7 +104,7 @@
                                  [:div
                                   {:hx-swap-oob "afterbegin:#board-list"}
                                   (views/list-item {:router router
-                                                    :board board})]
+                                                    :board (update board :favorite #(> % 0))})]
                                  ; Remove empty state
                                  [:div
                                   {:hx-swap-oob "delete:#empty-boards"}]))

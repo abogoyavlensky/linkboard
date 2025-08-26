@@ -88,7 +88,7 @@
        {:class ["relative" "w-auto" "pb-8"]}
        [:div
         {:class ["w-full" "max-w-xs" "mx-auto"]}
-        (ext/csrf-token-html)
+        (update (ext/csrf-token-html) 1 dissoc :id)
         form-fields]]
       [:div
        {:class ["flex" "flex-row" "justify-end" "space-x-2"]}
