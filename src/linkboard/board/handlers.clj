@@ -148,6 +148,7 @@
       ; HTMX search request - just links
       (->> (views/link-list {:links links
                              :has-more? has-more?
+                             :show-board? true
                              :route route
                              :page page
                              :router router
