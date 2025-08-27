@@ -190,28 +190,21 @@
                                                      :session-id (:session-id session)})))
         (-> (response/response "Board not found or access denied")
             (response/status 403))
-        (let [_ (->> {:update :link
-                      :set {:title title
-                            :url url
-                            :icon (:icon metadata)
-                            :board-id board-id}
-                      :where [:and
-                              [:= :id link-id]
-                              [:= :user-id (:id user)]]}
-                     (db/exec-one! db))
-              ; Get the complete updated link
-              updated-link (->> {:select [:*]
-                                 :from [:link]
+        (let [updated-link (->> {:update :link
+                                 :set {:title title
+                                       :url url
+                                       :icon (:icon metadata)
+                                       :board-id board-id}
                                  :where [:and
                                          [:= :id link-id]
-                                         [:= :user-id (:id user)]]}
+                                         [:= :user-id (:id user)]]
+                                 :returning [:*]}
                                 (db/exec-one! db))]
           (-> (views/link-list-item {:request request
                                      :router router
                                      :link updated-link
                                      :boards boards})
               (ext/render-html)
-              (response/header "HX-Refresh" "true")
               (response/header "HX-Trigger" "showLinkEditToast")
               (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
