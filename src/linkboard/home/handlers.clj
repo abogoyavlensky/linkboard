@@ -185,7 +185,7 @@
         (-> (assoc-in request
                       [:errors :humanized :url]
                       ["Link limit reached. You can have up to 1000 links."])
-            (c/link-form-fields )
+            (c/link-form-fields)
             (ext/render-html)
             (response/status 200)
             (response/header "HX-Trigger-After-Swap" "modal-close")
