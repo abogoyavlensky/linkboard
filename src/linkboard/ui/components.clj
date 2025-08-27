@@ -84,6 +84,7 @@
     [:div
      {:x-cloak ""
       :x-show "modalOpen"
+      :x-init "htmx.process($el)"
       :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
       :x-on:click "modalOpen=false"}
      [:form

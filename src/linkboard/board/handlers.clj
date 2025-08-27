@@ -190,16 +190,16 @@
                                                      :session-id (:session-id session)})))
         (-> (response/response "Board not found or access denied")
             (response/status 403))
-        (let [updated-link (->> {:update :link
-                                 :set {:title title
-                                       :url url
-                                       :icon (:icon metadata)
-                                       :board-id board-id}
-                                 :where [:and
-                                         [:= :id link-id]
-                                         [:= :user-id (:id user)]]
-                                 :returning [:*]}
-                                (db/exec-one! db))]
+        (let [updated-link (-> (db/exec-one! db {:update :link
+                                                 :set {:title title
+                                                       :url url
+                                                       :icon (:icon metadata)
+                                                       :board-id board-id}
+                                                 :where [:and
+                                                         [:= :id link-id]
+                                                         [:= :user-id (:id user)]]
+                                                 :returning [:*]})
+                               (update :favorite #(> % 0)))]
           (-> (views/link-list-item {:request request
                                      :router router
                                      :link updated-link
