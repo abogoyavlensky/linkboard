@@ -81,21 +81,18 @@
           :target "_blank"
           :class ["text-l" "break-words" "block" "w-full" "no-underline"]}
       (:title link)]
-     [:a {:href (:url link)
-          :rel "noopener noreferrer"
-          :target "_blank"
-          :class ["text-gray-400" "truncate" "block" "w-full" "no-underline"]}
-      (if (and show-board? (:board-title link))
-        [:span
-         [:span {:class ["hover:underline" "cursor-pointer"]
-                 :style "color: inherit;"
-                 :hx-get (ext/route router ::r/board-details {:path {:id (:board-id link)}})
-                 :hx-target "#body"
-                 :hx-push-url "true"
-                 :onclick "event.preventDefault(); event.stopPropagation(); return false;"}
+     [:div {:class ["flex" "items-center" "gap-2" "w-full"]}
+      (when (and show-board? (:board-title link))
+        [:span {:class ["flex-shrink-0" "text-gray-400" "truncate" "flex-shrink" "min-w-0"]}
+         [:a {:class ["hover:underline"]
+              :href (ext/route router ::r/board-details {:path {:id (:board-id link)}})}
           (:board-title link)]
-         (str " • " (:url link))]
-        (:url link))]]]
+         " • "])
+      [:a {:href (:url link)
+           :rel "noopener noreferrer"
+           :target "_blank"
+           :class ["text-gray-400" "truncate" "flex-shrink" "min-w-0" "no-underline"]}
+       (:url link)]]]]
    [:div {:class ["flex" "items-center" "gap-2" "flex-shrink-0"]}
     [:div {:onclick "event.stopPropagation()"
            :hx-patch (ext/route router ::r/toggle-link-favorite {:path {:link-id (:id link)}})
@@ -181,16 +178,13 @@
 
 (defn board-view
   [{router :reitit.core/router
-    :as request} {:keys [board links link-count has-more? route page search-term boards]}]
+    :as request}
+   {:keys [board links link-count has-more? route page search-term boards]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
-     [:a {:class ["text-blue-500" "hover:text-blue-600"]
-          :hx-get (ext/route router ::r/home-page)
-          :hx-target "#body"
-          :hx-push-url "true"}
-      icons/chevron-left]
+     (c/back-button request)
      [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}
@@ -259,11 +253,7 @@
    ; Title, back button and add link button
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
-     [:a {:class ["text-blue-500" "hover:text-blue-600"]
-          :hx-get (ext/route router ::r/home-page)
-          :hx-target "#body"
-          :hx-push-url "true"}
-      icons/chevron-left]
+     (c/back-button request)
      [:h2 {:class ["text-2xl" "font-bold"]} "All Links"]]
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}

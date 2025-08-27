@@ -78,19 +78,6 @@
                                                   :page page
                                                   :search-term search-term
                                                   :boards boards})
-           (ext/render-html))
-
-      :else
-      ; Standard HTMX page response
-      (->> (views/board-view request* {:board board
-                                       :links links
-                                       :link-count link-count
-                                       :has-more? has-more?
-                                       :route route
-                                       :page page
-                                       :search-term search-term
-                                       :boards boards})
-           (c/body request*)
            (ext/render-html)))))
 
 (defn all-links-handler
@@ -142,18 +129,6 @@
                                                      :page page
                                                      :search-term search-term
                                                      :boards boards})
-           (ext/render-html))
-
-      :else
-      ; Standard HTMX page response
-      (->> (views/all-links-view request {:links links
-                                          :link-count link-count
-                                          :has-more? has-more?
-                                          :route route
-                                          :page page
-                                          :search-term search-term
-                                          :boards boards})
-           (c/body request)
            (ext/render-html)))))
 
 (defn update-link-handler

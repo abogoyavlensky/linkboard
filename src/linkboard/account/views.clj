@@ -125,16 +125,11 @@
 
 (defn account-view
   "Main account page view."
-  [{router :reitit.core/router
-    :as request} {:keys [user]}]
+  [{:as request} {:keys [user]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Header
    [:div {:class ["flex" "items-center" "gap-2" "mb-6"]}
-    [:a {:class ["text-blue-500" "hover:text-blue-600"]
-         :hx-get (ext/route router ::r/home-page)
-         :hx-target "#body"
-         :hx-push-url "true"}
-     icons/chevron-left]
+    (c/back-button request)
     [:h2 {:class ["text-2xl" "font-bold"]} "Account Settings"]]
 
    ; Content

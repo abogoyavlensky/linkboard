@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
+            [linkboard.utils :as utils]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as ext]))
 
@@ -384,9 +385,7 @@
      {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
      [:div
       [:a
-       {:hx-get (ext/route router ::r/home-page)
-        :hx-target "#body"
-        :hx-push-url "true"}
+       {:href (ext/route router ::r/home-page)}
        [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
       [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
        [:p "Personal bookmark manager"]
@@ -398,11 +397,9 @@
       (if user
         [:div
          {:class ["flex" "items-center"]}
-         [:button
+         [:a
           {:class ["text-blue-500" "text-lg" "cursor-pointer"]
-           :hx-get (ext/route router ::r/account)
-           :hx-target "#body"
-           :hx-push-url "true"}
+           :href (ext/route router ::r/account)}
           "Account"]]
         [:div
          {:x-data "{ modalOpen: false, accountId: '' }"
@@ -543,3 +540,9 @@
     ;; Add infinite scroll trigger if more pages exist
     (when has-more?
       (infinite-scroll-trigger route (inc current-page)))))
+
+(defn back-button
+  [request]
+  [:a {:class ["text-blue-500" "hover:text-blue-600"]
+       :href (utils/back-url request)}
+   icons/chevron-left])

@@ -17,9 +17,7 @@
                  "justify-between" "shadow-xs" "mt-2"]
          :id (str "board-" (:id board))}
    [:a {:class ["flex" "items-center" "gap-3" "flex-1" "cursor-pointer"]
-        :hx-get (ext/route router ::r/board-details {:path {:id (:id board)}})
-        :hx-target "#body"
-        :hx-push-url "true"}
+        :href (ext/route router ::r/board-details {:path {:id (:id board)}})}
     [:div {:class ["flex" "items-center" "gap-3"]}
      icons/folder
      [:span {:class ["text-lg"]} (:title board)]]]
@@ -100,9 +98,7 @@
   [:div {:class ["flex-1" "px-4"]}
    ; TODO: replace with list-item
    [:a {:class ["w-full" "bg-white" "rounded-xl" "mb-4" "p-4" "flex" "items-center" "justify-between" "shadow-xs" "cursor-pointer"]
-        :hx-get (ext/route router ::r/links)
-        :hx-target "#body"
-        :hx-push-url "true"}
+        :href (ext/route router ::r/links)}
     [:div {:class ["flex" "items-center" "gap-3"]}
      icons/queue-list
      [:span {:class ["text-lg"]} "All Links"]]
