@@ -280,5 +280,7 @@
       (let [updated-link (q/toggle-link-favorite! db {:link-id link-id
                                                       :user-id (:id user)})]
         (-> (ext/render-html (views/favorite-link-icon updated-link))
-            (response/header "HX-Trigger" "showFavoriteToggleToast")))
+            (response/header "HX-Trigger" (if (:favorite updated-link)
+                                            "showLinkFavoriteAddedToast"
+                                            "showLinkFavoriteRemovedToast"))))
       (response/status 403))))

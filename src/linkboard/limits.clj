@@ -44,4 +44,4 @@
           ; Rate limit exceeded
           (-> (response/response "Too many requests. Please try again later.")
               (response/status 429)
-              (response/header "Retry-After" (str (int (/ (- window-ms time-since-reset) 1000))))))))))
+              (response/header "HX-Trigger" "showRateLimitToast")))))))
