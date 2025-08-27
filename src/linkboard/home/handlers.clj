@@ -182,7 +182,10 @@
           link-count (queries/get-user-link-count db (:id user))]
       (if (>= link-count DEFAULT-LINK-LIMIT)
         ; Return 200 status with error message
-        (-> (c/link-form-fields (assoc-in request [:errors :humanized :url] ["Link limit reached. You can have up to 1000 links."]))
+        (-> (assoc-in request
+                      [:errors :humanized :url]
+                      ["Link limit reached. You can have up to 1000 links."])
+            (c/link-form-fields )
             (ext/render-html)
             (response/status 200)
             (response/header "HX-Trigger-After-Swap" "modal-close")
@@ -199,14 +202,14 @@
                                                                :session-id (:session-id session)})))
             (response/status 403)
             (let [boards (queries/get-user-boards-minimal db (:id user))
-                  link (->> {:insert-into :link
-                             :values [{:url (:url form)
-                                       :title final-title
-                                       :icon (:icon metadata)
-                                       :board-id board-id
-                                       :user-id (:id user)}]
-                             :returning [:*]}
-                            (db/exec-one! db))]
+                  link (-> (db/exec-one! db {:insert-into :link
+                                             :values [{:url (:url form)
+                                                       :title final-title
+                                                       :icon (:icon metadata)
+                                                       :board-id board-id
+                                                       :user-id (:id user)}]
+                                             :returning [:*]})
+                           (update :favorite #(> % 0)))]
               (-> (ext/render-html (list (c/link-form-fields {})
                                          [:div
                                           ; Add item to the top of the link list
@@ -218,7 +221,6 @@
                                          ; Remove empty state
                                          [:div
                                           {:hx-swap-oob "delete:#empty-links"}]))
-                  (response/header "HX-Refresh" "true")
                   (response/header "HX-Trigger" "showLinkCreationToast")
                   (response/header "HX-Trigger-After-Swap" "modal-close")))))))))
 
