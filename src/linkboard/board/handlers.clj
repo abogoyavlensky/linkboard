@@ -23,6 +23,7 @@
   [{{:keys [db]} :context
     {:keys [path query]} :parameters
     :keys [session]
+    router :reitit.core/router
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         board (->> {:select [:*]
@@ -78,12 +79,24 @@
                                                   :page page
                                                   :search-term search-term
                                                   :boards boards})
+           (ext/render-html))
+
+      :else
+      ; HTMX search request - just links
+      (->> (views/link-list {:links links
+                             :has-more? has-more?
+                             :route route
+                             :page page
+                             :router router
+                             :request request
+                             :boards boards})
            (ext/render-html)))))
 
 (defn all-links-handler
   [{{:keys [db]} :context
     {:keys [query]} :parameters
     :keys [session]
+    router :reitit.core/router
     :as request}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         boards (q/get-user-boards-minimal db (:id user))
@@ -129,6 +142,17 @@
                                                      :page page
                                                      :search-term search-term
                                                      :boards boards})
+           (ext/render-html))
+
+      :else
+      ; HTMX search request - just links
+      (->> (views/link-list {:links links
+                             :has-more? has-more?
+                             :route route
+                             :page page
+                             :router router
+                             :request request
+                             :boards boards})
            (ext/render-html)))))
 
 (defn update-link-handler

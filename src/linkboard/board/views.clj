@@ -159,6 +159,25 @@
    [:p {:class ["text-gray-500" "text-center" "mb-4" "max-w-sm"]}
     "Start building your collection by adding your first link"]])
 
+(defn link-list
+  [{:keys [links has-more? route page router request boards show-board?]}]
+  [:div
+   {:id "link-list"
+    :class ["flex-1"]}
+   (if (seq links)
+     (c/paginated-links
+       links
+       has-more?
+       route
+       page
+       (fn [link]
+         (link-list-item {:router router
+                          :request request
+                          :show-board? (or show-board? false)
+                          :link link
+                          :boards boards})))
+     (empty-links))])
+
 (defn board-view
   [{router :reitit.core/router
     :as request}
@@ -198,21 +217,13 @@
    (list
      (c/search-bar {:search-term search-term
                     :route route})
-     [:div
-      {:id "link-list"
-       :class ["flex-1"]}
-      (if (seq links)
-        (c/paginated-links
-          links
-          has-more?
-          route
-          page
-          (fn [link]
-            (link-list-item {:router router
-                             :request request
-                             :link link
-                             :boards boards})))
-        (empty-links))])])
+     (link-list {:links links
+                 :has-more? has-more?
+                 :route route
+                 :page page
+                 :router router
+                 :request request
+                 :boards boards}))])
 
 (defn board-pagination-view
   [{router :reitit.core/router
@@ -244,22 +255,14 @@
    (list
      (c/search-bar {:search-term search-term
                     :route route})
-     [:div
-      {:id "link-list"
-       :class ["flex-1"]}
-      (if (seq links)
-        (c/paginated-links
-          links
-          has-more?
-          route
-          page
-          (fn [link]
-            (link-list-item {:router router
-                             :request request
-                             :link link
-                             :show-board? true
-                             :boards boards})))
-        (empty-links))])])
+     (link-list {:links links
+                 :has-more? has-more?
+                 :show-board? true
+                 :route route
+                 :page page
+                 :router router
+                 :request request
+                 :boards boards}))])
 
 (defn all-links-pagination-view
   [{router :reitit.core/router

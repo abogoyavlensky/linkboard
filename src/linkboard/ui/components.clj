@@ -475,7 +475,8 @@
      [:form {:class ["bg-gray-200" "rounded-lg" "flex" "items-center" "px-4" "py-2"]
              :hx-get base-route
              :hx-trigger "input changed delay:500ms, search"
-             :hx-target "#body"
+             :hx-target "#link-list"
+             :hx-swap "outerHTML"
              :hx-push-url "true"
              :method "get"}
       [:div {:class ["mr-2"]} icons/search]
