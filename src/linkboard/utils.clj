@@ -1,7 +1,7 @@
 (ns linkboard.utils
-  (:require [reitit-extras.core :as ext]
-            [lambdaisland.uri :as uri]
-            [linkboard.routes :as-alias r]))
+  (:require [lambdaisland.uri :as uri]
+            [linkboard.routes :as-alias r]
+            [reitit-extras.core :as ext]))
 
 (defn back-url
   [{router :reitit.core/router
