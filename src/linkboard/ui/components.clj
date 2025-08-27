@@ -20,6 +20,28 @@
     :type "button"}
    content])
 
+(defn form-input
+  [{:keys [input-name text value errors attrs]}]
+  [:div
+   [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for (name input-name)} text]
+   [:input
+    (merge
+      {:type "text"
+       :name (name input-name)
+       :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm" "mb-3"
+                       "bg-white" "border" "rounded-md" "border-neutral-300"
+                       "ring-offset-background" "placeholder:text-neutral-500"
+                       "focus:border-neutral-300" "focus:outline-hidden"
+                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                      (when (seq (get errors input-name))
+                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+       :id (name input-name)
+       :value value}
+      attrs)]
+   (for [error (get errors input-name)]
+     [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])])
+
 (defn dropdown-menu
   [{:keys [trigger-icon items]}]
   [:div {:class ["relative" "mt-1"]
@@ -112,6 +134,7 @@
   (let [errors (get-in request [:errors :humanized :account-number])]
     [:div
      {:id "login-form-fields"}
+     ; TODO: replace with form-input
      [:label {:class ["text-md" "font-medium" "text-gray-600" "block" "mb-2"]} "Enter your account number"]
      [:input {:type "password"
               :name "account-number"
@@ -306,51 +329,21 @@
   (let [errors (get-in request [:errors :humanized])]
     [:div
      {:id "link-form-fields"}
-     [:input
-      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm" "mb-3"
-                       "bg-white" "border" "rounded-md" "border-neutral-300"
-                       "ring-offset-background" "placeholder:text-neutral-500"
-                       "focus:border-neutral-300" "focus:outline-hidden"
-                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                      (when (seq (:title errors))
-                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-       :type "text"
-       :name "title"
-       :value (get-in request [:parameters :form :title] nil)
-       :placeholder "Title (optional)"}]
-     (for [error (:title errors)]
-       [:p {:class ["text-red-500" "text-sm" "mt-1" "mb-3"]} (str/capitalize error)])
-     [:input
-      {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                       "bg-white" "border" "rounded-md" "border-neutral-300"
-                       "ring-offset-background" "placeholder:text-neutral-500"
-                       "focus:border-neutral-300" "focus:outline-hidden"
-                       "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                       "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                      (when (seq (:url errors))
-                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-       :type "text"
-       :name "url"
-       :value (get-in request [:parameters :form :url] nil)
-       :minlength 1
-       :autofocus true
-       :placeholder "Enter link"}]
-     (for [error (:url errors)]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     (form-input {:input-name :url
+                  :errors errors
+                  :value (get-in request [:parameters :form :url] nil)
+                  :text "Link"
+                  :attrs {:placeholder "Link title"
+                          :autofocus true}})
+     (form-input {:input-name :title
+                  :errors errors
+                  :value (get-in request [:parameters :form :title] nil)
+                  :text "Title (optional)"
+                  :attrs {:placeholder "Link title"}})
      (when board-id
-       [:input
-        {:class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                         "bg-white" "border" "rounded-md" "border-neutral-300"
-                         "ring-offset-background" "placeholder:text-neutral-500"
-                         "focus:border-neutral-300" "focus:outline-hidden"
-                         "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                         "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                        (when (seq (:board errors))
-                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-         :type "hidden"
-         :name "board"
-         :value board-id}])]))
+       [:input {:type "hidden"
+                :name "board"
+                :value board-id}])]))
 
 (defn body
   [{user :identity

@@ -16,48 +16,38 @@
   (let [errors (get-in request [:errors :humanized])]
     [:div
      {:id "link-edit-form-fields"}
-     [:div.mb-4
-      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "title"} "Title"]
-      [:input
-       {:type "text"
-        :name "title"
-        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
-                       (when (seq (:title errors))
-                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-        :id "title"
-        :value (or (:title link) "")
-        :placeholder "Link title"}]]
-     (for [error (:title errors)]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
+     (c/form-input {:input-name :url
+                    :errors errors
+                    :value (:url link)
+                    :text "Link"
+                    :attrs {:placeholder "https://example.com"
+                            :autofocus true}})
+     (c/form-input {:input-name :title
+                    :errors errors
+                    :value (or (:title link) "")
+                    :text "Title"
+                    :attrs {:placeholder "Link title"}})
      [:div.mb-4
       [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "board"} "Board"]
       [:select
        {:name "board-id"
-        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
+        :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                        "bg-white" "border" "rounded-md" "border-neutral-300"
+                        "ring-offset-background" "placeholder:text-neutral-500"
+                        "focus:border-neutral-300" "focus:outline-hidden"
+                        "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                        "disabled:cursor-not-allowed" "disabled:opacity-50"]
                        (when (seq (:board-id errors))
                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
         :id "board"}
        [:option {:value ""
-                 :selected (nil? (:board-id link))} "No board"]
+                 :selected (nil? (:board-id link))} "--------"]
        (for [board boards]
          [:option {:value (:id board)
                    :selected (= (:id board) (:board-id link))}
-          (:title board)])]]
-     (for [error (:board-id errors)]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])
-     [:div
-      [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "url"} "URL"]
-      [:input
-       {:type "text"
-        :name "url"
-        :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
-                       (when (seq (:url errors))
-                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-        :id "url"
-        :value (:url link)
-        :placeholder "https://example.com"}]]
-     (for [error (:url errors)]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+          (:title board)])]
+      (for [error (:board-id errors)]
+        [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]]))
 
 (defn link-list-item
   [{:keys [request router link show-board? boards]}]
@@ -143,21 +133,14 @@
 
 (defn board-edit-form-fields
   [request {:keys [board]}]
-  (let [errors (get-in request [:errors :humanized :title])]
-    [:div
-     {:id "board-edit-form-fields"}
-     [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "title"} "Board Title"]
-     [:input
-      {:type "text"
-       :name "title"
-       :class (concat ["w-full" "px-3" "py-2" "border" "rounded-md" "text-sm"]
-                      (when (seq errors)
-                        ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-       :id "title"
-       :value (:title board)
-       :placeholder "Enter board name"}]
-     (for [error errors]
-       [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])]))
+  [:div
+   {:id "board-edit-form-fields"}
+   (c/form-input {:input-name :title
+                  :errors (get-in request [:errors :humanized])
+                  :value (:title board)
+                  :text "Title"
+                  :attrs {:placeholder "Enter board name"
+                          :autofocus true}})])
 
 (defn empty-links
   []

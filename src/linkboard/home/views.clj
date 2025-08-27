@@ -1,6 +1,5 @@
 (ns linkboard.home.views
-  (:require [clojure.string :as str]
-            [linkboard.routes :as-alias r]
+  (:require [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as ext]))
@@ -69,28 +68,14 @@
 
 (defn board-form-fields
   [request]
-  (let [errors (get-in request [:errors :humanized :title])]
-    (list
-      [:div
-       {:id "board-form-fields"}
-       [:input
-        {:id "board-form-fields"
-         :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
-                         "bg-white" "border" "rounded-md" "border-neutral-300"
-                         "ring-offset-background" "placeholder:text-neutral-500"
-                         "focus:border-neutral-300" "focus:outline-hidden"
-                         "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
-                         "disabled:cursor-not-allowed" "disabled:opacity-50"]
-                        (when (seq errors)
-                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-         :type "text"
-         :name "title"
-         :minlength 1
-         :autofocus true
-         :value (get-in request [:parameters :form :title] nil)
-         :placeholder "Enter board name"}]
-       (for [error errors]
-         [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])])))
+  [:div
+   {:id "board-form-fields"}
+   (c/form-input {:input-name :title
+                  :errors (get-in request [:errors :humanized])
+                  :value (get-in request [:parameters :form :title] nil)
+                  :text "Title"
+                  :attrs {:placeholder "Enter board name"
+                          :autofocus true}})])
 
 (defn boards-view
   [{router :reitit.core/router

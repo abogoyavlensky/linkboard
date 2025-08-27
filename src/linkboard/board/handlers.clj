@@ -155,9 +155,9 @@
     (let [link-id (-> path :link-id)
           title (:title form)
           url (:url form)
-          board-id (when-let [bid (:board-id form)]
-                     (when (not (str/blank? (str bid)))
-                       (parse-long (str bid))))
+          board-id (when (and (:board-id form)
+                              (not (str/blank? (str (:board-id form)))))
+                     (parse-long (str (:board-id form))))
           user (q/get-user-by-session-id db (:session-id session))
           boards (q/get-user-boards-minimal db (:id user))
           metadata (fetch/fetch-page-metadata url)]

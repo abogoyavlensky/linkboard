@@ -481,7 +481,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Priority Sorting**: Favorite items appear first in all listings (boards and links) with `:favorite :desc` sorting
 - **Keyboard Shortcuts UX**: Use `event.code` instead of `event.key` for reliable cross-platform detection, especially with modifier keys
 - **Modal Management**: Prevent stacking by dispatching `modal-close` events before opening new modals via keyboard shortcuts
-- **Form Enhancement**: Board selectors with alphabetical ordering and "No board" option for standalone links
+- **Form Enhancement**: Board selectors with alphabetical ordering and "-------" option for standalone links
 
 ### Testing Strategy
 - Unit tests with eftest

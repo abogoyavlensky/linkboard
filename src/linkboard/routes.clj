@@ -73,7 +73,9 @@
                 :parameters {:form [:map
                                     [:title [:string {:min 1}]]
                                     [:url spec/Link]
-                                    [:board-id {:optional true} [:maybe pos-int?]]]}}
+                                    [:board-id {:optional true} [:or
+                                                                 pos-int?
+                                                                 [:enum nil ""]]]]}}
           :delete {:handler board-handlers/delete-link-handler}}]
      ["/favorite" {:name ::toggle-link-favorite
                    :patch {:handler board-handlers/toggle-link-favorite-handler
