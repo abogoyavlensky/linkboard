@@ -205,10 +205,16 @@
                                                          [:= :id link-id]
                                                          [:= :user-id (:id user)]]
                                                  :returning [:*]})
-                               (update :favorite #(> % 0)))]
+                               (update :favorite #(> % 0))
+                               (assoc :board-title (when board-id
+                                                     (->> boards
+                                                          (filter #(= (:id %) board-id))
+                                                          first
+                                                          :title))))]
           (-> (views/link-list-item {:request request
                                      :router router
                                      :link updated-link
+                                     :show-board? true
                                      :boards boards})
               (ext/render-html)
               (response/header "HX-Trigger" "showLinkEditToast")
