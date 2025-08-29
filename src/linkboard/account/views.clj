@@ -66,7 +66,7 @@
 
 (defn account-limit-section
   "Account limits information section."
-  [_user]
+  [{:keys [board-count link-count]}]
   [:div {:class ["bg-white" "rounded-xl" "p-6" "mb-6" "shadow-xs"]}
    [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Limits"]
    [:div {:class ["space-y-3"]}
@@ -75,13 +75,13 @@
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Board Limit"]
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
-      [:span {:class ["text-blue-600" "font-bold"]} "50"] " boards per user"]]
+      [:span {:class ["text-blue-600" "font-bold"]} (str board-count "/50")]]]
 
     ; Link Limit Row
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Link Limit"]
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
-      [:span {:class ["text-blue-600" "font-bold"]} "5,000"] " links per user"]]]])
+      [:span {:class ["text-blue-600" "font-bold"]} (str link-count "/5,000")]]]]])
 
 (defn action-buttons-section
   "Action buttons section."
@@ -144,7 +144,7 @@
 
 (defn account-view
   "Main account page view."
-  [{:as request} {:keys [user]}]
+  [{:as request} {:keys [user board-count link-count]}]
   [:div {:class ["flex-1" "px-4"]}
    ; Header
    [:div {:class ["flex" "items-center" "gap-2" "mb-6"]}
@@ -154,5 +154,5 @@
    ; Content
    [:div {:class ["max-w-4xl"]}
     (account-info-section user)
-    (account-limit-section user)
+    (account-limit-section {:board-count board-count :link-count link-count})
     (action-buttons-section request)]])
