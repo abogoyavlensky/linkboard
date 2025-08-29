@@ -346,6 +346,18 @@
                 :name "board"
                 :value board-id}])]))
 
+(defn temporary-session-banner
+  "Warning banner for non-registered users."
+  []
+  [:div
+   {:class ["px-4"]}
+   [:div
+    {:class ["bg-amber-50" "border" "border-amber-200" "px-4" "py-3" "mb-4" "rounded-lg"]}
+    [:div {:class ["flex" "items-center" "gap-2"]}
+     [:span {:class ["text-amber-800" "text-sm"]} "⚠️"]
+     [:p {:class ["text-amber-800" "text-sm"]}
+      "Using temporary session. Register account to keep your data permanently."]]]])
+
 (defn body
   [{user :identity
     router :reitit.core/router
@@ -401,6 +413,9 @@
           :class ["flex" "items-center"]}
          (login-modal request)
          (create-account-modal request)])]]
+
+    (when-not user
+      (temporary-session-banner))
 
     [:div
      {:id "content"
