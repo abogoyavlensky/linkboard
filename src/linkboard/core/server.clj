@@ -67,7 +67,9 @@
                              ring-cookies/wrap-cookies
                              [ring-session/wrap-session
                               {:cookie-attrs {:secure true
-                                              :http-only true}
+                                              :http-only true
+                                              :same-site :lax
+                                              :max-age (* 365 24 60 60 10)} ; 10 years
                                :flash true
                                :store session-store}]
                              ; add handler options to request

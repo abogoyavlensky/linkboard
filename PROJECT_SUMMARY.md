@@ -83,12 +83,15 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 #### Handlers
 - **Home handlers** (`src/linkboard/home/handlers.clj`): Board listing, creation, account management, and login/logout
   - **Board list pagination**: Home handler supports infinite scroll for board lists with 3 response types
+  - **Smart link creation flow**: Board-specific links use OOB updates, boardless links redirect to All Links page for immediate feedback
 - **Board handlers** (`src/linkboard/board/handlers.clj`): Link management within boards with comprehensive security validation
   - **All Links handler**: Fetches all user links with board information using LEFT JOIN queries, supports full-text search
-  - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts, supports full-text search
+  - **Board handler**: Fetches board-specific links with efficient SQL COUNT queries for link counts, supports full-text search, includes 404 handling for non-existent boards
   - **Link count optimization**: Separate SQL COUNT queries instead of in-memory counting for performance, includes search result counting
   - **Infinite scroll pagination**: All handlers support 3 response types (full page, HTMX page, pagination fragment) with configurable page sizes
   - **Search integration**: Hybrid FTS5/LIKE search system with BM25 ranking, proper query preprocessing, and search term preservation in pagination
+  - **Board deletion UX**: Shows custom deletion message with home page link instead of automatic redirect
+  - **Link update enhancement**: Includes board title in response data for complete UI updates
 - **Account handlers** (`src/linkboard/account/handlers.clj`): Account management functionality
   - **Account page handler**: Displays user account information with member since date
   - **Export data handler**: Generates CSV export of all user boards and links with proper HTTP headers
@@ -142,6 +145,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Escape key handling for accessibility
 - **Modal closing via HTMX events**: Uses `HX-Trigger-After-Swap: modal-close` to close modals after successful form submissions
 - **Alpine.js event handling**: Listens for `modal-close` window events to set `modalOpen = false`
+- **Dynamic content processing**: Uses `x-init="htmx.process($el)"` and global `htmx:afterSwap` events to ensure HTMX attributes work in teleported modal content
 
 #### Account Number UX (`src/linkboard/ui/components.clj` + `src/linkboard/account/views.clj`)
 - **Enhanced copy functionality** with consistent copy/check icon transitions in both register modal and account page
@@ -370,6 +374,7 @@ closeModal()                                     // Close Alpine.js modals via c
 ### HTMX Out-of-Band (OOB) Patterns
 - **Board Creation**: `{:hx-swap-oob "afterbegin:#board-list"}` adds new boards to list top
 - **Link Creation**: `{:hx-swap-oob "afterbegin:#link-list"}` adds new links to All Links page
+- **Boardless Link Redirect**: New boardless links redirect to All Links page for immediate feedback instead of OOB updates
 - **Empty State Removal**: `{:hx-swap-oob "delete:#empty-boards"}` removes "No boards yet" message
 - **Form Clearing**: Target form fields with `innerHTML` swap to reset forms after submission
 - **Modal Integration**: Use `HX-Trigger-After-Swap` with custom events to close modals
@@ -386,11 +391,13 @@ closeModal()                                     // Close Alpine.js modals via c
 
 ### Error Handling
 - Schema validation with Malli
-- Default error pages for 404/405/406
+- Default error pages for 404/405/406 with home page navigation buttons
 - Integrant component lifecycle management
 - **HTMX Response Targets**: Use `hx-target-error` for form validation errors with proper HTTP status codes
 - **Status Code Routing**: 200 responses target main elements, 400/4xx responses target form fields
 - **Form Validation Flow**: Invalid submissions (400) update form fields, valid ones (200) update content
+- **Board not found handling**: Returns proper 404 error page instead of crashes
+- **Custom deletion messages**: Board deletions show informative content instead of immediate redirects
 
 ## Deployment
 
@@ -464,6 +471,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Empty State Management**: Remove empty state elements using `hx-swap-oob="delete:#element-id"` when adding first items
 - **Form State Management**: Clear forms using `innerHTML` swap after successful submissions
 - **Dynamic Content Handling**: Use `htmx.onLoad()` for Alpine.js reinitialization on dynamically added content
+- **HTMX Modal Processing**: Use `x-init="htmx.process($el)"` in teleported modals and global `hx-on:after-swap` events to ensure dynamic content HTMX attributes work properly
 - **Icon Design**: Bookmark icons for link-related empty states, folder icons for board-related states
 - **Navigation UX**: Enhanced back buttons with icon + text, proper padding for touch targets
 - **Link Count Badges**: Rounded badges with gray background positioned on right side of headers
@@ -482,6 +490,8 @@ bb clj-repl              # Start REPL with dev profile
 - **Keyboard Shortcuts UX**: Use `event.code` instead of `event.key` for reliable cross-platform detection, especially with modifier keys
 - **Modal Management**: Prevent stacking by dispatching `modal-close` events before opening new modals via keyboard shortcuts
 - **Form Enhancement**: Board selectors with alphabetical ordering and "-------" option for standalone links
+- **Error Page Navigation**: All error pages include "Go to Home Page" button for better user recovery
+- **Board Deletion UX**: Custom deletion message replaces automatic redirects, provides clear next steps with home page navigation
 
 ### Testing Strategy
 - Unit tests with eftest
