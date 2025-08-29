@@ -21,7 +21,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
   - Ctrl/Cmd + Shift + L: Navigate to All Links (global)
   - Ctrl/Cmd + K: Search (existing, in search contexts)
 - **Smart modal management** prevents stacking by auto-closing existing modals when opening new ones via keyboard shortcuts
-- **User limits with validation**: 50 boards and 1000 links per user with toast notifications and modal management
+- **User limits with validation**: 50 boards and 5000 links per user with toast notifications and modal management
 - PWA-ready with modern web app icons
 - Account-based authentication with auto-generated account numbers
 - Client-side account number generation using crypto.randomUUID()
@@ -101,7 +101,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Security patterns**: All board/link operations validate user ownership using `user-owns-board?` function
 - **Error handling**: Form validation with error display and user-friendly 403 responses for unauthorized access
 - **Conditional logic**: Handlers use `cond` for clean multi-branch decision making (validation, authorization, success)
-- **User limits enforcement**: Board creation limited to 50 per user, link creation limited to 1000 per user with validation, toast notifications, and proper error handling
+- **User limits enforcement**: Board creation limited to 50 per user, link creation limited to 5000 per user with validation, toast notifications, and proper error handling
 
 #### Link Metadata Fetching (`src/linkboard/board/fetch.clj`)
 - Automatic title and icon extraction from URLs
@@ -434,7 +434,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Optional Link Titles** (✅ implemented with smart conditional metadata fetching)
 - **Board Management in Link Editing** (✅ implemented with dropdown selector, board reassignment, and ownership validation)
 - **Global Keyboard Shortcuts** (✅ implemented with cross-platform support and smart modal management)
-- **User limits** (✅ implemented with 50 board limit and 1000 link limit per user, including validation and error notifications)
+- **User limits** (✅ implemented with 50 board limit and 5000 link limit per user, including validation and error notifications)
 - Link categorization/tagging
 - Import/export capabilities (✅ CSV export implemented)
 - Link sharing and collaboration

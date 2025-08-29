@@ -20,7 +20,7 @@
   "Account information section."
   [user]
   [:div {:class ["bg-white" "rounded-xl" "p-6" "mb-6" "shadow-xs"]}
-   [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Account Information"]
+   [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Information"]
    [:div {:class ["space-y-3"]}
 
     ; Account Number Row
@@ -64,11 +64,30 @@
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
       (format-date (:created-at user))]]]])
 
+(defn account-limit-section
+  "Account limits information section."
+  [_user]
+  [:div {:class ["bg-white" "rounded-xl" "p-6" "mb-6" "shadow-xs"]}
+   [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Limits"]
+   [:div {:class ["space-y-3"]}
+
+    ; Board Limit Row
+    [:div {:class ["flex" "justify-between" "items-center"]}
+     [:span {:class ["text-sm" "text-gray-600"]} "Board Limit"]
+     [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
+      [:span {:class ["text-blue-600" "font-bold"]} "50"] " boards per user"]]
+
+    ; Link Limit Row
+    [:div {:class ["flex" "justify-between" "items-center"]}
+     [:span {:class ["text-sm" "text-gray-600"]} "Link Limit"]
+     [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
+      [:span {:class ["text-blue-600" "font-bold"]} "5,000"] " links per user"]]]])
+
 (defn action-buttons-section
   "Action buttons section."
   [{router :reitit.core/router}]
   [:div {:class ["bg-white" "rounded-xl" "p-6" "shadow-xs"]}
-   [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Account Actions"]
+   [:h3 {:class ["text-lg" "font-semibold" "text-gray-900" "mb-4"]} "Actions"]
    [:div {:class ["space-y-4"]}
 
     ; Logout Button
@@ -130,9 +149,10 @@
    ; Header
    [:div {:class ["flex" "items-center" "gap-2" "mb-6"]}
     (c/back-button request)
-    [:h2 {:class ["text-2xl" "font-bold"]} "Account Settings"]]
+    [:h2 {:class ["text-2xl" "font-bold"]} "Settings"]]
 
    ; Content
    [:div {:class ["max-w-4xl"]}
     (account-info-section user)
+    (account-limit-section user)
     (action-buttons-section request)]])

@@ -12,7 +12,7 @@
             [ring.util.response :as response]))
 
 (def ^:const DEFAULT-BOARD-LIMIT 50)
-(def ^:const DEFAULT-LINK-LIMIT 1000)
+(def ^:const DEFAULT-LINK-LIMIT 5000)
 
 (defn home-handler
   {:malli/schema [:=> [:cat :map] :map]}
@@ -184,7 +184,7 @@
         ; Return 200 status with error message
         (-> (assoc-in request
                       [:errors :humanized :url]
-                      ["Link limit reached. You can have up to 1000 links."])
+                      ["Link limit reached. You can have up to 5000 links."])
             (c/link-form-fields)
             (ext/render-html)
             (response/status 200)
