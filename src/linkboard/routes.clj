@@ -23,8 +23,10 @@
 (def routes
   [""
    {:middleware [wrap-auth
-                 ; Global rate limit for all routes - 200 requests per minute per IP
-                 [limits/wrap-rate-limit 200 60000]]}
+                 ; Global rate limit for all routes - 60 requests per minute per IP
+                 [limits/wrap-rate-limit {:max-requests 60
+                                          :window-ms 60000
+                                          :id :global}]]}
    ["/" {:name ::home-page
          :parameters {:query [:map [:page {:optional true} pos-int?]]}
          :get {:handler home-handlers/home-handler
@@ -32,14 +34,18 @@
    ["/up" {:name ::health-check
            :get {:handler (fn [_] (response/response "OK"))}}]
    ["/create-account" {:name ::create-account
-                       ; Rate limit login attempts to 3 per minute per IP
-                       :middleware [[limits/wrap-rate-limit 10 60000]]
+                       ; Rate limit login attempts to 3 per 10 minutes per IP
+                       :middleware [[limits/wrap-rate-limit {:max-requests 3
+                                                             :window-ms 600000
+                                                             :id :create-account}]]
                        :post {:handler home-handlers/create-account-handler
                               :parameters {:form {:account-number [:string {:min 1}]}}
                               :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
-              ; Rate limit login attempts to 10 per minute per IP
-              :middleware [[limits/wrap-rate-limit 20 60000]]
+              ; Rate limit login attempts to 5 per minute per IP
+              :middleware [[limits/wrap-rate-limit {:max-requests 5
+                                                    :window-ms 60000
+                                                    :id :login}]]
               :post {:handler home-handlers/login-handler
                      :parameters {:form {:account-number [:string {:min 1}]}}
                      :responses {200 {:body string?}}}}]

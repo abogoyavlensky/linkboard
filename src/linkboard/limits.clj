@@ -1,7 +1,7 @@
 (ns linkboard.limits
   (:require [ring.util.response :as response]))
 
-; Rate limiting storage - maps IP to {:count N :last-reset timestamp}
+; Rate limiting storage - maps composite key (id-ip) to {:count N :last-reset timestamp}
 (defonce rate-limit-store (atom {}))
 
 (defn get-client-ip
@@ -22,14 +22,15 @@
                      store))))
 
 (defn wrap-rate-limit
-  "Rate limiting middleware - limits to max-requests per window-ms per IP"
-  [handler max-requests window-ms]
+  "Rate limiting middleware - limits to max-requests per window-ms per ID per IP"
+  [handler {:keys [max-requests window-ms id]}]
   (fn [request]
     (let [client-ip (get-client-ip request)
+          composite-key (str (name id) "-" client-ip)
           now (System/currentTimeMillis)]
       (swap! rate-limit-store clean-expired-entries window-ms)
-      (let [current-data (get @rate-limit-store client-ip {:count 0
-                                                           :last-reset now})
+      (let [current-data (get @rate-limit-store composite-key {:count 0
+                                                               :last-reset now})
             time-since-reset (- now (:last-reset current-data))
             should-reset? (>= time-since-reset window-ms)
             new-count (if should-reset? 1 (inc (:count current-data)))
@@ -39,7 +40,7 @@
                        (assoc current-data :count new-count))]
         (if (<= new-count max-requests)
           (do
-            (swap! rate-limit-store assoc client-ip new-data)
+            (swap! rate-limit-store assoc composite-key new-data)
             (handler request))
           ; Rate limit exceeded
           (-> (response/response "Too many requests. Please try again later.")
