@@ -466,7 +466,10 @@
   (base
     [:div {:class ["mt-56"]}
      [:div {:class ["mx-auto" "text-center"]}
-      [:h1 {:class ["text-5xl"]} text]]]))
+      [:h1 {:class ["text-5xl"]} text]
+      [:a {:href "/"
+           :class ["inline-block" "bg-blue-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-blue-700" "transition" "mt-4"]}
+       "Go to Home Page"]]]))
 
 (defn search-bar
   [{:keys [search-term route]}]
