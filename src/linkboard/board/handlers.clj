@@ -212,27 +212,27 @@
 (defn update-board-handler
   [{{:keys [db]} :context
     {:keys [form]} :parameters
-    router :reitit.core/router
     :keys [parameters session errors]
     :as request}]
   (if (seq errors)
     (-> (views/board-edit-form-fields request {:board form})
-        (ext/render-html))
+        (ext/render-html)
+        (response/status 400))
     (let [user (q/get-user-by-session-id db (:session-id session))
           board-id (-> parameters :path :id)
-          title (:title form)]
-      ; Update board in the database
-      (->> {:update :board
-            :set {:title title}
-            :where [:and
-                    [:= :id board-id]
-                    [:= :user-id (:id user)]]}
-           (db/exec-one! db))
+          title (:title form)
+          board (->> {:update :board
+                      :set {:title title}
+                      :where [:and
+                              [:= :id board-id]
+                              [:= :user-id (:id user)]]
+                      :returning [:*]}
+                     (db/exec-one! db))]
       ; Render updated board content
-      (-> (response/response [:div])
-          (response/header "HX-Redirect"
-                           (ext/route router ::r/board-details {:path {:id board-id}}))
-          (response/header "HX-Trigger" "showBoardEditToast")))))
+      (-> (views/board-title board)
+          (ext/render-html)
+          (response/header "HX-Trigger" "showBoardEditToast")
+          (response/header "HX-Trigger-After-Swap" "modal-close")))))
 
 (defn delete-board-handler
   [{{:keys [db]} :context

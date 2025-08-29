@@ -178,6 +178,11 @@
                           :boards boards})))
      (empty-links))])
 
+(defn board-title
+  [board]
+  [:h2 {:class ["text-2xl" "font-bold"]}
+   (:title board)])
+
 (defn board-view
   [{router :reitit.core/router
     :as request}
@@ -187,7 +192,7 @@
    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
     [:div {:class ["flex" "items-center" "gap-2"]}
      (c/back-button request)
-     [:h2 {:class ["text-2xl" "font-bold"]} (:title board)]]
+     [:div {:id "board-title"} (board-title board)]]
     [:div {:class ["flex" "items-center" "gap-2"]}
      [:span {:class ["bg-gray-100" "text-gray-600" "px-2" "py-1" "rounded-full" "text-sm" "font-medium"]}
       (str link-count " " (if (= link-count 1) "link" "links"))]
@@ -199,7 +204,8 @@
         :form-fields (board-edit-form-fields request {:board board})
         :form-attrs {:hx-put (ext/route router ::r/board-details {:path {:id (:id board)}})
                      :hx-headers (ext/csrf-token-json)
-                     :hx-target "#board-edit-form-fields"}})
+                     :hx-target-error "#board-edit-form-fields"
+                     :hx-target "#board-title"}})
      (c/modal
        {:open-btn-text [:div.ml-2.text-red-500.hover:text-red-700.cursor-pointer
                         icons/bin]

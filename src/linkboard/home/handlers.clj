@@ -210,19 +210,26 @@
                                                        :user-id (:id user)}]
                                              :returning [:*]})
                            (update :favorite #(> % 0)))]
-              (-> (ext/render-html (list (c/link-form-fields {})
-                                         [:div
-                                          ; Add item to the top of the link list
-                                          {:hx-swap-oob "afterbegin:#link-list"}
-                                          (board-views/link-list-item {:request request
-                                                                       :router router
-                                                                       :link link
-                                                                       :boards boards})]
-                                         ; Remove empty state
-                                         [:div
-                                          {:hx-swap-oob "delete:#empty-links"}]))
-                  (response/header "HX-Trigger" "showLinkCreationToast")
-                  (response/header "HX-Trigger-After-Swap" "modal-close")))))))))
+              (if board-id
+                ; Board-specific link: stay on current page with OOB updates
+                (-> (ext/render-html (list (c/link-form-fields {:board-id board-id})
+                                           [:div
+                                            ; Add item to the top of the link list
+                                            {:hx-swap-oob "afterbegin:#link-list"}
+                                            (board-views/link-list-item {:request request
+                                                                         :router router
+                                                                         :link link
+                                                                         :boards boards})]
+                                           ; Remove empty state
+                                           [:div
+                                            {:hx-swap-oob "delete:#empty-links"}]))
+                    (response/header "HX-Trigger" "showLinkCreationToast")
+                    (response/header "HX-Trigger-After-Swap" "modal-close"))
+                ; Boardless link: redirect to All Links page
+                (-> (ext/render-html [:div])
+                    (response/header "HX-Trigger" "showLinkCreationToast")
+                    (response/header "HX-Trigger-After-Swap" "modal-close")
+                    (response/header "HX-Redirect" (ext/route router ::r/links)))))))))))
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}
