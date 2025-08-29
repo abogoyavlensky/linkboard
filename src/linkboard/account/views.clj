@@ -154,5 +154,6 @@
    ; Content
    [:div {:class ["max-w-4xl"]}
     (account-info-section user)
-    (account-limit-section {:board-count board-count :link-count link-count})
+    (account-limit-section {:board-count board-count
+                            :link-count link-count})
     (action-buttons-section request)]])
