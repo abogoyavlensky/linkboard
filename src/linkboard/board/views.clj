@@ -142,6 +142,25 @@
                   :attrs {:placeholder "Enter board name"
                           :autofocus true}})])
 
+(defn deleted-board-message
+  []
+  [:div {:class ["flex" "flex-col" "items-center" "justify-center" "py-12" "px-4"]}
+   [:div {:class ["w-16" "h-16" "rounded-full" "bg-gray-100" "flex" "items-center" "justify-center" "mb-4"]}
+    [:svg {:class ["w-8" "h-8" "text-gray-400"]
+           :fill "none"
+           :stroke "currentColor"
+           :viewBox "0 0 24 24"
+           :stroke-width "1.5"}
+     [:path {:stroke-linecap "round"
+             :stroke-linejoin "round"
+             :d "M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"}]]]
+   [:h3 {:class ["text-lg" "font-medium" "text-gray-900" "mb-2"]} "Board deleted"]
+   [:p {:class ["text-gray-500" "text-center" "mb-4" "max-w-sm"]}
+    "The board you are looking for has been deleted. You can go back to the home page."]
+   [:a {:href "/"
+        :class ["inline-block" "bg-blue-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-blue-700" "transition"]}
+    "Go to Home Page"]])
+
 (defn empty-links
   []
   [:div {:id "empty-links"
@@ -219,7 +238,8 @@
                       [:b {:class ["text-gray-900" "font-semibold" "line-clamp-3"]}
                        (:title board)]]
         :form-attrs {:hx-delete (ext/route router ::r/board-details {:path {:id (:id board)}})
-                     :hx-headers (ext/csrf-token-json)}})]]
+                     :hx-headers (ext/csrf-token-json)
+                     :hx-target "#content"}})]]
    (list
      (c/search-bar {:search-term search-term
                     :route route})

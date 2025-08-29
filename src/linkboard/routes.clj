@@ -96,8 +96,7 @@
                 :responses {200 {:body string?}}}
           :put {:handler board-handlers/update-board-handler
                 :parameters {:form {:title [:string {:min 1}]}}}
-          :delete {:handler board-handlers/delete-board-handler
-                   :responses {200 {:body nil?}}}}]
+          :delete {:handler board-handlers/delete-board-handler}}]
      ["/favorite" {:name ::toggle-board-favorite
                    :patch {:handler home-handlers/toggle-board-favorite-handler
                            :responses {200 {:body string?}}}}]]]])

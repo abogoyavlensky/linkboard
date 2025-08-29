@@ -57,6 +57,11 @@
         request* (assoc request :board-id (:id board))]
 
     (cond
+      (not board)
+      (-> (c/error-page "404 - Board not found")
+          (ext/render-html)
+          (response/status 200))
+
       (not (c/hx-request? request))
       ; Full page response
       (->> (views/board-view request* {:board board
@@ -239,16 +244,15 @@
     :keys [path-params session]}]
   (let [user (q/get-user-by-session-id db (:session-id session))
         board-id (-> path-params :id parse-long)]
-    ; Delete board (this will cascade delete all links in the board)
     (->> {:delete-from :board
           :where [:and
                   [:= :id board-id]
                   [:= :user-id (:id user)]]}
          (db/exec-one! db))
-    ; Redirect to home page
-    (-> (response/response nil)
-        (response/header "HX-Redirect" "/")
-        (response/header "HX-Trigger" "showBoardDeletionToast"))))
+    (-> (views/deleted-board-message)
+        (ext/render-html)
+        (response/header "HX-Trigger" "showBoardDeletionToast")
+        (response/header "HX-Trigger-After-Swap" "modal-close"))))
 
 (defn delete-link-handler
   [{{:keys [db]} :context
