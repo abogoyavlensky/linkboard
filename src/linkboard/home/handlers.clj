@@ -123,25 +123,39 @@
     (cond
       (not user)
       ; Create new user with session-id and hashed account number
-      (let [created-user (queries/create-user! db (:session-id session) account-number)
-            identity-data (select-keys created-user [:id :session-id])]
-        (-> (ext/render-html [:div])
-            (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/route router ::r/home-page))
-            (response/header "HX-Trigger" "showRegistrationToast")))
+      (try
+        (throw (ex-info "User creation failed" {})) ; Simulate failure if user creation fails
+        (let [created-user (queries/create-user! db (:session-id session) account-number)
+              identity-data (select-keys created-user [:id :session-id])]
+          (-> (ext/render-html [:div])
+              (assoc :session (assoc session :identity identity-data))
+              (response/header "HX-Redirect" (ext/route router ::r/home-page))
+              (response/header "HX-Trigger" "showRegistrationToast")))
+        (catch Exception _e
+          (-> (response/response "Unexpected error.")
+              (response/status 500)
+              (response/header "HX-Trigger" "showUnexpectedErrorToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close"))))
 
       (:account-number user)
-      (-> (response/response "User already exists with an account number.")
+      (-> (response/response "Unexpected error.")
           (response/status 400))
 
       :else
       ; Update existing user's empty account number with actual hashed account number
-      (let [updated-user (queries/update-user-account-number! db (:id user) account-number)
-            identity-data (select-keys updated-user [:id :session-id])]
-        (-> (ext/render-html [:div])
-            (assoc :session (assoc session :identity identity-data))
-            (response/header "HX-Redirect" (ext/route router ::r/home-page))
-            (response/header "HX-Trigger" "showRegistrationToast"))))))
+      (try
+        (throw (ex-info "User creation failed" {})) ; Simulate failure if user creation fails
+        (let [updated-user (queries/update-user-account-number! db (:id user) account-number)
+              identity-data (select-keys updated-user [:id :session-id])]
+          (-> (ext/render-html [:div])
+              (assoc :session (assoc session :identity identity-data))
+              (response/header "HX-Redirect" (ext/route router ::r/home-page))
+              (response/header "HX-Trigger" "showRegistrationToast")))
+        (catch Exception _e
+          (-> (response/response "Unexpected error.")
+              (response/status 500)
+              (response/header "HX-Trigger" "showUnexpectedErrorToast")
+              (response/header "HX-Trigger-After-Swap" "modal-close")))))))
 
 (defn login-handler
   {:malli/schema [:=> [:cat :map] :map]}

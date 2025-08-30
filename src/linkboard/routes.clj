@@ -39,7 +39,7 @@
                                                              :window-ms 600000
                                                              :id :create-account}]]
                        :post {:handler home-handlers/create-account-handler
-                              :parameters {:form {:account-number [:string {:min 1}]}}
+                              :parameters {:form {:account-number spec/AccountNumber}}
                               :responses {200 {:body string?}}}}]
    ["/login" {:name ::login
               ; Rate limit login attempts to 5 per minute per IP
@@ -47,7 +47,7 @@
                                                     :window-ms 60000
                                                     :id :login}]]
               :post {:handler home-handlers/login-handler
-                     :parameters {:form {:account-number [:string {:min 1}]}}
+                     :parameters {:form {:account-number spec/AccountNumber}}
                      :responses {200 {:body string?}}}}]
    ["/logout" {:name ::logout
                :post {:handler home-handlers/logout-handler
