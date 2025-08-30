@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 --;;
--- Insert a testing user for pagination testing
-INSERT INTO "user" (session_id, account_number) VALUES ('test-pagination-user', 'TEST-PAGI-NATI-ON01');
+-- Insert a testing user for pagination testing, account number = 'TEST-PAGI-NATI-ON01'
+INSERT INTO "user" (session_id, account_number, password) VALUES ('test-pagination-user', 'TEST-PAGI', 'bcrypt+sha512$2be585535f369913d68101faa7d1c3e7$12$ef518208b2862aac8afb6ab6a158ac279505a93c8d0b41f2');
 --;;
 -- Insert 30 boards for testing pagination
 INSERT INTO "board" (title, user_id) VALUES

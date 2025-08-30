@@ -1,6 +1,9 @@
 (ns linkboard.queries
-  (:require [clojure.string :as str]
+  (:require [buddy.hashers :as hashers]
+            [clojure.string :as str]
             [linkboard.core.db :as db]))
+
+(def ^:const PASSWORD-HASH-ALGORITHM :bcrypt+sha512)
 
 (defn get-user-by-session-id
   "Get a user by session_id."
@@ -18,23 +21,39 @@
         :where [:= :account-number account-number]}
        (db/exec-one! db)))
 
+(defn account-number->creds
+  [account-number]
+  (let [number-split (str/split account-number #"-")
+        account-lookup-id (->> number-split
+                               (take 2)
+                               (str/join "-"))
+        password (->> number-split
+                      (drop 2)
+                      (str/join "-"))]
+    {:account-lookup-id account-lookup-id
+     :password password}))
+
 (defn update-user-account-number!
   "Update user's account_number by user id."
-  [db user-id hashed-account-number]
-  (->> {:update :user
-        :set {:account-number hashed-account-number}
-        :where [:= :id user-id]
-        :returning [:*]}
-       (db/exec-one! db)))
+  [db user-id account-number]
+  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)]
+    (->> {:update :user
+          :set {:account-number account-lookup-id
+                :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}
+          :where [:= :id user-id]
+          :returning [:*]}
+         (db/exec-one! db))))
 
 (defn create-user!
   "Create a new user with session_id and account_number."
-  [db session-id hashed-account-number]
-  (->> {:insert-into :user
-        :values [{:session-id session-id
-                  :account-number hashed-account-number}]
-        :returning [:*]}
-       (db/exec-one! db)))
+  [db session-id account-number]
+  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)]
+    (->> {:insert-into :user
+          :values [{:session-id session-id
+                    :account-number account-lookup-id
+                    :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}]
+          :returning [:*]}
+         (db/exec-one! db))))
 
 (defn create-user-with-session!
   "Create a new user with only session_id (empty account_number)."

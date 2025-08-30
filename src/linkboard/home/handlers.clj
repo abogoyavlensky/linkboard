@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
-  (:require [clojure.string :as str]
+  (:require [buddy.hashers :as hashers]
+            [clojure.string :as str]
             [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as board-views]
@@ -165,16 +166,19 @@
   (if (seq errors)
     (->> (c/login-form-fields request)
          (ext/render-html))
-    (if-let [user (queries/get-user-by-account-number db (:account-number form))]
-      (-> (ext/render-html [:div])
-          (assoc :session (assoc session :identity (select-keys user [:id :session-id])
-                                 :session-id (:session-id user)))
-          (response/header "HX-Redirect" (ext/route router ::r/home-page)))
-      ; If user not found, return an error response
-      (-> request
-          (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
-          (c/login-form-fields)
-          (ext/render-html)))))
+    (let [{:keys [account-lookup-id password]} (queries/account-number->creds (:account-number form))
+          user (queries/get-user-by-account-number db account-lookup-id)
+          valid? (hashers/verify password (:password user) {:alg queries/PASSWORD-HASH-ALGORITHM})]
+      (if (and user valid?)
+        (-> (ext/render-html [:div])
+            (assoc :session (assoc session :identity (select-keys user [:id :session-id])
+                                   :session-id (:session-id user)))
+            (response/header "HX-Redirect" (ext/route router ::r/home-page)))
+        ; If user not found, return an error response
+        (-> request
+            (assoc-in [:errors :humanized :account-number] ["Invalid account number"])
+            (c/login-form-fields)
+            (ext/render-html))))))
 
 (defn create-link-handler
   {:malli/schema [:=> [:cat :map] :map]}

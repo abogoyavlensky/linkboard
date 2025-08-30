@@ -5,6 +5,7 @@ CREATE TABLE "user" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id VARCHAR NOT NULL UNIQUE,
     account_number VARCHAR NULL UNIQUE,
+    password VARCHAR NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
