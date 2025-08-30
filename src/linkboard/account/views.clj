@@ -1,10 +1,9 @@
 (ns linkboard.account.views
   (:require [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [linkboard.ui.icons :as icons]
             [reitit-extras.core :as ext])
-  (:import [java.time LocalDateTime]
-           [java.time.format DateTimeFormatter]))
+  (:import (java.time LocalDateTime)
+           (java.time.format DateTimeFormatter)))
 
 (defn format-date
   "Format date for display."
@@ -25,43 +24,16 @@
 
     ; Account Number Row
     [:div {:class ["flex" "justify-between" "items-center" "gap-2"]}
-     [:span {:class ["text-sm" "text-gray-600" "flex-shrink-0"]} "Account Number"]
-     [:div {:class ["flex" "items-center" "gap-1" "flex-shrink" "min-w-0"]
-            :x-data (str "{ showAccountNumber: false, copySuccess: false, accountNumber: '" (:account-number user) "' }")}
+     [:span {:class ["text-sm" "text-gray-600" "flex-shrink-0"]} "Account Number prefix"]
+     [:div {:class ["flex" "items-center" "gap-1" "flex-shrink" "min-w-0"]}
       ; Account number display (dots or actual number)
-      [:span {:class ["text-xs" "sm:text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]
-              :x-show "!showAccountNumber"
-              :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
-       "••••••••"]
-      [:span {:class ["text-xs" "sm:text-sm" "font-medium" "text-gray-900" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]
-              :x-show "showAccountNumber"
-              :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
-       (:account-number user)]
-
-      ; Eye toggle button
-      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
-                :x-show "!showAccountNumber"
-                :x-on:click "showAccountNumber = true"}
-       icons/eye]
-      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
-                :x-show "showAccountNumber"
-                :x-on:click "showAccountNumber = false"}
-       icons/eye-slash]
-
-      ; Copy button / Success indicator
-      [:button {:class ["p-1" "hover:bg-gray-100" "rounded"]
-                :x-show "!copySuccess"
-                :x-on:click "navigator.clipboard.writeText(accountNumber); copySuccess = true; setTimeout(() => copySuccess = false, 2000)"}
-       icons/copy]
-      [:button {:class ["p-1" "rounded"]
-                :x-show "copySuccess"
-                :disabled true}
-       icons/check-circle]]]
+      [:span {:class ["text-gray-600" "font-bold" "text-xs" "sm:text-sm" "font-medium" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]}
+       (str (subs (:account-number user) 0 5) "...")]]]
 
     ; Member Since Row
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Member Since"]
-     [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
+     [:span {:class ["text-sm" "font-medium" "text-gray-600" "font-bold"]}
       (format-date (:created-at user))]]]])
 
 (defn account-limit-section
@@ -75,13 +47,13 @@
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Board Limit"]
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
-      [:span {:class ["text-blue-600" "font-bold"]} (str board-count "/50")]]]
+      [:span {:class ["text-gray-600" "font-bold"]} (str board-count "/50")]]]
 
     ; Link Limit Row
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Link Limit"]
      [:span {:class ["text-sm" "font-medium" "text-gray-900"]}
-      [:span {:class ["text-blue-600" "font-bold"]} (str link-count "/5,000")]]]]])
+      [:span {:class ["text-gray-600" "font-bold"]} (str link-count "/5,000")]]]]])
 
 (defn action-buttons-section
   "Action buttons section."
