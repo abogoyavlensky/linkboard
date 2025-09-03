@@ -51,7 +51,7 @@
              :d "M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"}]]]
    [:h3 {:class ["text-lg" "font-medium" "text-gray-900" "mb-2"]} "No boards yet"]
    [:p {:class ["text-gray-500" "text-center" "mb-4" "max-w-sm"]}
-    "Get started by creating your first board to organize your bookmarks"]])
+    "Get started by creating your first board to organize your bookmarks, or create a boardless link"]])
 
 (defn board-list
   [router {:keys [boards has-more? route page]}]
@@ -99,7 +99,8 @@
     [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
      [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
      [:div (c/modal
-             {:open-btn-text icons/plus
+             {:btn-id "create-board-btn"
+              :open-btn-text icons/plus
               :title "Create board"
               :form-attrs {:hx-post (ext/route router ::r/board-list)
                            :hx-target "#board-form-fields"

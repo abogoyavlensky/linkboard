@@ -1,72 +1,62 @@
 (ns linkboard.home-test
   (:require [clojure.test :refer :all]
-            ;[etaoin.api :as etaoin]
+            [etaoin.api :as e]
+            [etaoin.keys :as k]
             [integrant-extras.tests :as ig-extras]
-            ;[linkboard.core.db :as db]
             [linkboard.server :as-alias server]
-            [linkboard.test-utils :as test-utils]))
-            ;[reitit-extras.tests :as reitit-extras]))
+            [linkboard.test-utils :as utils]
+            ; adds support for `match?` and `thrown-match?` in `is`
+            [matcher-combinators.test]
+            [reitit-extras.tests :as ext]))
 
 (use-fixtures :once
   (ig-extras/with-system))
 
 (use-fixtures :each
-  test-utils/with-truncated-tables)
+  utils/with-truncated-tables)
 
-;TODO: update with local chromedriver!
+(deftest test-empty-home-page
+  (let [url (ext/get-server-url (utils/->server))]
 
-;(deftest test-home-page-loads-correctly
-;  (testing "Home page loads and displays correctly"
-;    (let [db (::db/db ig-extras/*test-system*)
-;          driver (get-in ig-extras/*test-system* [::test-utils/webdriver :driver])
-;          server (::server/server ig-extras/*test-system*)
-;          url (reitit-extras/get-server-url server :container)]
-;
-;      ; Create test user
-;      (db/exec-one! db {:insert-into :user
-;                        :values [{:sync_code "test-sync-code"}]})
-;
-;      ; Create test boards
-;      (db/exec-one! db {:insert-into :board
-;                        :values [{:title "Test Board 1"
-;                                  :user_id 1}]})
-;
-;      ; Navigate to home page
-;      (etaoin/go driver url)
-;      (etaoin/wait-visible driver {:tag :h1
-;                                   :fn/has-text "Linkboard"}
-;                           {:timeout 5})
-;
-;      ; Verify page elements
-;      (is (etaoin/visible? driver {:tag :h1
-;                                   :fn/has-text "Linkboard"}))
-;      (is (etaoin/visible? driver {:tag :h2
-;                                   :fn/has-text "MY BOARDS"}))
-;
-;      ; Verify board is displayed
-;      (is (etaoin/visible? driver {:tag :span
-;                                   :fn/has-text "Test Board 1"}))
-;
-;      ; Verify database state
-;      (is (= 1 (count (db/exec! db {:select [:*]
-;                                    :from [:user]}))))
-;      (is (= 1 (count (db/exec! db {:select [:*]
-;                                    :from [:board]})))))))
-;
-;(deftest test-index-page-loads-correctly
-;  (testing "Index page loads and displays correctly"
-;    (let [driver (get-in ig-extras/*test-system* [::test-utils/webdriver :driver])
-;          server (::server/server ig-extras/*test-system*)
-;          url (reitit-extras/get-server-url server :container)]
-;
-;      ; Navigate to home page
-;      (etaoin/go driver (str url "/index"))
-;      (etaoin/wait-visible driver {:tag :span
-;                                   :fn/has-text "Clojure Stack Lite"}
-;                           {:timeout 5})
-;
-;      ; Verify page elements
-;      (is (etaoin/visible? driver {:tag :span
-;                                   :fn/has-text "Clojure Stack Lite"}))
-;      (is (etaoin/visible? driver {:tag :a
-;                                   :fn/has-text "Get Started"})))))
+    (e/with-chrome-headless
+      {:path-driver (utils/driver-path!)}
+      driver
+      ; Navigate to home page
+      (e/go driver url)
+      ; all the elements should be visible on the page
+      (e/wait-visible driver {:tag :h1
+                              :fn/has-text "Linkboard"})
+      (e/wait-visible driver {:fn/has-text "No boards yet"})
+      (e/wait-visible driver {:fn/has-text "All Links"})
+      (e/wait-visible driver {:fn/has-text "Login"})
+      (e/wait-visible driver {:fn/has-text "Register"})
+      (e/wait-visible driver {:fn/has-text "Using temporary session. Register account to keep your data permanently."}))
+    (is (= 1 1))))
+
+(deftest test-create-board-unauthenticated
+  (let [url (ext/get-server-url (utils/->server))]
+    (testing "no boards creatd"
+      (is (= [] (utils/get-all-boards (utils/->db)))))
+
+    (e/with-chrome-headless
+      {:path-driver (utils/driver-path!)}
+      driver
+
+      (e/go driver url)
+      (e/wait-visible driver {:tag :button
+                              :id "create-board-btn"})
+      (e/click driver {:tag :button
+                       :id "create-board-btn"})
+      (e/wait-visible driver {:id "board-form-fields"})
+      (e/fill driver {:tag :input
+                      :name :title} "My Test Board")
+      (e/fill driver {:tag :input
+                      :name :title} k/enter))
+
+    (testing "board created in db"
+      (is (match? [{:created-at string?
+                    :favorite 0
+                    :id 1
+                    :title "My Test Board"
+                    :user-id 1}]
+                  (utils/get-all-boards (utils/->db)))))))

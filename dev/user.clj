@@ -34,6 +34,8 @@
   ; It's convenient to bind shortcuts to these functions in your editor.
   ; Start or restart system
   (reset)
+  ; refresh code without restarting system
+  (repl/refresh)
   ; Check system state
   (keys state/system)
   ; Stop system

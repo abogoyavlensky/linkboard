@@ -1,12 +1,9 @@
 (ns linkboard.test-utils
-  (:require [clojure.tools.logging :as log]
-            [etaoin.api :as etaoin]
+  (:require [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [integrant-extras.tests :as ig-extras]
-            [integrant.core :as ig]
             [linkboard.core.db :as db]
-            [linkboard.core.server :as server])
-  (:import [org.testcontainers Testcontainers]
-           [org.testcontainers.containers GenericContainer]))
+            [linkboard.core.server :as server]))
 
 (def ^:const TEST-CSRF-TOKEN "test-csrf-token")
 (def ^:const TEST-SECRET-KEY "test-secret-key")
@@ -28,38 +25,27 @@
       (db/exec! db {:delete-from table}))
     (f)))
 
-(def ^:private WEBDRIVER-PORT 4444)
-(def ^:private WEBDRIVER-IMAGE "selenium/standalone-chromium:131.0")
-
-(defmethod ig/init-key ::webdriver
-  [_ {:keys [server]}]
-  (log/info "[DB] Starting webdriver...")
-  (let [server-port (.getLocalPort (first (.getConnectors server)))
-        ; Expose port from local machine to container
-        _ (Testcontainers/exposeHostPorts (int-array [server-port]))
-        ; Start the webdriver container
-        container (doto (GenericContainer. WEBDRIVER-IMAGE)
-                    (.withExposedPorts (into-array Integer [(int WEBDRIVER-PORT)]))
-                    (.withReuse true)
-                    (.start))
-        driver (etaoin/chrome-headless {:port (.getMappedPort container WEBDRIVER-PORT)
-                                        :host (.getHost container)
-                                        :args ["--no-sandbox"]})]
-    {:container container
-     :driver driver}))
-
-(defmethod ig/halt-key! ::webdriver
-  [_ {:keys [driver]}]
-  (log/info "[DB] Closing webdriver...")
-  ; Do not stop the container to be able to reuse it
-  (etaoin/quit driver))
-
-(defn db
+(defn ->db
   "Get the database connection from the test system."
   []
   (::db/db ig-extras/*test-system*))
 
-(defn server
+(defn ->server
   "Get the server instance from the test system."
   []
   (::server/server ig-extras/*test-system*))
+
+(def driver-path!
+  (memoize
+    (fn []
+      (-> (shell/sh "mise" "which" "chromedriver")
+          :out
+          (str/trim)))))
+
+; DB queries
+
+(defn get-all-boards
+  [db]
+  (db/exec! db {:select [:*]
+                :from [:board]
+                :order-by [[:id :desc]]}))
