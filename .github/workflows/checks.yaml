@@ -41,6 +41,6 @@ jobs:
           key-label: 'tests'
       - uses: jdx/mise-action@v3
         with:
-          install_args: "babashka java clojure"
+          install_args: "babashka java clojure chromedriver"
       - name: Run tests
         run: bb deps && bb test
