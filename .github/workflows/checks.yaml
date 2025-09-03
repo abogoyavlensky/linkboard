@@ -42,7 +42,7 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@latest
         with:
-          chrome-version: "140.0.7339.81"
+          chrome-version: "140.0.7339.80"
       - uses: jdx/mise-action@v3
         with:
           install_args: "babashka java clojure chromedriver"
