@@ -40,9 +40,10 @@ jobs:
         with:
           key-label: 'tests'
       - name: Setup Chrome
-        uses: browser-actions/setup-chrome@latest
+        uses: browser-actions/setup-chrome@v2
         with:
-          chrome-version: "140.0.7339.80"
+          chrome-version: 140.0.7339.80
+          install-chromedriver: true
       - uses: jdx/mise-action@v3
         with:
           install_args: "babashka java clojure chromedriver"
