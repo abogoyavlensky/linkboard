@@ -10,17 +10,15 @@
             [reitit-extras.tests :as ext]))
 
 (use-fixtures :once
-  (ig-extras/with-system))
+  (ig-extras/with-system "config.test.edn"))
 
 (use-fixtures :each
   utils/with-truncated-tables)
 
 (deftest test-empty-home-page
-  (let [url (ext/get-server-url (utils/->server))
-        path (utils/setup-webdriver!)]
-
+  (let [url (ext/get-server-url (utils/->server))]
     (e/with-chrome-headless
-      {:path-driver path}
+      {:path-driver (utils/->webdriver-path)}
       driver
       ; Navigate to home page
       (e/go driver url)
@@ -40,7 +38,7 @@
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
     (e/with-chrome-headless
-      {:path-driver (utils/setup-webdriver!)}
+      {:path-driver (utils/->webdriver-path)}
       driver
 
       (e/go driver url)

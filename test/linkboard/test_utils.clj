@@ -1,7 +1,8 @@
 (ns linkboard.test-utils
   (:require [integrant-extras.tests :as ig-extras]
             [linkboard.core.db :as db]
-            [linkboard.core.server :as server])
+            [linkboard.core.server :as server]
+            [integrant.core :as ig])
   (:import (io.github.bonigarcia.wdm WebDriverManager)))
 
 (def ^:const TEST-CSRF-TOKEN "test-csrf-token")
@@ -40,6 +41,14 @@
   (let [manager (WebDriverManager/chromedriver)]
     (.setup manager)
     (.getDownloadedDriverPath manager)))
+
+(defmethod ig/init-key ::webdriver-path
+  [_ _]
+  (setup-webdriver!))
+
+(defn ->webdriver-path
+  []
+  (::webdriver-path ig-extras/*test-system*))
 
 ; DB queries
 
