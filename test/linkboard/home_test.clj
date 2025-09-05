@@ -35,7 +35,35 @@
     (testing "no boards created"
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
-    (utils/with-chrome driver
+    (utils/with-chrome
+      driver
+      (e/go driver url)
+      (e/wait-visible driver {:tag :button
+                              :id "create-board-btn"})
+      (e/click driver {:tag :button
+                       :id "create-board-btn"})
+      (e/wait-visible driver {:id "board-form-fields"})
+      (e/fill driver {:tag :input
+                      :name :title} "My Test Board")
+      (e/click driver {:tag :button
+                       :fn/text "Save"}))
+
+
+    (testing "board created in db"
+      (is (match? [{:created-at string?
+                    :favorite 0
+                    :id 1
+                    :title "My Test Board"
+                    :user-id 1}]
+                  (utils/get-all-boards (utils/->db)))))))
+
+(deftest test-create-board-unauthenticated-create-board-with-enter-key
+  (let [url (ext/get-server-url (utils/->server))]
+    (testing "no boards created"
+      (is (= [] (utils/get-all-boards (utils/->db)))))
+
+    (utils/with-chrome
+      driver
       (e/go driver url)
       (e/wait-visible driver {:tag :button
                               :id "create-board-btn"})
