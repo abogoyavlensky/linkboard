@@ -7,7 +7,6 @@ cljfmt = "0.13.0"
 tailwindcss = "4.0.14"
 lefthook = "1.8.2"
 ruby = "3.3.0"
-chromedriver = "140.0.7339.80"
 
 [alias]
 cljfmt = "asdf:https://github.com/b-social/asdf-cljfmt"

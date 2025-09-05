@@ -1,9 +1,8 @@
 (ns linkboard.test-utils
-  (:require [clojure.java.shell :as shell]
-            [clojure.string :as str]
-            [integrant-extras.tests :as ig-extras]
+  (:require [integrant-extras.tests :as ig-extras]
             [linkboard.core.db :as db]
-            [linkboard.core.server :as server]))
+            [linkboard.core.server :as server])
+  (:import (io.github.bonigarcia.wdm WebDriverManager)))
 
 (def ^:const TEST-CSRF-TOKEN "test-csrf-token")
 (def ^:const TEST-SECRET-KEY "test-secret-key")
@@ -35,12 +34,12 @@
   []
   (::server/server ig-extras/*test-system*))
 
-(def driver-path!
-  (memoize
-    (fn []
-      (-> (shell/sh "mise" "which" "chromedriver")
-          :out
-          (str/trim)))))
+(defn setup-webdriver! []
+  ; This automatically downloads the correct ChromeDriver version
+  ; and return chromedriver path
+  (let [manager (WebDriverManager/chromedriver)]
+    (.setup manager)
+    (.getDownloadedDriverPath manager)))
 
 ; DB queries
 

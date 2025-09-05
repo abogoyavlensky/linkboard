@@ -16,10 +16,11 @@
   utils/with-truncated-tables)
 
 (deftest test-empty-home-page
-  (let [url (ext/get-server-url (utils/->server))]
+  (let [url (ext/get-server-url (utils/->server))
+        path (utils/setup-webdriver!)]
 
     (e/with-chrome-headless
-      {:path-driver (utils/driver-path!)}
+      {:path-driver path}
       driver
       ; Navigate to home page
       (e/go driver url)
@@ -35,11 +36,11 @@
 
 (deftest test-create-board-unauthenticated
   (let [url (ext/get-server-url (utils/->server))]
-    (testing "no boards creatd"
+    (testing "no boards created"
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
     (e/with-chrome-headless
-      {:path-driver (utils/driver-path!)}
+      {:path-driver (utils/setup-webdriver!)}
       driver
 
       (e/go driver url)
