@@ -36,16 +36,13 @@
   []
   (::server/server ig-extras/*test-system*))
 
-(defn setup-webdriver! []
+(defmethod ig/init-key ::webdriver-path
+  [_ _]
   ; This automatically downloads the correct ChromeDriver version
   ; and return chromedriver path
   (let [manager (WebDriverManager/chromedriver)]
     (.setup manager)
     (.getDownloadedDriverPath manager)))
-
-(defmethod ig/init-key ::webdriver-path
-  [_ _]
-  (setup-webdriver!))
 
 (defn ->webdriver-path
   []
