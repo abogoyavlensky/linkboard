@@ -2,7 +2,7 @@
 java = "temurin-21.0.2+13.0.LTS"
 clojure = "1.12.0.1479"
 babashka = "1.12.197"
-clj-kondo = "2025.02.20"
+clj-kondo = "2025.07.28"
 cljfmt = "0.13.0"
 tailwindcss = "4.0.14"
 lefthook = "1.8.2"

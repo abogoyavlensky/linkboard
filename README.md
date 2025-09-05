@@ -83,6 +83,9 @@ To generate SSH keys, run:
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 
+#### Tests
+
+To be able to run tests locally you have to install Chrome  browser. 
 
 ## TODO
 

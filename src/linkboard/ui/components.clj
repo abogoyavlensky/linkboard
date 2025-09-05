@@ -69,14 +69,15 @@
        item)]]])
 
 (defn modal
-  [{:keys [title open-btn-text submit-btn-title form-attrs form-fields]}]
+  [{:keys [btn-id title open-btn-text submit-btn-title form-attrs form-fields]}]
   [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
     :x-on:keydown.escape.window "modalOpen = false"
     :x-on:modal-close.window "modalOpen = false"
     :hx-on:closeModal "closeModal()"}
    [:button
-    {:x-on:click "modalOpen=true"
+    {:id btn-id
+     :x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
    [:template

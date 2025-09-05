@@ -2,6 +2,7 @@
 .classpath
 .clj-kondo/*
 !.clj-kondo/config.edn
+!.clj-kondo/hooks
 .cpcache
 .lsp/
 lsp/
