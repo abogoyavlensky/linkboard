@@ -1,8 +1,8 @@
 (ns linkboard.test-utils
   (:require [integrant-extras.tests :as ig-extras]
+            [integrant.core :as ig]
             [linkboard.core.db :as db]
-            [linkboard.core.server :as server]
-            [integrant.core :as ig])
+            [linkboard.core.server :as server])
   (:import (io.github.bonigarcia.wdm WebDriverManager)))
 
 (def ^:const TEST-CSRF-TOKEN "test-csrf-token")
