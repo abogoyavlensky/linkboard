@@ -2,5 +2,5 @@
            :shadowed-var {:level :warning}
            :refer-all {:exclude [clojure.test]}
            :consistent-alias {:aliases {clojure.string str}}
-           :unresolved-symbol {:exclude [(clojure.test/is [match?])
-                                         (linkboard.test-utils/with-chrome [driver])]}}}
+           :unresolved-symbol {:exclude [(clojure.test/is [match?])]}}
+ :hooks {:analyze-call {linkboard.test-utils/with-chrome hooks.linkboard.test-utils/with-chrome}}}

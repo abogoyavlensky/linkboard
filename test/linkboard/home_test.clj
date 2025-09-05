@@ -36,7 +36,6 @@
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
     (utils/with-chrome driver
-
       (e/go driver url)
       (e/wait-visible driver {:tag :button
                               :id "create-board-btn"})
