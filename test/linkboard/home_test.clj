@@ -17,9 +17,7 @@
 
 (deftest test-empty-home-page
   (let [url (ext/get-server-url (utils/->server))]
-    (e/with-chrome-headless
-      {:path-driver (utils/->webdriver-path)}
-      driver
+    (utils/with-chrome driver
       ; Navigate to home page
       (e/go driver url)
       ; all the elements should be visible on the page
@@ -37,9 +35,7 @@
     (testing "no boards created"
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
-    (e/with-chrome-headless
-      {:path-driver (utils/->webdriver-path)}
-      driver
+    (utils/with-chrome driver
 
       (e/go driver url)
       (e/wait-visible driver {:tag :button

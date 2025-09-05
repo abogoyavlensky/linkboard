@@ -1,5 +1,6 @@
 (ns linkboard.test-utils
-  (:require [integrant-extras.tests :as ig-extras]
+  (:require [etaoin.api :as e]
+            [integrant-extras.tests :as ig-extras]
             [integrant.core :as ig]
             [linkboard.core.db :as db]
             [linkboard.core.server :as server])
@@ -49,6 +50,12 @@
 (defn ->webdriver-path
   []
   (::webdriver-path ig-extras/*test-system*))
+
+(defmacro with-chrome
+  "Wrapper macro for etaoin with-chrome-headless that includes predefined :path-driver option."
+  [driver & body]
+  `(e/with-chrome-headless {:path-driver (->webdriver-path)} ~driver
+     ~@body))
 
 ; DB queries
 
