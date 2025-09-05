@@ -48,7 +48,6 @@
       (e/click driver {:tag :button
                        :fn/text "Save"}))
 
-
     (testing "board created in db"
       (is (match? [{:created-at string?
                     :favorite 0
