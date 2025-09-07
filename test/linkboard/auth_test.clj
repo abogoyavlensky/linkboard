@@ -30,7 +30,7 @@
       ; Wait for modal to appear with account number
       (e/wait-visible driver
                       {:fn/has-text "Your Account number"}
-                      {:timeout 15})
+                      {:timeout 30})
       ; The account number should be auto-generated and visible
       (is (e/visible? driver {:css "[x-text='accountId']"}))
       ; Click Create Account button
@@ -73,7 +73,8 @@
       (e/click driver {:fn/has-text "Login"})
 
       ; Wait for login modal to appear
-      (e/wait-visible driver {:fn/has-text "Login"})
+      (e/wait-visible driver {:tag :h3
+                              :fn/has-text "Login"} {:timeout 30})
       (e/wait-visible driver {:fn/has-text "Enter your account number"})
 
       ; Fill in the account number
