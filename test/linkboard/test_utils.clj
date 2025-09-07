@@ -13,12 +13,18 @@
   [db]
   (->> {:select [:name]
         :from [:sqlite_master]
-        :where [:= :type "table"]}
+        :where [:and
+                [:= :type "table"]
+                [:<> :name "link_search"]
+                [:<> :name "link_search_data"]
+                [:<> :name "link_search_idx"]
+                [:<> :name "link_search_docsize"]
+                [:<> :name "link_search_config"]]}
        (db/exec! db)
        (map (comp keyword :name))))
 
 (defn with-truncated-tables
-  "Remove all data from all tables."
+  "Remove all data from all tables except virtual tables (e.g., FTS5)."
   [f]
   (let [db (::db/db ig-extras/*test-system*)]
     (doseq [table (all-tables db)
@@ -60,4 +66,10 @@
   [db]
   (db/exec! db {:select [:*]
                 :from [:board]
+                :order-by [[:id :desc]]}))
+
+(defn get-all-links
+  [db]
+  (db/exec! db {:select [:*]
+                :from [:link]
                 :order-by [[:id :desc]]}))

@@ -36,7 +36,6 @@
                        "disabled:cursor-not-allowed" "disabled:opacity-50"]
                       (when (seq (get errors input-name))
                         ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
-       :id (name input-name)
        :value value}
       attrs)]
    (for [error (get errors input-name)]
@@ -69,14 +68,14 @@
        item)]]])
 
 (defn modal
-  [{:keys [btn-id title open-btn-text submit-btn-title form-attrs form-fields]}]
+  [{:keys [title open-btn-text submit-btn-title form-attrs form-fields id-prefix]}]
   [:div.w-auto.h-auto
    {:x-data "{ modalOpen: false }"
     :x-on:keydown.escape.window "modalOpen = false"
     :x-on:modal-close.window "modalOpen = false"
     :hx-on:closeModal "closeModal()"}
    [:button
-    {:id btn-id
+    {:id (str id-prefix "-modal-btn")
      :x-on:click "modalOpen=true"
      :class "focus:ring-neutral-200/60"}
     open-btn-text]
@@ -85,6 +84,7 @@
     [:div
      {:x-cloak ""
       :x-show "modalOpen"
+      ; Re-evaluate htmx content when modal is opened
       :x-init "htmx.process($el)"
       :class ["fixed" "inset-0" "flex" "items-center" "justify-center" "z-50" "bg-black/50" "backdrop-blur-xs"]
       :x-on:click "modalOpen=false"}
@@ -127,6 +127,7 @@
         {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
                  "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
          :autofocus true
+         :id (format "%s-submit-btn" id-prefix)
          :type "submit"}
         (or submit-btn-title "Save")
         [:div {:class "htmx-indicator ml-2"} icons/spinner]]]]]]])
@@ -157,6 +158,7 @@
   [request]
   (modal
     {:title "Login"
+     :id-prefix "login"
      :open-btn-text [:button
                      {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
                       :x-on:click "modalOpen = true"}
@@ -220,6 +222,7 @@
   [request]
   (modal
     {:title "Create Account"
+     :id-prefix "create-account"
      :open-btn-text [:button
                      {:class ["text-blue-500" "text-lg" "cursor-pointer"]
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
@@ -344,17 +347,17 @@
   (let [errors (get-in request [:errors :humanized])]
     [:div
      {:id "link-form-fields"}
+     (form-input {:input-name :title
+                  :errors errors
+                  :value (get-in request [:parameters :form :title] nil)
+                  :text "Title (optional)"
+                  :attrs {:placeholder "Link title"}})
      (form-input {:input-name :url
                   :errors errors
                   :value (get-in request [:parameters :form :url] nil)
                   :text "Link"
                   :attrs {:placeholder "Link title"
                           :autofocus true}})
-     (form-input {:input-name :title
-                  :errors errors
-                  :value (get-in request [:parameters :form :title] nil)
-                  :text "Title (optional)"
-                  :attrs {:placeholder "Link title"}})
      (when board-id
        [:input {:type "hidden"
                 :name "board"
@@ -449,6 +452,7 @@
        {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
                                           icons/plus-circle "Add link"]})
         :title "Add link"
+        :id-prefix "add-link"
         :form-attrs {:hx-post (ext/route router ::r/links)
                      :hx-target "#link-form-fields"
                      :hx-swap "innerHTML"}

@@ -99,7 +99,7 @@
     [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
      [:h2 {:class ["text-gray-500" "text-sm"]} "MY BOARDS"]
      [:div (c/modal
-             {:btn-id "create-board-btn"
+             {:id-prefix "create-board"
               :open-btn-text icons/plus
               :title "Create board"
               :form-attrs {:hx-post (ext/route router ::r/board-list)

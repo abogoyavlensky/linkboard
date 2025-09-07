@@ -16,17 +16,17 @@
   (let [errors (get-in request [:errors :humanized])]
     [:div
      {:id "link-edit-form-fields"}
+     (c/form-input {:input-name :title
+                    :errors errors
+                    :value (or (:title link) "")
+                    :text "Title"
+                    :attrs {:placeholder "Link title"}})
      (c/form-input {:input-name :url
                     :errors errors
                     :value (:url link)
                     :text "Link"
                     :attrs {:placeholder "https://example.com"
                             :autofocus true}})
-     (c/form-input {:input-name :title
-                    :errors errors
-                    :value (or (:title link) "")
-                    :text "Title"
-                    :attrs {:placeholder "Link title"}})
      [:div.mb-4
       [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "board"} "Board"]
       [:select
@@ -97,6 +97,7 @@
                                   [:div {:class ["flex-shrink-0"]} (icons/edit)]
                                   [:span "Edit"]]
                   :title "Edit link"
+                  :id-prefix "edit-link"
                   :submit-btn-title "Save changes"
                   :form-fields (link-edit-form-fields request {:link link
                                                                :boards boards})
@@ -117,6 +118,7 @@
                                   [:div {:class ["flex-shrink-0"]} icons/bin]
                                   [:span "Delete"]]
                   :title "Delete link"
+                  :id-prefix "delete-link"
                   :submit-btn-title "Confirm"
                   :form-fields [:div
                                 [:p {:class ["text-md text-gray-600" "mb-2"]}
@@ -219,6 +221,7 @@
        {:open-btn-text [:div.ml-2.text-gray-500.hover:text-gray-700.cursor-pointer
                         (icons/edit)]
         :title "Edit board"
+        :id-prefix "edit-board"
         :submit-btn-title "Save changes"
         :form-fields (board-edit-form-fields request {:board board})
         :form-attrs {:hx-put (ext/route router ::r/board-details {:path {:id (:id board)}})
@@ -229,6 +232,7 @@
        {:open-btn-text [:div.ml-2.text-red-500.hover:text-red-700.cursor-pointer
                         icons/bin]
         :title "Delete board"
+        :id-prefix "delete-board"
         :submit-btn-title "Confirm"
         :form-fields [:div
                       [:p {:class ["text-md text-gray-600" "mb-2"]}
