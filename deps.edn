@@ -35,7 +35,6 @@
            :test {:extra-paths ["test"]
                   :extra-deps {eftest/eftest {:mvn/version "0.6.0"}
                                cloverage/cloverage {:mvn/version "1.2.4"}
-                               hato/hato {:mvn/version "1.0.0"}
                                etaoin/etaoin {:mvn/version "1.1.43"}
                                circleci/bond {:mvn/version "0.6.0"}
                                io.github.bonigarcia/webdrivermanager {:mvn/version "6.3.1"}

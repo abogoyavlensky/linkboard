@@ -68,6 +68,12 @@
                 :from [:board]
                 :order-by [[:id :desc]]}))
 
+(defn get-link
+  [db {:keys [id]}]
+  (db/exec-one! db {:select [:*]
+                    :from [:link]
+                    :where [:= :id id]}))
+
 (defn get-all-links
   [db]
   (db/exec! db {:select [:*]
