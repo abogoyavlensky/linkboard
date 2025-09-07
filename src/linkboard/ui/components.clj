@@ -160,7 +160,7 @@
     {:title "Login"
      :id-prefix "login"
      :open-btn-text [:button
-                     {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700" 
+                     {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700"
                               "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
                       :id "login-header-modal-btn"
                       :x-on:click "modalOpen = true"}
@@ -226,7 +226,7 @@
     {:title "Create Account"
      :id-prefix "create-account"
      :open-btn-text [:button
-                     {:class ["px-4" "py-2" "text-slate-600" "font-semibold" "hover:text-slate-700" 
+                     {:class ["px-4" "py-2" "text-slate-600" "font-semibold" "hover:text-slate-700"
                               "hover:bg-slate-100" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"
                               "border" "border-slate-300" "hover:border-slate-400"]
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
@@ -416,8 +416,8 @@
       [:a
        {:href (ext/route router ::r/home-page)
         :class ["group" "transition-all" "duration-200"]}
-       [:h1 {:class ["text-3xl" "md:text-4xl" "font-extrabold" "text-slate-800" 
-                     "cursor-pointer" "group-hover:text-blue-600" "transition-colors" "duration-200"]} 
+       [:h1 {:class ["text-3xl" "md:text-4xl" "font-extrabold" "text-slate-800"
+                     "cursor-pointer" "group-hover:text-blue-600" "transition-colors" "duration-200"]}
         "Linkboard"]]
       [:div {:class ["flex" "items-center" "gap-3" "text-slate-500"]}
        [:p {:class ["text-sm" "md:text-base" "font-medium"]} "Personal bookmark manager"]
@@ -429,7 +429,7 @@
      [:div {:class ["flex" "items-center"]}
       (if user
         [:a
-         {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700" 
+         {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700"
                   "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
           :href (ext/route router ::r/account)}
          "Account"]
