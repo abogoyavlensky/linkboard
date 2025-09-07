@@ -189,8 +189,10 @@
                               (not (str/blank? (str (:board-id form)))))
                      (parse-long (str (:board-id form))))
           user (q/get-user-by-session-id db (:session-id session))
+          current-link (q/get-link-by-id-and-user-id db link-id (:id user))
           boards (q/get-user-boards-minimal db (:id user))
-          metadata (fetch/fetch-page-metadata url)]
+          url-changed? (not= (:url current-link) url)
+          metadata (when url-changed? (fetch/fetch-page-metadata url))]
       ; Validate board ownership if board-id is provided
       (if (and board-id (not (q/user-owns-board? db {:board-id board-id
                                                      :session-id (:session-id session)})))
@@ -199,7 +201,7 @@
         (let [updated-link (-> (db/exec-one! db {:update :link
                                                  :set {:title title
                                                        :url url
-                                                       :icon (:icon metadata)
+                                                       :icon (if url-changed? (:icon metadata) (:icon current-link))
                                                        :board-id board-id}
                                                  :where [:and
                                                          [:= :id link-id]

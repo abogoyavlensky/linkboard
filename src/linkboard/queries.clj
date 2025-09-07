@@ -80,6 +80,16 @@
                 [:= :user-id user-id]]}
        (db/exec-one! db)))
 
+(defn get-link-by-id-and-user-id
+  "Get a link by ID if it belongs to the specified user."
+  [db link-id user-id]
+  (->> {:select [:*]
+        :from [:link]
+        :where [:and
+                [:= :id link-id]
+                [:= :user-id user-id]]}
+       (db/exec-one! db)))
+
 (defn user-owns-board?
   "Check if the user owns the board."
   [db {:keys [board-id session-id]}]
