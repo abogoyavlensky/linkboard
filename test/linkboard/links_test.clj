@@ -3,13 +3,13 @@
             [clj-http.client :as http]
             [clojure.test :refer :all]
             [integrant-extras.tests :as ig-extras]
-            [reitit-extras.tests :as ext]
             [linkboard.board.fetch :as fetch]
             [linkboard.core.db :as db]
             [linkboard.queries :as q]
             [linkboard.server :as-alias server]
             [linkboard.test-utils :as utils]
-            [matcher-combinators.test]))
+            [matcher-combinators.test]
+            [reitit-extras.tests :as ext]))
 
 (use-fixtures :once
   (ig-extras/with-system "config.test.edn"))
@@ -38,14 +38,14 @@
         {:keys [link user]} (create-test-user-and-link! db)]
     (bond/with-spy [fetch/fetch-page-metadata]
       (http/put (str base-url "/links/" (:id link))
-        {:cookies (ext/session-cookies
-                    {ext/CSRF-TOKEN-SESSION-KEY utils/TEST-CSRF-TOKEN
-                     :session-id SESSION-ID}
-                    utils/TEST-SECRET-KEY)
-         :form-params {ext/CSRF-TOKEN-FORM-KEY utils/TEST-CSRF-TOKEN
-                       :title "Updated Title"
+                {:cookies (ext/session-cookies
+                            {ext/CSRF-TOKEN-SESSION-KEY utils/TEST-CSRF-TOKEN
+                             :session-id SESSION-ID}
+                            utils/TEST-SECRET-KEY)
+                 :form-params {ext/CSRF-TOKEN-FORM-KEY utils/TEST-CSRF-TOKEN
+                               :title "Updated Title"
                        ; same url
-                       :url "https://example.com"}})
+                               :url "https://example.com"}})
 
       ; Verify fetch-page-metadata was NOT called
       (is (= 0 (-> fetch/fetch-page-metadata bond/calls count)))
@@ -66,14 +66,14 @@
         {:keys [link user]} (create-test-user-and-link! db)]
     (bond/with-stub [[fetch/fetch-page-metadata (constantly {:html "<h1></h1>"})]]
       (http/put (str base-url "/links/" (:id link))
-        {:cookies (ext/session-cookies
-                    {ext/CSRF-TOKEN-SESSION-KEY utils/TEST-CSRF-TOKEN
-                     :session-id SESSION-ID}
-                    utils/TEST-SECRET-KEY)
-         :form-params {ext/CSRF-TOKEN-FORM-KEY utils/TEST-CSRF-TOKEN
-                       :title "Updated Title"
+                {:cookies (ext/session-cookies
+                            {ext/CSRF-TOKEN-SESSION-KEY utils/TEST-CSRF-TOKEN
+                             :session-id SESSION-ID}
+                            utils/TEST-SECRET-KEY)
+                 :form-params {ext/CSRF-TOKEN-FORM-KEY utils/TEST-CSRF-TOKEN
+                               :title "Updated Title"
                        ; different url
-                       :url "https://newsite.com"}})
+                               :url "https://newsite.com"}})
 
       ; Verify fetch-page-metadata was called exactly once
       (is (= 1 (-> fetch/fetch-page-metadata bond/calls count)))
@@ -90,4 +90,4 @@
                    :url "https://newsite.com"
                    :created-at string?
                    :favorite 0}
-                  #p (utils/get-link (utils/->db) {:id (:id link)}))))))
+                  (utils/get-link (utils/->db) {:id (:id link)}))))))
