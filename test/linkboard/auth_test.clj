@@ -25,8 +25,13 @@
       ; Verify initial state shows temporary session
       (e/wait-visible driver {:fn/has-text "Using temporary session. Register account to keep your data permanently."})
       (e/wait-visible driver {:fn/has-text "Register"})
+      ; Wait for Alpine.js to initialize and Register button to be ready
+      (e/wait-visible driver {:fn/has-text "Register"} {:timeout 10})
+      (Thread/sleep 1000) ; Give Alpine.js time to initialize
+
       ; Click Register button
       (e/click driver {:fn/has-text "Register"})
+
       ; Wait for modal to appear with account number
       (e/wait-visible driver
                       {:fn/has-text "Your Account number"}
@@ -69,10 +74,20 @@
       (e/wait-visible driver {:fn/has-text "Using temporary session. Register account to keep your data permanently."})
       (e/wait-visible driver {:fn/has-text "Login"})
 
+      ; Wait for Alpine.js to initialize and login button to be ready
+      (e/wait-visible driver {:id "login-header-modal-btn"} {:timeout 10})
+      (Thread/sleep 1000) ; Give Alpine.js time to initialize
+
       ; Click Login button to open modal
       (e/click driver {:id "login-header-modal-btn"})
 
-      ; Wait for login modal to appear
+      ; Wait for modal backdrop/overlay to appear (teleported to body)
+      (e/wait-visible driver {:css "div.fixed.inset-0"} {:timeout 15})
+
+      ; Wait for the login form fields container to be present
+      (e/wait-visible driver {:id "login-form-fields"} {:timeout 15})
+
+      ; Now wait for the specific modal content
       (e/wait-visible driver {:tag :h3
                               :fn/has-text "Login"} {:timeout 30})
       (e/wait-visible driver {:fn/has-text "Enter your account number"})
