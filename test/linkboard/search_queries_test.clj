@@ -1,4 +1,4 @@
-(ns linkboard.queries-test
+(ns linkboard.search-queries-test
   (:require [clojure.test :refer :all]
             [linkboard.queries :refer [preprocess-search-query]]))
 

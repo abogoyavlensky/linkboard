@@ -90,6 +90,7 @@
        {:open-btn-text [:div {:class ["bg-red-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-red-600" "transition-colors" "cursor-pointer"]}
                         "Delete"]
         :title "Delete Account"
+        :id-prefix "delete-account"
         :submit-btn-title "Delete Account"
         :form-fields [:div {:class ["space-y-4"]}
                       [:div {:class ["bg-red-50" "border" "border-red-200" "rounded-lg" "p-4"]}

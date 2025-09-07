@@ -6,6 +6,9 @@
                                                           :test #free-port true}
                                           :session-secret-key #profile {:default "test-secret-key"
                                                                         :prod #env SESSION_SECRET_KEY}
+                                          :env #profile {:default :dev
+                                                         :prod :prod
+                                                         :test :test}
                                           :auto-reload? #profile {:default false
                                                                   :dev true}
                                           :cache-assets? #profile {:default false
