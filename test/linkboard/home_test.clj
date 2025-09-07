@@ -30,7 +30,7 @@
       (e/wait-visible driver {:fn/has-text "Using temporary session. Register account to keep your data permanently."}))
     (is (= 1 1))))
 
-(deftest test-create-board-unauthenticated
+(deftest test-create-board-unauth
   (let [url (ext/get-server-url (utils/->server))]
     (testing "no boards created"
       (is (= [] (utils/get-all-boards (utils/->db)))))
@@ -45,8 +45,16 @@
       (e/wait-visible driver {:id "board-form-fields"})
       (e/fill driver {:tag :input
                       :name :title} "My Test Board")
+      ; create the board
       (e/click driver {:tag :button
-                       :fn/text "Save"}))
+                       :fn/text "Save"})
+      ; board is visible on the page
+      (e/wait-visible driver {:id "board-1"})
+      (e/wait-visible driver {:fn/has-text "My Test Board"})
+      (e/wait-invisible driver {:fn/has-text "No boards yet"})
+      ; open board page
+      (e/click driver {:fn/has-text "My Test Board"})
+      (e/wait-visible driver {:fn/has-text "No bookmarks yet"}))
 
     (testing "board created in db"
       (is (match? [{:created-at string?
@@ -56,13 +64,12 @@
                     :user-id 1}]
                   (utils/get-all-boards (utils/->db)))))))
 
-(deftest test-create-board-unauthenticated-create-board-with-enter-key
+(deftest test-create-board-unauth-with-enter-key
   (let [url (ext/get-server-url (utils/->server))]
     (testing "no boards created"
       (is (= [] (utils/get-all-boards (utils/->db)))))
 
-    (utils/with-chrome
-      driver
+    (utils/with-chrome driver
       (e/go driver url)
       (e/wait-visible driver {:tag :button
                               :id "create-board-btn"})
