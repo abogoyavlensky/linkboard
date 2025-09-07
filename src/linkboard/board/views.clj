@@ -93,7 +93,7 @@
     (c/dropdown-menu
       {:trigger-icon icons/menu
        :items [(c/modal
-                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]}
+                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-primary-600" "flex" "items-center" "gap-3" "cursor-pointer"]}
                                   [:div {:class ["flex-shrink-0"]} (icons/edit)]
                                   [:span "Edit"]]
                   :title "Edit link"
@@ -109,12 +109,12 @@
                                :hx-target (str "#link-" (:id link))
                                :hx-swap "outerHTML"
                                :hx-target-error "#link-edit-form-fields"}})
-               [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]
+               [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-primary-600" "flex" "items-center" "gap-3" "cursor-pointer"]
                       :onclick (str "navigator.clipboard.writeText('" (:url link) "').then(() => { showToast('Link copied to clipboard!'); }).catch(() => { const textArea = document.createElement('textarea'); textArea.value = '" (:url link) "'; document.body.appendChild(textArea); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea); showToast('Link copied to clipboard!'); });")}
                 [:div {:class ["flex-shrink-0"]} icons/copy]
                 [:span "Copy Link"]]
                (c/modal
-                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-blue-500" "flex" "items-center" "gap-3" "cursor-pointer"]}
+                 {:open-btn-text [:div {:class ["w-full" "px-4" "py-2" "text-left" "text-sm" "text-gray-700" "hover:text-primary-600" "flex" "items-center" "gap-3" "cursor-pointer"]}
                                   [:div {:class ["flex-shrink-0"]} icons/bin]
                                   [:span "Delete"]]
                   :title "Delete link"
@@ -160,7 +160,7 @@
    [:p {:class ["text-gray-500" "text-center" "mb-4" "max-w-sm"]}
     "The board you are looking for has been deleted. You can go back to the home page."]
    [:a {:href "/"
-        :class ["inline-block" "bg-blue-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-blue-700" "transition"]}
+        :class ["inline-block" "bg-primary-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-primary-700" "transition"]}
     "Go to Home Page"]])
 
 (defn empty-links

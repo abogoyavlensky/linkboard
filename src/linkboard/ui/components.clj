@@ -15,8 +15,8 @@
 (defn button
   [{:keys [content]}]
   [:div
-   {:class ["inline-flex" "items-center" "px-4" "py-2" "bg-blue-600" "text-white"
-            "rounded-lg" "hover:bg-blue-700" "transition-colors" "cursor-pointer"]
+   {:class ["inline-flex" "items-center" "px-4" "py-2" "bg-primary-600" "text-white"
+            "rounded-lg" "hover:bg-primary-700" "transition-colors" "cursor-pointer"]
     :type "button"}
    content])
 
@@ -125,7 +125,7 @@
          :type "button"} "Cancel"]
        [:button
         {:class ["inline-flex" "items-center" "justify-center" "px-4" "py-2" "cursor-pointer"
-                 "bg-blue-600" "text-white" "rounded-lg" "hover:bg-blue-700" "transition-colors"]
+                 "bg-primary-600" "text-white" "rounded-lg" "hover:bg-primary-700" "transition-colors"]
          :autofocus true
          :id (format "%s-submit-btn" id-prefix)
          :type "submit"}
@@ -160,8 +160,8 @@
     {:title "Login"
      :id-prefix "login"
      :open-btn-text [:button
-                     {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700"
-                              "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
+                     {:class ["px-4" "py-2" "text-primary-600" "font-semibold" "hover:text-primary-700"
+                              "hover:bg-primary-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
                       :id "login-header-modal-btn"
                       :x-on:click "modalOpen = true"}
                      "Login"]
@@ -194,7 +194,7 @@
       :x-bind:class "{
         'border-green-500 text-gray-800': toast.type === 'success',
         'border-red-500 text-gray-800': toast.type === 'error',
-        'border-blue-500 text-gray-800': toast.type === 'info',
+        'border-primary-500 text-gray-800': toast.type === 'info',
         'border-yellow-500 text-gray-800': toast.type === 'warning'
       }"
       :x-transition:enter "transform ease-out duration-300"
@@ -417,7 +417,7 @@
        {:href (ext/route router ::r/home-page)
         :class ["group" "transition-all" "duration-200"]}
        [:h1 {:class ["text-3xl" "md:text-4xl" "font-extrabold" "text-slate-800"
-                     "cursor-pointer" "group-hover:text-blue-600" "transition-colors" "duration-200"]}
+                     "cursor-pointer" "group-hover:text-primary-600" "transition-colors" "duration-200"]}
         "Linkboard"]]
       [:div {:class ["flex" "items-center" "gap-3" "text-slate-500"]}
        [:p {:class ["text-sm" "md:text-base" "font-medium"]} "Personal bookmark manager"]
@@ -429,8 +429,8 @@
      [:div {:class ["flex" "items-center"]}
       (if user
         [:a
-         {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700"
-                  "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
+         {:class ["px-4" "py-2" "text-primary-600" "font-semibold" "hover:text-primary-700"
+                  "hover:bg-primary-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
           :href (ext/route router ::r/account)}
          "Account"]
         [:div
@@ -509,7 +509,7 @@
      [:div {:class ["mx-auto" "text-center"]}
       [:h1 {:class ["text-5xl"]} text]
       [:a {:href "/"
-           :class ["inline-block" "bg-blue-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-blue-700" "transition" "mt-4"]}
+           :class ["inline-block" "bg-primary-600" "text-white" "px-4" "py-2" "rounded-md" "hover:bg-primary-700" "transition" "mt-4"]}
        "Go to Home Page"]]]))
 
 (defn search-bar
@@ -583,6 +583,6 @@
 
 (defn back-button
   [request]
-  [:a {:class ["text-blue-500" "hover:text-blue-600"]
+  [:a {:class ["text-primary-500" "hover:text-primary-600"]
        :href (utils/back-url request)}
    icons/chevron-left])

@@ -3,7 +3,7 @@
 (defn- base-svg
   [{:keys [path color]}]
   [:svg
-   {:class ["size-6" "hover:text-blue-500" "cursor-pointer" (or color "text-gray-500")]
+   {:class ["size-6" "hover:text-primary-500" "cursor-pointer" (or color "text-gray-500")]
     :xmlns "http://www.w3.org/2000/svg"
     :fill "none"
     :viewBox "0 0 24 24"
@@ -29,14 +29,14 @@
 
 (def link
   (base-svg
-    {:color "text-blue-500"
+    {:color "text-primary-500"
      :path {:stroke-linecap "round"
             :stroke-linejoin "round"
             :d "M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"}}))
 
 (def folder
   (base-svg
-    {:color "text-blue-500"
+    {:color "text-primary-500"
      :path {:stroke-linecap "round"
             :stroke-linejoin "round"
             :d "M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"}}))
@@ -49,14 +49,14 @@
 
 (def queue-list
   (base-svg
-    {:color "text-blue-500"
+    {:color "text-primary-500"
      :path {:stroke-linecap "round"
             :stroke-linejoin "round"
             :d "M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"}}))
 
 (def plus
   [:svg
-   {:class ["size-8" "hover:text-blue-500" "cursor-pointer" "text-blue-500"]
+   {:class ["size-8" "hover:text-primary-500" "cursor-pointer" "text-primary-500"]
     :xmlns "http://www.w3.org/2000/svg"
     :fill "none"
     :viewBox "0 0 24 24"
@@ -85,7 +85,7 @@
             :d "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"}}))
 
 (def github
-  [:svg {:class ["size-5" "hover:text-blue-500" "cursor-pointer"]
+  [:svg {:class ["size-5" "hover:text-primary-500" "cursor-pointer"]
          :xmlns "http://www.w3.org/2000/svg"
          :width "24"
          :height "24"
@@ -99,7 +99,7 @@
 
 (def open-all
   (base-svg
-    {:color "text-blue-500"
+    {:color "text-primary-500"
      :path {:stroke-linecap "round"
             :stroke-linejoin "round"
             :d "m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"}}))
@@ -112,7 +112,7 @@
 
 (def bookmark
   (base-svg
-    {:color "text-blue-500"
+    {:color "text-primary-500"
      :path {:stroke-linecap "round"
             :stroke-linejoin "round"
             :d "M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"}}))

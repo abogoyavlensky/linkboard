@@ -78,7 +78,7 @@
       [:h4 {:class ["font-medium" "text-gray-900"]} "Export Data"]
       [:p {:class ["text-sm" "text-gray-600"]} "Download all your bookmarks as CSV"]]
      [:a {:href (ext/route router ::r/export-data)
-          :class ["bg-blue-500" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-blue-600" "transition-colors"]}
+          :class ["bg-primary-600" "text-white" "px-4" "py-2" "rounded-lg" "hover:bg-primary-700" "transition-colors"]}
       "Export"]]
 
     ; Delete Account Button
