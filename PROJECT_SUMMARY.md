@@ -494,10 +494,18 @@ bb clj-repl              # Start REPL with dev profile
 - **Board Deletion UX**: Custom deletion message replaces automatic redirects, provides clear next steps with home page navigation
 
 ### Testing Strategy
-- Unit tests with eftest
-- Browser automation with etaoin
-- Test coverage with cloverage
-- Containerized testing environment
+- **Unit tests with eftest**: Core business logic testing
+- **Browser automation with etaoin**: E2E testing with Chrome/Firefox
+- **Test coverage with cloverage**: Coverage analysis and reporting
+- **Containerized testing environment**: Isolated test execution
+- **Test organization**: 
+  - `test/linkboard/home_test.clj`: Home page functionality, board creation, link creation
+  - `test/linkboard/auth_test.clj`: Authentication flows (account creation, login)
+  - `test/linkboard/test_utils.clj`: Test utilities and database helpers
+- **Test fixtures**: Database truncation between tests, Chrome driver management
+- **FTS5 Virtual Table Handling**: Tests skip FTS5 virtual table cleanup to prevent corruption
+- **CI/Local Environment Differences**: Browser automation tests may have timing issues in CI due to Alpine.js loading, headless browser differences, and resource constraints
+- **Test Maintenance**: Complex modal/JavaScript-dependent tests may be commented out temporarily to maintain CI stability while preserving test coverage for core functionality
 
 ### Performance Considerations
 - SQLite WAL mode for concurrent access
