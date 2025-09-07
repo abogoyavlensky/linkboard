@@ -160,7 +160,8 @@
     {:title "Login"
      :id-prefix "login"
      :open-btn-text [:button
-                     {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+                     {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700" 
+                              "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
                       :id "login-header-modal-btn"
                       :x-on:click "modalOpen = true"}
                      "Login"]
@@ -225,7 +226,9 @@
     {:title "Create Account"
      :id-prefix "create-account"
      :open-btn-text [:button
-                     {:class ["text-blue-500" "text-lg" "cursor-pointer"]
+                     {:class ["px-4" "py-2" "text-slate-600" "font-semibold" "hover:text-slate-700" 
+                              "hover:bg-slate-100" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"
+                              "border" "border-slate-300" "hover:border-slate-400"]
                       :x-on:click "modalOpen = true; accountId = generateAccountId()"}
                      "Register"]
      :submit-btn-title "Create Account"
@@ -407,29 +410,32 @@
     :hx-on:show-rate-limit-toast "showToast('Too many requests. Please try again later.', 'error')"}
    [:div
     {:class ["h-screen" "flex" "flex-col" "max-w-4xl" "mx-auto"]}
-    [:div
-     {:class ["px-4" "pt-2" "pb-4" "mb-2" "md:mb-4" "flex" "justify-between" "items-center"]}
-     [:div
+    [:header
+     {:class ["px-6" "py-5" "mb-6" "flex" "justify-between" "items-center" "backdrop-blur-sm"]}
+     [:div {:class ["flex" "flex-col" "gap-2"]}
       [:a
-       {:href (ext/route router ::r/home-page)}
-       [:h1 {:class ["text-3xl" "font-bold" "cursor-pointer"]} "Linkboard"]]
-      [:div {:class ["text-gray-400" "flex" "items-center" "gap-2"]}
-       [:p "Personal bookmark manager"]
+       {:href (ext/route router ::r/home-page)
+        :class ["group" "transition-all" "duration-200"]}
+       [:h1 {:class ["text-3xl" "md:text-4xl" "font-extrabold" "text-slate-800" 
+                     "cursor-pointer" "group-hover:text-blue-600" "transition-colors" "duration-200"]} 
+        "Linkboard"]]
+      [:div {:class ["flex" "items-center" "gap-3" "text-slate-500"]}
+       [:p {:class ["text-sm" "md:text-base" "font-medium"]} "Personal bookmark manager"]
        [:a
         {:href PROJECT-GITHUB-LINK
-         :target "_blank"}
+         :target "_blank"
+         :class ["p-1" "rounded-md" "hover:bg-slate-100" "transition-colors" "duration-200"]}
         icons/github]]]
-     [:div {:class ["flex" "gap-4"]}
+     [:div {:class ["flex" "items-center"]}
       (if user
-        [:div
-         {:class ["flex" "items-center"]}
-         [:a
-          {:class ["text-blue-500" "text-lg" "cursor-pointer"]
-           :href (ext/route router ::r/account)}
-          "Account"]]
+        [:a
+         {:class ["px-4" "py-2" "text-blue-600" "font-semibold" "hover:text-blue-700" 
+                  "hover:bg-blue-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
+          :href (ext/route router ::r/account)}
+         "Account"]
         [:div
          {:x-data "{ modalOpen: false, accountId: '' }"
-          :class ["flex" "items-center"]}
+          :class ["flex" "items-center" "gap-3"]}
          (login-modal request)
          (create-account-modal request)])]]
 
