@@ -161,6 +161,7 @@
      :id-prefix "login"
      :open-btn-text [:button
                      {:class ["p-4" "text-blue-500" "text-lg" "cursor-pointer"]
+                      :id "login-header-modal-btn"
                       :x-on:click "modalOpen = true"}
                      "Login"]
      :submit-btn-title "Login"

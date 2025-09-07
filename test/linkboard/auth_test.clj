@@ -70,7 +70,7 @@
       (e/wait-visible driver {:fn/has-text "Login"})
 
       ; Click Login button to open modal
-      (e/click driver {:fn/has-text "Login"})
+      (e/click driver {:id "login-header-modal-btn"})
 
       ; Wait for login modal to appear
       (e/wait-visible driver {:tag :h3
