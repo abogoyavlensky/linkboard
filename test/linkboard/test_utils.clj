@@ -73,3 +73,9 @@
   (db/exec! db {:select [:*]
                 :from [:link]
                 :order-by [[:id :desc]]}))
+
+(defn get-all-users
+  [db]
+  (db/exec! db {:select [:*]
+                :from [:user]
+                :order-by [[:id :desc]]}))

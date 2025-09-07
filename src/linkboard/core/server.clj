@@ -37,6 +37,7 @@
                [:map
                 [:port pos-int?]
                 [:session-secret-key string?]
+                [:env [:enum :dev :prod :test]]
                 [:auto-reload? boolean?]
                 [:cache-assets? {:optional true} boolean?]
                 [:cache-control {:optional true} string?]]]
@@ -53,7 +54,7 @@
                                 (:session-secret-key options))})]
     (ring/ring-handler
       (ring/router
-        app-routes/routes
+        (app-routes/routes (:env options))
         {:exception pretty/exception
          :data {:muuntaja muuntaja-core/instance
                 :coercion coercion-malli/coercion
