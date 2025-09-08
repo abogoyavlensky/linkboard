@@ -2,9 +2,9 @@
 
 @theme {
   --color-primary-50: #fbf7fd;
-  --color-primary-500: #c792e9;
-  --color-primary-600: #b36ede;
-  --color-primary-700: #a04fce;
+  --color-primary-500: #b36ede;
+  --color-primary-600: #a04fce;
+  --color-primary-700: #893cb4;
 }
 
 .htmx-indicator{
