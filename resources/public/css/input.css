@@ -1,10 +1,10 @@
 @import 'tailwindcss' source("../../../src");
 
 @theme {
-  --color-primary-50: oklch(0.97 0.019 180.8);     /* teal-50 equivalent */
-  --color-primary-500: oklch(0.658 0.129 179.9);   /* teal-500 equivalent */ 
-  --color-primary-600: oklch(0.588 0.151 180.7);   /* teal-600 equivalent */
-  --color-primary-700: oklch(0.518 0.151 180.9);   /* teal-700 equivalent */
+  --color-primary-50: #fbf7fd;
+  --color-primary-500: #c792e9;
+  --color-primary-600: #b36ede;
+  --color-primary-700: #a04fce;
 }
 
 .htmx-indicator{

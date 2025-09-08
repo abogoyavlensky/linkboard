@@ -90,3 +90,5 @@ To be able to run tests locally you have to install Chrome  browser.
 ## TODO
 
 - [x] Setup SQLite: `PRAGMA journal_mode=WAL` https://til.simonwillison.net/sqlite/enabling-wal-mode 
+
+Base color for primary color: #c792e9
