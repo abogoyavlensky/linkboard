@@ -491,10 +491,13 @@
     [:link {:rel "manifest"
             :href "/assets/manifest.json"}]
     [:link {:rel "icon"
-            :href (manifest/asset "images/favicon-1.png")}]
+            :href (manifest/asset "images/icon@32px.png")}]
+    [:link {:rel "icon"
+            :href (manifest/asset "images/icon.svg")
+            :type "image/svg+xml"}]
     [:link {:rel "apple-touch-icon"
             :sizes "180x180"
-            :href (manifest/asset "images/apple-touch-icon-1.png")}]
+            :href (manifest/asset "images/icon@180px.png")}]
     [:link {:type "text/css"
             :href (manifest/asset "css/output.css")
             :rel "stylesheet"}]
