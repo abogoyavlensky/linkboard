@@ -35,7 +35,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - **Backend**: Clojure with Ring/Jetty server
 - **Database**: SQLite with WAL mode for better concurrency
 - **Frontend**: Server-side rendered HTML with HTMX for interactivity
-- **Styling**: TailwindCSS for responsive design
+- **Styling**: TailwindCSS v4 with custom primary color system for consistent theming
 - **JavaScript**: AlpineJS for client-side behavior
 - **Build**: Babashka (bb) for task automation
 
@@ -159,6 +159,22 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Satisfying scale animation (`scale-0` to `scale-100`) for visual feedback
 - Improved warning message: "Please store account number safely - you cannot restore your account if it is lost."
 
+#### Enhanced Header Design (`src/linkboard/ui/components.clj`)
+- **Refined visual hierarchy** with semantic `<header>` element and gradient background
+- **Enhanced typography** with responsive font sizing (`text-3xl md:text-4xl`) and improved color contrast
+- **Professional styling** with subtle gradient (`bg-gradient-to-r from-white to-slate-50/50`), backdrop blur, and elegant borders  
+- **Interactive elements** with smooth hover transitions and consistent button styling
+- **Mobile-responsive** layout with proper spacing and alignment
+- **GitHub icon integration** with hover background and consistent visual treatment
+
+#### Custom Primary Color System (`resources/public/css/input.css`)
+- **TailwindCSS v4 theming** using `@theme` syntax for maintainable color management
+- **Semantic color names** with `primary-50`, `primary-500`, `primary-600`, `primary-700` classes
+- **Teal color palette** with purple accent colors (#b36ede, #a04fce, #893cb4)
+- **Consistent application** across all UI components, buttons, links, and interactive elements
+- **Future-proof design** allowing easy brand color changes in single location
+- **Automatic CSS generation** with proper CSS custom properties for browser compatibility
+
 #### Fixed Footer (`src/linkboard/ui/components.clj`)
 - **Persistent Add Link button** positioned at bottom-right of screen
 - Glass-morphism design with transparent background (`backdrop-blur-sm`) and semi-transparent border
@@ -244,6 +260,8 @@ resources/
 ├── migrations/         # Database migrations
 └── public/            # Static assets
     ├── css/
+    │   ├── input.css    # TailwindCSS v4 input with custom primary color theme
+    │   └── output.css   # Generated CSS with custom properties (auto-built)
     ├── js/
     │   └── utils.js     # Client-side utilities (account ID generation, toast notifications)
     └── images/
@@ -446,6 +464,8 @@ bb clj-repl              # Start REPL with dev profile
 - **API rate limiting** (✅ implemented with configurable per-endpoint limits)
 - **Fixed footer with Add Link button** (✅ implemented with transparent blur background)
 - **Full-text search** (✅ implemented with SQLite FTS5, contentless virtual table, and BM25 ranking)
+- **Custom primary color system** (✅ implemented with TailwindCSS v4 theming and semantic color classes)
+- **Enhanced header design** (✅ implemented with improved typography, gradient backgrounds, and professional styling)
 - Enhanced toast notifications for other user actions (create/update/delete)
 
 ## Development Guidelines
@@ -492,6 +512,9 @@ bb clj-repl              # Start REPL with dev profile
 - **Form Enhancement**: Board selectors with alphabetical ordering and "-------" option for standalone links
 - **Error Page Navigation**: All error pages include "Go to Home Page" button for better user recovery
 - **Board Deletion UX**: Custom deletion message replaces automatic redirects, provides clear next steps with home page navigation
+- **Header Design**: Enhanced typography with semantic elements, gradient backgrounds, and smooth hover transitions for professional appearance
+- **Primary Color System**: Use semantic `primary-*` classes instead of specific color names for maintainable theming, defined in `@theme` block of `input.css`
+- **Button Consistency**: Standardized button styling across login/register with distinct visual hierarchy (primary vs secondary actions)
 
 ### Testing Strategy
 - **Unit tests with eftest**: Core business logic testing
