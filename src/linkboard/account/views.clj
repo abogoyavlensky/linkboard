@@ -24,16 +24,16 @@
 
     ; Account Number Row
     [:div {:class ["flex" "justify-between" "items-center" "gap-2"]}
-     [:span {:class ["text-sm" "text-gray-600" "flex-shrink-0"]} "Account Number prefix"]
+     [:span {:class ["text-sm" "text-gray-600" "flex-shrink-0"]} "Account Number starting with"]
      [:div {:class ["flex" "items-center" "gap-1" "flex-shrink" "min-w-0"]}
       ; Account number display (dots or actual number)
-      [:span {:class ["text-gray-600" "font-bold" "text-xs" "sm:text-sm" "font-medium" "cursor-pointer" "select-none" "font-mono" "whitespace-nowrap"]}
+      [:span {:class ["text-sm" "text-gray-600" "font-bold" "whitespace-nowrap"]}
        (str (subs (:account-number user) 0 5) "...")]]]
 
     ; Member Since Row
     [:div {:class ["flex" "justify-between" "items-center"]}
      [:span {:class ["text-sm" "text-gray-600"]} "Member Since"]
-     [:span {:class ["text-sm" "font-medium" "text-gray-600" "font-bold"]}
+     [:span {:class ["text-sm" "text-gray-600" "font-bold"]}
       (format-date (:created-at user))]]]])
 
 (defn account-limit-section

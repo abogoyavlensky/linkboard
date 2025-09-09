@@ -429,8 +429,9 @@
      [:div {:class ["flex" "items-center"]}
       (if user
         [:a
-         {:class ["px-4" "py-2" "text-primary-600" "font-semibold" "hover:text-primary-700"
-                  "hover:bg-primary-50" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"]
+         {:class ["px-4" "py-2" "text-slate-600" "font-semibold" "hover:text-slate-700"
+                  "hover:bg-slate-100" "rounded-lg" "transition-all" "duration-200" "cursor-pointer"
+                  "border" "border-slate-300" "hover:border-slate-400"]
           :href (ext/route router ::r/account)}
          "Account"]
         [:div
