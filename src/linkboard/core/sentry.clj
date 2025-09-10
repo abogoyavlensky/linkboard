@@ -29,7 +29,6 @@
      :schema [:map
               [:dsn any?]]}))
 
-
 (defmethod ig/init-key ::sentry
   [_ {:keys [dsn config]}]
   (if dsn
@@ -40,7 +39,6 @@
       (set-default-exception-handler!)
       :sentry-initialized)
     (log/info "[SENTRY] No Sentry DSN provided.")))
-
 
 (defmethod ig/halt-key! ::sentry
   [_ status]

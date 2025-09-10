@@ -1,7 +1,7 @@
 (ns linkboard.home.handlers
   (:require [buddy.hashers :as hashers]
-            [clojure.tools.logging :as log]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as board-views]

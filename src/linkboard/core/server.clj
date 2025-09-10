@@ -1,24 +1,21 @@
 (ns linkboard.core.server
-  (:require [clojure.tools.logging :as log]
-            [clojure.string :as str]
-            [ring.util.request :as request-util]
-            [ring.util.response :as response]
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
-            [reitit.ring.middleware.exception :as exception]
+            [linkboard.core.sentry :as sentry]
             [linkboard.handlers :as handlers]
             [linkboard.routes :as app-routes]
-            [linkboard.core.sentry :as sentry]
             [muuntaja.core :as muuntaja-core]
             [reitit-extras.core :as reitit-extras]
             [reitit.coercion.malli :as coercion-malli]
             [reitit.dev.pretty :as pretty]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as ring-coercion]
+            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as ring-multipart]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as ring-parameters]
-            [sentry-clj.ring :as sentry-ring]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.anti-forgery :as anti-forgery]
             [ring.middleware.content-type :as content-type]
@@ -30,7 +27,10 @@
             [ring.middleware.session :as ring-session]
             [ring.middleware.session.cookie :as ring-session-cookie]
             [ring.middleware.ssl :as ring-ssl]
-            [ring.middleware.x-headers :as x-headers])
+            [ring.middleware.x-headers :as x-headers]
+            [ring.util.request :as request-util]
+            [ring.util.response :as response]
+            [sentry-clj.ring :as sentry-ring])
   (:import com.zaxxer.hikari.HikariDataSource))
 
 ; Exceptions
