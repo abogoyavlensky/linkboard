@@ -8,9 +8,9 @@
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
             [next.jdbc.result-set :as jdbc-rs]
-            [sentry-clj.tracing :as tracing]
             [ragtime.next-jdbc :as ragtime-jdbc]
-            [ragtime.repl :as ragtime-repl]))
+            [ragtime.repl :as ragtime-repl]
+            [sentry-clj.tracing :as tracing]))
 
 ; Common functions
 
