@@ -1,9 +1,14 @@
 (ns linkboard.core.server
   (:require [clojure.tools.logging :as log]
+            [clojure.string :as str]
+            [ring.util.request :as request-util]
+            [ring.util.response :as response]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
+            [reitit.ring.middleware.exception :as exception]
             [linkboard.handlers :as handlers]
             [linkboard.routes :as app-routes]
+            [linkboard.core.sentry :as sentry]
             [muuntaja.core :as muuntaja-core]
             [reitit-extras.core :as reitit-extras]
             [reitit.coercion.malli :as coercion-malli]
@@ -13,6 +18,7 @@
             [reitit.ring.middleware.multipart :as ring-multipart]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as ring-parameters]
+            [sentry-clj.ring :as sentry-ring]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.anti-forgery :as anti-forgery]
             [ring.middleware.content-type :as content-type]
@@ -26,6 +32,41 @@
             [ring.middleware.ssl :as ring-ssl]
             [ring.middleware.x-headers :as x-headers])
   (:import com.zaxxer.hikari.HikariDataSource))
+
+; Exceptions
+
+(defn- get-error-path
+  [exception]
+  (mapv
+    (comp #(str/join ":" %) :at)
+    (:via (Throwable->map exception))))
+
+(defn- default-error-handler
+  [error-type exception _request]
+  {:status 500
+   :body {:type error-type
+          :path (get-error-path exception)
+          :error (ex-data exception)
+          :details (ex-message exception)}})
+
+(defn- wrap-exception
+  [{:keys [sentry]}]
+  (fn [handler e request]
+    (log/error e (pr-str (:request-method request) (:uri request)) (ex-message e))
+    (when (= sentry :sentry-initialized)
+      (sentry/report-exception! {:message (ex-message e)
+                                 :request {:url (request-util/request-url request)
+                                           :method (-> request :request-method name)
+                                           :query-string (:query-string request "")
+                                           :data (:params request)
+                                           :env {"REMOTE_ADDR" (:remote-addr request)}
+                                           :cookies (:cookies request)
+                                           :headers (:headers request)}
+                                 :user {:id (-> request :session :identity str)
+                                        :other {"session" (-> request :session :session-id str)}}
+                                 :throwable e}))
+    (-> (handler e request)
+        (response/header "HX-Trigger" "showUnexpectedErrorToast"))))
 
 (defmethod ig/assert-key ::server
   [_ params]
@@ -43,7 +84,8 @@
                 [:cache-control {:optional true} string?]]]
               [:db [:fn
                     {:error/message "Wrong db datasource type"}
-                    #(instance? HikariDataSource %)]]]}))
+                    #(instance? HikariDataSource %)]]
+              [:sentry [:enum :sentry-initialized nil]]]}))
 
 (defn ring-handler
   "Return main application handler for server-side rendering."
@@ -51,7 +93,15 @@
     :as context}]
   (let [session-store (ring-session-cookie/cookie-store
                         {:key (reitit-extras/string->16-byte-array
-                                (:session-secret-key options))})]
+                                (:session-secret-key options))})
+        exception-middleware (exception/create-exception-middleware
+                               (merge
+                                 exception/default-handlers
+                                 {; override the default handler
+                                  ::exception/default (partial default-error-handler "UnexpectedError")
+
+                                  ; print stack-traces for all exceptions
+                                  ::exception/wrap (wrap-exception context)}))]
     (ring/ring-handler
       (ring/router
         (app-routes/routes (:env options))
@@ -75,6 +125,8 @@
                                :store session-store}]
                              ; add handler options to request
                              [reitit-extras/wrap-context context]
+                             ; sentry error reporting
+                             sentry-ring/wrap-sentry-tracing
                              ; parse any request parameters
                              ring-parameters/parameters-middleware
                              ring-multipart/multipart-middleware
@@ -85,7 +137,7 @@
                              ; check CSRF token
                              anti-forgery/wrap-anti-forgery
                              ; handle exceptions
-                             reitit-extras/exception-middleware
+                             exception-middleware
                              ; coerce request and response to spec
                              ring-coercion/coerce-exceptions-middleware
                              reitit-extras/non-throwing-coerce-request-middleware

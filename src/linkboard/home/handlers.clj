@@ -1,5 +1,6 @@
 (ns linkboard.home.handlers
   (:require [buddy.hashers :as hashers]
+            [clojure.tools.logging :as log]
             [clojure.string :as str]
             [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
@@ -99,6 +100,7 @@
                                     :user-id (:id user)}]
                           :returning [:*]}
                          (db/exec-one! db))]
+          (log/infof "Created new board: %s" (pr-str board))
           (-> (ext/render-html (list ; Return fresh form
                                  (views/board-form-fields {})
                                      ; Add item to the top of the board list

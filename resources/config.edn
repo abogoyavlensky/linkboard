@@ -1,6 +1,8 @@
 {:linkboard.core.db/db {:jdbc-url #profile {:default "jdbc:sqlite:db/linkboard.sqlite"
                                             :test "jdbc:sqlite::memory:"}}
 
+ :linkboard.core.sentry/sentry {:dsn #or [#env SENTRY_DSN nil]}
+
  :linkboard.core.server/server {:options {:port #profile {:default 8000
                                                           :prod 80
                                                           :test #free-port true}
@@ -13,4 +15,5 @@
                                                                   :dev true}
                                           :cache-assets? #profile {:default false
                                                                    :prod true}}
+                                :sentry #ig/ref :linkboard.core.sentry/sentry
                                 :db #ig/ref :linkboard.core.db/db}}
