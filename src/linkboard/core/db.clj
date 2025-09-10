@@ -8,6 +8,7 @@
             ; Import for converting timestamp fields
             [next.jdbc.date-time]
             [next.jdbc.result-set :as jdbc-rs]
+            [sentry-clj.tracing :as tracing]
             [ragtime.next-jdbc :as ragtime-jdbc]
             [ragtime.repl :as ragtime-repl]))
 
@@ -17,15 +18,17 @@
   "Send query to db and return vector of result items."
   [db query]
   (let [query-sql (honey/format query)]
-    (jdbc/execute! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
-                                 :return-keys [:id]})))
+    (tracing/with-start-child-span "sql" (first query-sql)
+      (jdbc/execute! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
+                                   :return-keys [:id]}))))
 
 (defn exec-one!
   "Send query to db and return single result item."
   [db query]
   (let [query-sql (honey/format query)]
-    (jdbc/execute-one! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
-                                     :return-keys true})))
+    (tracing/with-start-child-span "sql" (first query-sql)
+      (jdbc/execute-one! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
+                                       :return-keys true}))))
 
 ; Component
 

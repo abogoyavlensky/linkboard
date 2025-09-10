@@ -30,11 +30,11 @@
               [:dsn any?]]}))
 
 (defmethod ig/init-key ::sentry
-  [_ {:keys [dsn config]}]
+  [_ {:keys [dsn]}]
   (if dsn
     (do
       (log/info "[SENTRY] Initialising Sentry...")
-      (sentry/init! dsn (or config {}))
+      (sentry/init! dsn {:traces-sample-rate 1.0})
       (log/info "[SENTRY] Sentry initialised successfully.")
       (set-default-exception-handler!)
       :sentry-initialized)
