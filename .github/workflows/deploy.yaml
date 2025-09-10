@@ -45,6 +45,7 @@ jobs:
           REGISTRY_PASSWORD: ${{ github.token }}
           APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: bb kamal deploy --version=${{ github.sha }}
 
       - name: Kamal Release
