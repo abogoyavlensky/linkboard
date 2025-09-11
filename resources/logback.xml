@@ -6,8 +6,22 @@
         </encoder>
     </appender>
 
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <options>
+            <sendDefaultPii>true</sendDefaultPii>
+        </options>
+        <!-- Optionally change minimum Event level. Default for Events is ERROR -->
+        <minimumEventLevel>WARN</minimumEventLevel>
+        <!-- Optionally change minimum Breadcrumbs level. Default for Breadcrumbs is INFO -->
+        <minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>
+        <!-- Optionally change minimum Log level. Default for Log Events is INFO -->
+        <minimumLevel>DEBUG</minimumLevel>
+    </appender>
+
     <logger name="com.zaxxer.hikari" level="warn"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="Sentry" />
     </root>
 </configuration>

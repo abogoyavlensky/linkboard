@@ -1,9 +1,7 @@
 (ns linkboard.core.server
-  (:require [clojure.string :as str]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
-            [linkboard.core.sentry :as sentry]
             [linkboard.handlers :as handlers]
             [linkboard.routes :as app-routes]
             [muuntaja.core :as muuntaja-core]
@@ -12,7 +10,6 @@
             [reitit.dev.pretty :as pretty]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as ring-coercion]
-            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as ring-multipart]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as ring-parameters]
@@ -28,45 +25,8 @@
             [ring.middleware.session.cookie :as ring-session-cookie]
             [ring.middleware.ssl :as ring-ssl]
             [ring.middleware.x-headers :as x-headers]
-            [ring.util.request :as request-util]
-            [ring.util.response :as response]
             [sentry-clj.ring :as sentry-ring])
   (:import com.zaxxer.hikari.HikariDataSource))
-
-; Exceptions
-
-(defn- get-error-path
-  [exception]
-  (mapv
-    (comp #(str/join ":" %) :at)
-    (:via (Throwable->map exception))))
-
-(defn- default-error-handler
-  [error-type exception _request]
-  {:status 500
-   :body {:type error-type
-          :path (get-error-path exception)
-          :error (ex-data exception)
-          :details (ex-message exception)}})
-
-(defn- wrap-exception
-  [{:keys [sentry]}]
-  (fn [handler e request]
-    (log/error e (pr-str (:request-method request) (:uri request)) (ex-message e))
-    (when (= sentry :sentry-initialized)
-      (sentry/report-exception! {:message (ex-message e)
-                                 :request {:url (request-util/request-url request)
-                                           :method (-> request :request-method name)
-                                           :query-string (:query-string request "")
-                                           :data (:params request)
-                                           :env {"REMOTE_ADDR" (:remote-addr request)}
-                                           :cookies (:cookies request)
-                                           :headers (:headers request)}
-                                 :user {:id (-> request :session :identity str)
-                                        :other {"session" (-> request :session :session-id str)}}
-                                 :throwable e}))
-    (-> (handler e request)
-        (response/header "HX-Trigger" "showUnexpectedErrorToast"))))
 
 (defmethod ig/assert-key ::server
   [_ params]
@@ -93,15 +53,7 @@
     :as context}]
   (let [session-store (ring-session-cookie/cookie-store
                         {:key (reitit-extras/string->16-byte-array
-                                (:session-secret-key options))})
-        exception-middleware (exception/create-exception-middleware
-                               (merge
-                                 exception/default-handlers
-                                 {; override the default handler
-                                  ::exception/default (partial default-error-handler "UnexpectedError")
-
-                                  ; print stack-traces for all exceptions
-                                  ::exception/wrap (wrap-exception context)}))]
+                                (:session-secret-key options))})]
     (ring/ring-handler
       (ring/router
         (app-routes/routes (:env options))
@@ -137,7 +89,7 @@
                              ; check CSRF token
                              anti-forgery/wrap-anti-forgery
                              ; handle exceptions
-                             exception-middleware
+                             reitit-extras/exception-middleware
                              ; coerce request and response to spec
                              ring-coercion/coerce-exceptions-middleware
                              reitit-extras/non-throwing-coerce-request-middleware
