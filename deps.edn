@@ -4,8 +4,12 @@
         ch.qos.logback/logback-classic {:mvn/version "1.5.18"}
         org.slf4j/slf4j-api {:mvn/version "2.0.17"}
         io.sentry/sentry {:mvn/version "8.21.1"}
-        io.sentry/sentry-clj {:mvn/version "8.20.229"}
-        ; TODO: maybe remove
+
+        ; TODO: use released version or my github fork
+        ;io.sentry/sentry-clj {:mvn/version "8.20.229"}
+        io.sentry/sentry-clj {:git/url "https://github.com/abogoyavlensky/sentry-clj.git"
+                              :sha "894c7d44add9379577898e520fe70057e670036e"}
+
         io.sentry/sentry-logback {:mvn/version "8.21.1"}
         ; system & config
         integrant/integrant {:mvn/version "0.13.1"}

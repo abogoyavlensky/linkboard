@@ -2,8 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [integrant-extras.core :as ig-extras]
             [integrant.core :as ig]
-            [sentry-clj.core :as sentry])
-  (:import [io.sentry Sentry]))
+            [sentry-clj.core :as sentry]))
 
 (defn- set-default-exception-handler!
   "Set a default uncaught exception handler that reports to Sentry."
@@ -20,26 +19,13 @@
      :schema [:map
               [:dsn any?]]}))
 
-(defn init-sentry! [dsn]
-  (Sentry/init
-    (reify io.sentry.Sentry$OptionsConfiguration
-      (configure [_ options]
-        (.setDsn options dsn)
-        ;; Enable tracing
-        (.setTracesSampleRate options 1.0)
-        ;; Enable structured logs
-        (-> options .getLogs (.setEnabled true))))))
-
 (defmethod ig/init-key ::sentry
   [_ {:keys [dsn]}]
   (if dsn
     (do
       (log/info "[SENTRY] Initialising Sentry...")
-
-      ; TODO: use sentry-clj wrapper instead
-      ;(sentry/init! dsn {:traces-sample-rate 1.0})
-      (init-sentry! dsn)
-
+      (sentry/init! dsn {:traces-sample-rate 1.0
+                         :logs-enabled true})
       (log/info "[SENTRY] Sentry initialised successfully.")
       (set-default-exception-handler!)
       :sentry-initialized)
