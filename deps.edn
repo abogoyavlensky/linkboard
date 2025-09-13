@@ -12,14 +12,14 @@
 
         io.sentry/sentry-logback {:mvn/version "8.21.1"}
         ; system & config
-        integrant/integrant {:mvn/version "0.13.1"}
+        integrant/integrant {:mvn/version "1.0.0"}
         io.github.abogoyavlensky/integrant-extras {:mvn/version "0.1.2"}
         ; server
         metosin/reitit-ring {:mvn/version "0.9.1"}
         metosin/reitit-middleware {:mvn/version "0.9.1"}
         metosin/reitit-malli {:mvn/version "0.9.1"}
         io.github.abogoyavlensky/reitit-extras {:mvn/version "0.2.3"}
-        ring/ring-jetty-adapter {:mvn/version "1.14.2"}
+        ring/ring-jetty-adapter {:mvn/version "1.15.1"}
         io.github.abogoyavlensky/manifest-edn {:mvn/version "0.1.1"}
         ; html parsing
         clj-http/clj-http {:mvn/version "3.13.1"}
@@ -37,8 +37,8 @@
  :paths ["src" "resources"]
 
  :aliases {:dev {:extra-paths ["dev"]
-                 :extra-deps {integrant/repl {:mvn/version "0.4.0"}
-                              ring/ring-devel {:mvn/version "1.14.2"}
+                 :extra-deps {integrant/repl {:mvn/version "0.5.0"}
+                              ring/ring-devel {:mvn/version "1.15.1"}
                               io.github.tonsky/clojure-plus {:mvn/version "1.6.3"}}}
 
            :test {:extra-paths ["test"]
