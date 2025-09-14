@@ -8,7 +8,7 @@
         ; TODO: use released version or my github fork
         ;io.sentry/sentry-clj {:mvn/version "8.20.229"}
         io.sentry/sentry-clj {:git/url "https://github.com/abogoyavlensky/sentry-clj.git"
-                              :sha "894c7d44add9379577898e520fe70057e670036e"}
+                              :sha "1fa75ca3af92d719311f2d7eba1018ba487bb51a"}
 
         io.sentry/sentry-logback {:mvn/version "8.21.1"}
         ; system & config
@@ -46,7 +46,7 @@
                                cloverage/cloverage {:mvn/version "1.2.4"}
                                etaoin/etaoin {:mvn/version "1.1.43"}
                                circleci/bond {:mvn/version "0.6.0"}
-                               io.github.bonigarcia/webdrivermanager {:mvn/version "6.3.1"}
+                               io.github.bonigarcia/webdrivermanager {:mvn/version "6.3.2"}
                                org.seleniumhq.selenium/selenium-java {:mvn/version "4.35.0"}
                                org.testcontainers/testcontainers {:mvn/version "1.21.3"}
                                nubank/matcher-combinators {:mvn/version "3.9.2"}}
