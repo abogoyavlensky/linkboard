@@ -2,14 +2,8 @@
         ; logging
         org.clojure/tools.logging {:mvn/version "1.3.0"}
         ch.qos.logback/logback-classic {:mvn/version "1.5.18"}
-        org.slf4j/slf4j-api {:mvn/version "2.0.17"}
         io.sentry/sentry {:mvn/version "8.21.1"}
-
-        ; TODO: use released version or my github fork
-        ;io.sentry/sentry-clj {:mvn/version "8.20.229"}
-        io.sentry/sentry-clj {:git/url "https://github.com/abogoyavlensky/sentry-clj.git"
-                              :sha "1fa75ca3af92d719311f2d7eba1018ba487bb51a"}
-
+        io.sentry/sentry-clj {:mvn/version "8.21.234"}
         io.sentry/sentry-logback {:mvn/version "8.21.1"}
         ; system & config
         integrant/integrant {:mvn/version "1.0.0"}
@@ -56,8 +50,7 @@
                               :runner :eftest
                               :runner-opts {:multithread? false}}}
 
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "2.11.1276"}
-                                   org.slf4j/slf4j-nop {:mvn/version "2.0.17"}}
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "2.11.1276"}}
                       :main-opts ["-m" "antq.core" "--no-diff"]}
 
            :build {:deps {io.github.abogoyavlensky/slim {:mvn/version "0.3.2"}}
