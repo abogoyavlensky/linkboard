@@ -8,8 +8,8 @@
             [sentry-clj.tracing :as tracing]))
 
 (def ^:private max-download-bytes
-  "Maximum number of bytes to download (1MB)"
-  (* 1024 1024))
+  "Maximum number of bytes to download (32KB)"
+  (* 32 1024))
 
 (defn get-domain-from-url
   "Extract domain from URL for fallback metadata."
