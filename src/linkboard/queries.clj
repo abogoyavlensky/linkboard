@@ -1,6 +1,7 @@
 (ns linkboard.queries
   (:require [buddy.hashers :as hashers]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [linkboard.core.db :as db]))
 
 (def ^:const PASSWORD-HASH-ALGORITHM :bcrypt+sha512)
@@ -33,35 +34,41 @@
     {:account-lookup-id account-lookup-id
      :password password}))
 
-(defn update-user-account-number!
+(defn assign-account-number!
   "Update user's account_number by user id."
   [db user-id account-number]
-  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)]
-    (->> {:update :user
-          :set {:account-number account-lookup-id
-                :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}
-          :where [:= :id user-id]
-          :returning [:*]}
-         (db/exec-one! db))))
+  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)
+        user (->> {:update :user
+                   :set {:account-number account-lookup-id
+                         :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}
+                   :where [:= :id user-id]
+                   :returning [:*]}
+                  (db/exec-one! db))]
+    (log/infof "Account number assigned: %s" (pr-str {:user-id user-id}))
+    user))
 
 (defn create-user!
   "Create a new user with session_id and account_number."
   [db session-id account-number]
-  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)]
-    (->> {:insert-into :user
-          :values [{:session-id session-id
-                    :account-number account-lookup-id
-                    :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}]
-          :returning [:*]}
-         (db/exec-one! db))))
+  (let [{:keys [account-lookup-id password]} (account-number->creds account-number)
+        user (->> {:insert-into :user
+                   :values [{:session-id session-id
+                             :account-number account-lookup-id
+                             :password (hashers/derive password {:alg PASSWORD-HASH-ALGORITHM})}]
+                   :returning [:*]}
+                  (db/exec-one! db))]
+    (log/infof "Account created: %s" (pr-str {:user-id (:id user)}))
+    user))
 
 (defn create-user-with-session!
   "Create a new user with only session_id (empty account_number)."
   [db session-id]
-  (->> {:insert-into :user
-        :values [{:session-id session-id}]
-        :returning [:*]}
-       (db/exec-one! db)))
+  (let [user (->> {:insert-into :user
+                   :values [{:session-id session-id}]
+                   :returning [:*]}
+                  (db/exec-one! db))]
+    (log/infof "User created with session: %s" (pr-str {:user-id (:id user)}))
+    user))
 
 (defn ensure-user-exists!
   "Get user by session_id or create one if doesn't exist. Returns user record."

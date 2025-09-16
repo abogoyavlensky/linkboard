@@ -100,7 +100,7 @@
                                     :user-id (:id user)}]
                           :returning [:*]}
                          (db/exec-one! db))]
-          (log/infof "Created new board: %s" (pr-str board))
+          (log/infof "Board created: %s" (-> board (select-keys [:id :title :user-id]) pr-str))
           (-> (ext/render-html (list ; Return fresh form
                                  (views/board-form-fields {})
                                      ; Add item to the top of the board list
@@ -146,7 +146,7 @@
       :else
       ; Update existing user's empty account number with actual hashed account number
       (try
-        (let [updated-user (queries/update-user-account-number! db (:id user) account-number)
+        (let [updated-user (queries/assign-account-number! db (:id user) account-number)
               identity-data (select-keys updated-user [:id :session-id])]
           (-> (ext/render-html [:div])
               (assoc :session (assoc session :identity identity-data))
@@ -228,6 +228,8 @@
                                                        :user-id (:id user)}]
                                              :returning [:*]})
                            (update :favorite #(> % 0)))]
+              (log/infof "Link created: %s" (pr-str {:user-id (:id user)
+                                                     :link-id (:id link)}))
               (if board-id
                 ; Board-specific link: stay on current page with OOB updates
                 (-> (ext/render-html (list (c/link-form-fields {:board-id board-id})

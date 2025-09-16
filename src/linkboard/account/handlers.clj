@@ -1,5 +1,6 @@
 (ns linkboard.account.handlers
   (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [linkboard.account.views :as views]
             [linkboard.core.db :as db]
             [linkboard.queries :as q]
@@ -74,6 +75,7 @@
             timestamp (.format (LocalDateTime/now) (DateTimeFormatter/ofPattern "yyyy-MM-dd_HH-mm-ss"))
             filename (str "linkboard_export_" timestamp ".csv")]
 
+        (log/infof "Exporting account data: %s" (pr-str {:user-id (:id user)}))
         (-> (response/response csv-content)
             (response/header "Content-Type" "text/csv; charset=utf-8")
             (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))))
