@@ -4,7 +4,8 @@
             [clojure.tools.logging :as log]
             [hickory.core :as hickory]
             [hickory.select :as s]
-            [lambdaisland.uri :as uri]))
+            [lambdaisland.uri :as uri]
+            [sentry-clj.tracing :as tracing]))
 
 (def ^:private max-download-bytes
   "Maximum number of bytes to download (1MB)"
@@ -114,7 +115,8 @@
   (let [normalized-url (if (re-find #"^https?://" url)
                          url
                          (str "https://" url))
-        result (fetch-url-limited normalized-url)]
+        result (tracing/with-start-child-span "fetch.link" url
+                 (fetch-url-limited normalized-url))]
     (if (:error result)
       (do
         (log/warn "[FETCH] Error fetching URL:" (:error result))
@@ -122,4 +124,5 @@
         {:title (get-domain-from-url normalized-url)
          :icon ""})
       ;; Parse HTML to extract metadata
-      (parse-html-metadata (:html result) normalized-url))))
+      (tracing/with-start-child-span "fetch.parse-html" url
+        (parse-html-metadata (:html result) normalized-url)))))

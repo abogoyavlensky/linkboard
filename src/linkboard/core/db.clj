@@ -18,7 +18,7 @@
   "Send query to db and return vector of result items."
   [db query]
   (let [query-sql (honey/format query)]
-    (tracing/with-start-child-span "sql" (first query-sql)
+    (tracing/with-start-child-span "sql.query" (first query-sql)
       (jdbc/execute! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
                                    :return-keys [:id]}))))
 
@@ -26,7 +26,7 @@
   "Send query to db and return single result item."
   [db query]
   (let [query-sql (honey/format query)]
-    (tracing/with-start-child-span "sql" (first query-sql)
+    (tracing/with-start-child-span "sql.query" (first query-sql)
       (jdbc/execute-one! db query-sql {:builder-fn jdbc-rs/as-unqualified-kebab-maps
                                        :return-keys true}))))
 
