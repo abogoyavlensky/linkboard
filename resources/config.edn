@@ -11,6 +11,8 @@
                                           :env #profile {:default :dev
                                                          :prod :prod
                                                          :test :test}
+                                          :cookie-attrs-secure? #profile {:default false
+                                                                          :prod true}
                                           :auto-reload? #profile {:default false
                                                                   :dev true}
                                           :cache-assets? #profile {:default false
