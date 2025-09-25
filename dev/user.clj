@@ -24,11 +24,14 @@
   []
   (ig-repl/halt))
 
-(defn run-all-tests
+(defn run-tests
   "Run all tests for the project."
-  []
-  (repl/refresh)
-  (eftest/run-tests (eftest/find-tests "test") {:report eftest-report/report}))
+  ([]
+   (run-tests "test"))
+  ([param]
+   (repl/refresh)
+   (eftest/run-tests (eftest/find-tests param) {:report eftest-report/report
+                                                :multithread? false})))
 
 (comment
   ; It's convenient to bind shortcuts to these functions in your editor.
@@ -41,7 +44,9 @@
   ; Stop system
   (stop)
   ; Run all project tests
-  (run-all-tests)
+  (run-tests)
+  (run-tests "test/linkboard/home_test.clj")
+  (run-tests 'linkboard.search-queries-test/test-preprocess-search-query-integration)
 
   ; Example of add-lib dynamically
   ; Sync all new libs at once
