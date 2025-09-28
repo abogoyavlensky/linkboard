@@ -10,13 +10,13 @@
    {:id (str "favorite-icon-" (:id board))}
    (if (:favorite board) icons/star-solid icons/star)])
 
-(defn board-list-item
+(defn list-item
   [{:keys [router board]}]
-  [:a {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
-               "justify-between" "shadow-xs" "mt-2" "cursor-pointer" "no-underline"]
-       :id (str "board-" (:id board))
-       :href (ext/route router ::r/board-details {:path {:id (:id board)}})}
-   [:div {:class ["flex" "items-center" "gap-3" "flex-1"]}
+  [:div {:class ["w-full" "bg-white" "rounded-xl" "p-4" "flex" "items-center"
+                 "justify-between" "shadow-xs" "mt-2"]
+         :id (str "board-" (:id board))}
+   [:a {:class ["flex" "items-center" "gap-3" "flex-1" "cursor-pointer"]
+        :href (ext/route router ::r/board-details {:path {:id (:id board)}})}
     [:div {:class ["flex" "items-center" "gap-3"]}
      icons/folder
      [:span {:class ["text-lg"]} (:title board)]]]
@@ -62,8 +62,8 @@
       route
       page
       (fn [board]
-        (board-list-item {:router router
-                          :board board})))
+        (list-item {:router router
+                    :board board})))
     (empty-boards)))
 
 (defn board-form-fields
