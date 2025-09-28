@@ -5,17 +5,18 @@
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
-(defn format-date
+(defn- format-date
   "Format date for display."
   [date-str]
   (when date-str
     (try
-      (let [date (LocalDateTime/parse date-str)
-            formatter (DateTimeFormatter/ofPattern "MMM d, yyyy")]
-        (.format date formatter))
+      (let [input-formatter (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm:ss")
+            date (LocalDateTime/parse date-str input-formatter)
+            output-formatter (DateTimeFormatter/ofPattern "dd-MM-yyyy")]
+        (.format date output-formatter))
       (catch Exception _ date-str))))
 
-(defn account-info-section
+(defn- account-info-section
   "Account information section."
   [user]
   [:div {:class ["bg-white" "rounded-xl" "p-6" "mb-6" "shadow-xs"]}
