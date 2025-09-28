@@ -36,7 +36,7 @@
                       :left-join [[:link :l] [:= :b.id :l.board-id]]
                       :where [:= :b.user-id (:id user)]
                       :group-by [:b.id :b.title :b.favorite]
-                      :order-by [[:b.favorite :desc] [:b.created-at :desc]]}
+                      :order-by [[:b.favorite :desc] [:b.title :asc]]}
         boards (->> (pagination/add-pagination boards-query page)
                     (db/exec! db)
                     (mapv (fn [v] (update v :favorite #(> % 0)))))
