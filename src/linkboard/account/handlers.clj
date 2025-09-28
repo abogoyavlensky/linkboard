@@ -26,22 +26,30 @@
       (not (c/hx-request? request))
       ; Full page response
       (let [board-count (q/get-user-board-count db (:id user))
-            link-count (q/get-user-link-count db (:id user))]
+            link-count (q/get-user-link-count db (:id user))
+            ; Get minimal boards data for footer modal
+            boards-minimal (q/get-user-boards-minimal db (:id user))
+            ; Add boards data to request for footer modal
+            request* (assoc request :boards boards-minimal)]
         (->> (views/account-view request {:user user
                                           :board-count board-count
                                           :link-count link-count})
-             (c/body request)
+             (c/body request*)
              (c/base)
              (ext/render-html)))
 
       :else
       ; HTMX page response
       (let [board-count (q/get-user-board-count db (:id user))
-            link-count (q/get-user-link-count db (:id user))]
+            link-count (q/get-user-link-count db (:id user))
+            ; Get minimal boards data for footer modal
+            boards-minimal (q/get-user-boards-minimal db (:id user))
+            ; Add boards data to request for footer modal
+            request* (assoc request :boards boards-minimal)]
         (->> (views/account-view request {:user user
                                           :board-count board-count
                                           :link-count link-count})
-             (c/body request)
+             (c/body request*)
              (ext/render-html))))))
 
 (defn export-data-handler

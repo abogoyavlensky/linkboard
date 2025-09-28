@@ -3,6 +3,7 @@
             [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
             [linkboard.utils :as utils]
+            [linkboard.constants :as constants]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as ext]))
 
@@ -346,7 +347,7 @@
         "Cmd is for Mac users, Ctrl is for Windows/Linux users"]]]]]])
 
 (defn link-form-fields
-  [{:keys [board-id]
+  [{:keys [board-id boards hide-board-input]
     :as request}]
   (let [errors (get-in request [:errors :humanized])]
     [:div
@@ -362,10 +363,33 @@
                   :text "Link"
                   :attrs {:placeholder "Link title"
                           :autofocus true}})
-     (when board-id
+     (if hide-board-input
+       ; When board-id is set (board-specific context), use hidden input
        [:input {:type "hidden"
                 :name "board"
-                :value board-id}])]))
+                :value board-id}]
+       ; When no board-id (global context), show board selector
+       [:div.mb-4
+        [:label.block.text-sm.font-medium.text-gray-700.mb-1 {:for "board"} "Board (optional)"]
+        [:select
+         {:name "board"
+          :class (concat ["flex" "w-full" "h-10" "px-3" "py-2" "text-sm"
+                          "bg-white" "border" "rounded-md" "border-neutral-300"
+                          "ring-offset-background" "placeholder:text-neutral-500"
+                          "focus:border-neutral-300" "focus:outline-hidden"
+                          "focus:ring-2" "focus:ring-offset-2" "focus:ring-neutral-400"
+                          "disabled:cursor-not-allowed" "disabled:opacity-50"]
+                         (when (seq (:board errors))
+                           ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
+          :id "board"}
+         [:option {:value ""
+                   :selected (nil? board-id)} constants/EMPTY-BOARD]
+         (for [board boards]
+           [:option {:value (:id board)
+                     :selected (= (str (:id board)) board-id)}
+            (:title board)])]
+        (for [error (:board errors)]
+          [:p {:class ["text-red-500" "text-sm" "mt-1"]} (str/capitalize error)])])]))
 
 (defn temporary-session-banner
   "Warning banner for non-registered users."

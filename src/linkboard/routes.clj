@@ -75,7 +75,7 @@
                 :parameters {:form [:map
                                     [:url spec/Link]
                                     [:title {:optional true} :string]
-                                    [:board {:optional true} pos-int?]]}}}]
+                                    [:board {:optional true} [:or pos-int? [:enum "" "--------"]]]]}}}]
     ["/:link-id"
      {:parameters {:path {:link-id pos-int?}}}
      ["" {:name ::link-details

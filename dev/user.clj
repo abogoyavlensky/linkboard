@@ -1,5 +1,5 @@
 (ns user
-  (:require [clojure.tools.namespace.repl :as repl]
+  (:require [clj-reload.core :as reload]
             [clojure.repl.deps :as repl-deps]
             [clojure+.error :as error+]
             [malli.dev :as malli-dev]
@@ -9,7 +9,7 @@
             [integrant.repl.state :as state]
             [integrant-extras.core :as ig-extras]))
 
-(repl/set-refresh-dirs "dev" "src" "test")
+(ig-repl/set-reload-options! {:dirs ["dev" "src" "test"], :file-pattern #"\.clj"})
 (malli-dev/start!)
 (error+/install!)
 
@@ -29,7 +29,7 @@
   ([]
    (run-tests "test"))
   ([param]
-   (repl/refresh)
+   (reload/reload)
    (eftest/run-tests (eftest/find-tests param) {:report eftest-report/report
                                                 :multithread? false})))
 
@@ -38,7 +38,7 @@
   ; Start or restart system
   (reset)
   ; refresh code without restarting system
-  (repl/refresh)
+  (reload/reload)
   ; Check system state
   (keys state/system)
   ; Stop system

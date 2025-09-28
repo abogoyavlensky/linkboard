@@ -11,7 +11,8 @@
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
             [reitit-extras.core :as ext]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import [java.net URI]))
 
 (def ^:const DEFAULT-BOARD-LIMIT 50)
 (def ^:const DEFAULT-LINK-LIMIT 5000)
@@ -44,7 +45,11 @@
                          (db/exec-one! db)
                          :board-count)
         has-more? (pagination/has-more-pages? board-count page)
-        route "/"]
+        route "/"
+        ; Get minimal boards data for footer modal
+        boards-minimal (queries/get-user-boards-minimal db (:id user))
+        ; Add boards data to request for footer modal
+        request* (assoc request :boards boards-minimal)]
     (cond
       (not (c/hx-request? request))
       ; Full page response
@@ -53,7 +58,7 @@
                                        :has-more? has-more?
                                        :route route
                                        :page page})
-           (c/body request)
+           (c/body request*)
            (c/base)
            (ext/render-html))
 
@@ -72,7 +77,7 @@
                                        :has-more? has-more?
                                        :route route
                                        :page page})
-           (c/body request)
+           (c/body request*)
            (ext/render-html)))))
 
 (defn create-board-handler
@@ -182,6 +187,20 @@
             (c/login-form-fields)
             (ext/render-html))))))
 
+(defn- referer-path
+  "Extract the path part from the Referer header, or return nil if not present."
+  [request]
+  (when-let [referer (get-in request [:headers "referer"])]
+    (try
+      (let [uri (URI. referer)]
+        (.getPath uri))
+      (catch Exception _e
+        nil))))
+
+(defn- hide-board-input?
+  [request]
+  (str/starts-with? (referer-path request) "/boards"))
+
 (defn create-link-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{{:keys [db]} :context
@@ -192,23 +211,37 @@
   (cond
     (seq errors)
     ; Return form validation errors
-    (-> (c/link-form-fields (assoc request :board-id (:board form)))
-        (ext/render-html))
+    (let [user (queries/get-user-by-session-id db (:session-id session))
+          boards-minimal (queries/get-user-boards-minimal db (:id user))]
+      (-> (c/link-form-fields (assoc request
+                                     :board-id (when (and (:board form)
+                                                          (not= "--------" (:board form))
+                                                          (not= "" (:board form)))
+                                                 (str (:board form)))
+                                     :hide-board-input (hide-board-input? request)
+                                     :boards boards-minimal))
+          (ext/render-html)))
 
     :else
     (let [user (queries/ensure-user-exists! db (:session-id session))
           link-count (queries/get-user-link-count db (:id user))]
       (if (>= link-count DEFAULT-LINK-LIMIT)
         ; Return 200 status with error message
-        (-> (assoc-in request
-                      [:errors :humanized :url]
-                      ["Link limit reached. You can have up to 5000 links."])
-            (c/link-form-fields)
-            (ext/render-html)
-            (response/status 200)
-            (response/header "HX-Trigger-After-Swap" "modal-close")
-            (response/header "HX-Trigger" "showLinkLimitReachedToast"))
-        (let [board-id (:board form)
+        (let [boards-minimal (queries/get-user-boards-minimal db (:id user))]
+          (-> (assoc-in request
+                        [:errors :humanized :url]
+                        ["Link limit reached. You can have up to 5000 links."])
+              (assoc :boards boards-minimal
+                     :hide-board-input (hide-board-input? request))
+              (c/link-form-fields)
+              (ext/render-html)
+              (response/status 200)
+              (response/header "HX-Trigger-After-Swap" "modal-close")
+              (response/header "HX-Trigger" "showLinkLimitReachedToast")))
+        (let [board-id (when (and (:board form)
+                                  (not= "--------" (:board form))
+                                  (not= "" (:board form)))
+                         (str (:board form)))
               user-title (str/trim (:title form))
               metadata (fetch/fetch-page-metadata (:url form))
               ; Use user-provided title or fallback to metadata title
@@ -216,10 +249,11 @@
                             user-title
                             (:title metadata))]
           ; Validate that if board_id is provided, the user owns that board
-          (if (and board-id (not (queries/user-owns-board? db {:board-id board-id
+          (if (and board-id (not (queries/user-owns-board? db {:board-id (parse-long board-id)
                                                                :session-id (:session-id session)})))
             (response/status 403)
             (let [boards (queries/get-user-boards-minimal db (:id user))
+                  board (when board-id (queries/get-board-by-id-and-user-id db (parse-long board-id) (:id user)))
                   link (-> (db/exec-one! db {:insert-into :link
                                              :values [{:url (:url form)
                                                        :title final-title
@@ -227,29 +261,34 @@
                                                        :board-id board-id
                                                        :user-id (:id user)}]
                                              :returning [:*]})
-                           (update :favorite #(> % 0)))]
+                           (update :favorite #(> % 0))
+                           (assoc :board-title (when board (:title board))))]
               (log/infof "Link created: %s" (pr-str {:user-id (:id user)
                                                      :link-id (:id link)}))
-              (if board-id
+              (if (= (referer-path request) (ext/route router ::r/home-page))
+                ; Boardless link: redirect to All Links page
+                (-> (ext/render-html [:div])
+                    (response/header "HX-Trigger" "showLinkCreationToast")
+                    (response/header "HX-Trigger-After-Swap" "modal-close")
+                    (response/header "HX-Redirect" (ext/route router ::r/links)))
                 ; Board-specific link: stay on current page with OOB updates
-                (-> (ext/render-html (list (c/link-form-fields {:board-id board-id})
+                (-> (ext/render-html (list (c/link-form-fields {:board-id board-id
+                                                                :hide-board-input (hide-board-input? request)
+                                                                :boards boards})
                                            [:div
                                             ; Add item to the top of the link list
                                             {:hx-swap-oob "afterbegin:#link-list"}
                                             (board-views/link-list-item {:request request
                                                                          :router router
                                                                          :link link
+                                                                         :show-board? (not (hide-board-input? request))
                                                                          :boards boards})]
                                            ; Remove empty state
                                            [:div
                                             {:hx-swap-oob "delete:#empty-links"}]))
                     (response/header "HX-Trigger" "showLinkCreationToast")
-                    (response/header "HX-Trigger-After-Swap" "modal-close"))
-                ; Boardless link: redirect to All Links page
-                (-> (ext/render-html [:div])
-                    (response/header "HX-Trigger" "showLinkCreationToast")
-                    (response/header "HX-Trigger-After-Swap" "modal-close")
-                    (response/header "HX-Redirect" (ext/route router ::r/links)))))))))))
+                    (response/header "HX-Trigger-After-Swap" "modal-close"))))))))))
+
 
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}

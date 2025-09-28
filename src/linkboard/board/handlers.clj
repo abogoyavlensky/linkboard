@@ -54,7 +54,8 @@
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
         route (build-route-with-search (str "/boards/" (:id path)) search-term)
-        request* (assoc request :board-id (:id board))]
+        request* (assoc request :board-id (:id board)
+                                :hide-board-input true)]
 
     (cond
       (not board)
@@ -123,7 +124,9 @@
                           (db/exec-one! db)
                           :link-count))
         has-more? (pagination/has-more-pages? link-count page)
-        route (build-route-with-search "/links" search-term)]
+        route (build-route-with-search "/links" search-term)
+        ; Add boards data to request for footer modal
+        request* (assoc request :boards boards)]
 
     (cond
       (not (c/hx-request? request))
@@ -135,7 +138,7 @@
                                           :page page
                                           :search-term search-term
                                           :boards boards})
-           (c/body request)
+           (c/body request*)
            (c/base)
            (ext/render-html))
 

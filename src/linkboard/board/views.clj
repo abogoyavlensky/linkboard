@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
+            [linkboard.constants :as constants]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as ext]))
 
@@ -41,7 +42,7 @@
                          ["border-red-500" "focus:border-red-500" "focus:ring-red-500"]))
         :id "board"}
        [:option {:value ""
-                 :selected (nil? (:board-id link))} "--------"]
+                 :selected (nil? (:board-id link))} constants/EMPTY-BOARD]
        (for [board boards]
          [:option {:value (:id board)
                    :selected (= (:id board) (:board-id link))}
