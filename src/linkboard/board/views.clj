@@ -1,8 +1,8 @@
 (ns linkboard.board.views
   (:require [clojure.string :as str]
+            [linkboard.constants :as constants]
             [linkboard.routes :as-alias r]
             [linkboard.ui.components :as c]
-            [linkboard.constants :as constants]
             [linkboard.ui.icons :as icons]
             [reitit-extras.core :as ext]))
 

@@ -1,9 +1,9 @@
 (ns linkboard.ui.components
   (:require [clojure.string :as str]
+            [linkboard.constants :as constants]
             [linkboard.routes :as-alias r]
             [linkboard.ui.icons :as icons]
             [linkboard.utils :as utils]
-            [linkboard.constants :as constants]
             [manifest-edn.core :as manifest]
             [reitit-extras.core :as ext]))
 

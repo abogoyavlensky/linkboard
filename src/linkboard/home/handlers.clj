@@ -289,7 +289,6 @@
                     (response/header "HX-Trigger" "showLinkCreationToast")
                     (response/header "HX-Trigger-After-Swap" "modal-close"))))))))))
 
-
 (defn logout-handler
   {:malli/schema [:=> [:cat :map] :map]}
   [{router :reitit.core/router

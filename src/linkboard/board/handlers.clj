@@ -55,7 +55,7 @@
         has-more? (pagination/has-more-pages? link-count page)
         route (build-route-with-search (str "/boards/" (:id path)) search-term)
         request* (assoc request :board-id (:id board)
-                                :hide-board-input true)]
+                        :hide-board-input true)]
 
     (cond
       (not board)
