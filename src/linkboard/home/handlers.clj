@@ -112,8 +112,8 @@
                                      ; Add item to the top of the board list
                                  [:div
                                   {:hx-swap-oob "afterbegin:#board-list"}
-                                  (views/list-item {:router router
-                                                    :board (update board :favorite #(> % 0))})]
+                                  (views/board-list-item {:router router
+                                                          :board (update board :favorite #(> % 0))})]
                                  ; Remove empty state
                                  [:div
                                   {:hx-swap-oob "delete:#empty-boards"}]))
