@@ -5,6 +5,7 @@
             [linkboard.board.fetch :as fetch]
             [linkboard.board.pagination :as pagination]
             [linkboard.board.views :as board-views]
+            [linkboard.constants :as constants]
             [linkboard.core.db :as db]
             [linkboard.home.views :as views]
             [linkboard.queries :as queries]
@@ -215,7 +216,7 @@
           boards-minimal (queries/get-user-boards-minimal db (:id user))]
       (-> (c/link-form-fields (assoc request
                                      :board-id (when (and (:board form)
-                                                          (not= "--------" (:board form))
+                                                          (not= constants/EMPTY-BOARD (:board form))
                                                           (not= "" (:board form)))
                                                  (str (:board form)))
                                      :hide-board-input (hide-board-input? request)
@@ -239,7 +240,7 @@
               (response/header "HX-Trigger-After-Swap" "modal-close")
               (response/header "HX-Trigger" "showLinkLimitReachedToast")))
         (let [board-id (when (and (:board form)
-                                  (not= "--------" (:board form))
+                                  (not= constants/EMPTY-BOARD (:board form))
                                   (not= "" (:board form)))
                          (str (:board form)))
               user-title (str/trim (:title form))

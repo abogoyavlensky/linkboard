@@ -509,7 +509,7 @@ bb clj-repl              # Start REPL with dev profile
 - **Priority Sorting**: Favorite items appear first in all listings (boards and links) with `:favorite :desc` sorting
 - **Keyboard Shortcuts UX**: Use `event.code` instead of `event.key` for reliable cross-platform detection, especially with modifier keys
 - **Modal Management**: Prevent stacking by dispatching `modal-close` events before opening new modals via keyboard shortcuts
-- **Form Enhancement**: Board selectors with alphabetical ordering and "-------" option for standalone links
+- **Form Enhancement**: Board selectors with alphabetical ordering and "--------" option for standalone links
 - **Error Page Navigation**: All error pages include "Go to Home Page" button for better user recovery
 - **Board Deletion UX**: Custom deletion message replaces automatic redirects, provides clear next steps with home page navigation
 - **Header Design**: Enhanced typography with semantic elements, gradient backgrounds, and smooth hover transitions for professional appearance

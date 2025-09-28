@@ -1,6 +1,7 @@
 (ns linkboard.routes
   (:require [linkboard.account.handlers :as account-handlers]
             [linkboard.board.handlers :as board-handlers]
+            [linkboard.constants :as constants]
             [linkboard.home.handlers :as home-handlers]
             [linkboard.limits :as limits]
             [linkboard.spec :as spec]
@@ -75,7 +76,7 @@
                 :parameters {:form [:map
                                     [:url spec/Link]
                                     [:title {:optional true} :string]
-                                    [:board {:optional true} [:or pos-int? [:enum "" "--------"]]]]}}}]
+                                    [:board {:optional true} [:or pos-int? [:enum "" constants/EMPTY-BOARD]]]]}}}]
     ["/:link-id"
      {:parameters {:path {:link-id pos-int?}}}
      ["" {:name ::link-details
