@@ -233,12 +233,12 @@
                                           :where [:and
                                                   [:= :l.user-id user-id]
                                                   [:raw "link_search MATCH " [search-term]]]
-                                          :order-by [[:search-rank :asc] [:l.favorite :desc] [:l.created-at :desc]])
+                                          :order-by [[:l.created-at :desc]])
     (< (count raw-search-term) 3) (assoc :select [:l.* [:b.title :board-title] [:b.id :board-id]]
                                          :where [:and
                                                  [:= :l.user-id user-id]
                                                  [:like :l.title (str "%" raw-search-term "%")]]
-                                         :order-by [[:l.favorite :desc] [:l.created-at :desc]])))
+                                         :order-by [[:l.created-at :desc]])))
 
 (defn search-board-links-query
   "Build query for searching links within a specific board using FTS5 or LIKE for short terms.
@@ -254,7 +254,7 @@
                                                   [:= :b.id board-id]
                                                   [:= :b.user-id user-id]
                                                   [:raw "link_search MATCH " [search-term]]]
-                                          :order-by [[:search-rank :asc] [:l.favorite :desc] [:l.created-at :desc]])
+                                          :order-by [[:l.favorite :desc] [:l.created-at :desc]])
     (< (count raw-search-term) 3) (assoc :select [:l.*]
                                          :where [:and
                                                  [:= :l.user-id user-id]
@@ -273,7 +273,7 @@
      :from [[:link :l]]
      :left-join [[:board :b] [:= :l.board-id :b.id]]
      :where [:= :l.user-id user-id]
-     :order-by [[:l.favorite :desc] [:l.created-at :desc]]}))
+     :order-by [[:l.created-at :desc]]}))
 
 (defn get-board-links-query
   "Build query for getting links within a specific board, optionally with search.
