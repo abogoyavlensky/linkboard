@@ -470,9 +470,9 @@
 
    ; Fixed footer with Help and Add Link buttons
    [:footer
-    {:class ["fixed" "bottom-4" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl"
+    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl"
              "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-4"]}
-    [:div {:class ["flex" "justify-between" "items-center" "mb-2"]}
+    [:div {:class ["flex" "justify-between" "items-center" "mb-4"]}
      (help-modal)
      (modal
        {:open-btn-text [:div
