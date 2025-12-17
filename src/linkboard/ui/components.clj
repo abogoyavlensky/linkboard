@@ -13,14 +13,6 @@
   [{:keys [headers]}]
   (= "true" (get headers "hx-request")))
 
-(defn button
-  [{:keys [content]}]
-  [:div
-   {:class ["inline-flex" "items-center" "px-4" "py-2" "bg-primary-600" "text-white"
-            "rounded-lg" "hover:bg-primary-700" "transition-colors" "cursor-pointer"]
-    :type "button"}
-   content])
-
 (defn form-input
   [{:keys [input-name text value errors attrs]}]
   [:div
@@ -478,13 +470,17 @@
 
    ; Fixed footer with Help and Add Link buttons
    [:footer
-    {:class ["fixed" "bottom-0" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl"
-             "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-3"]}
+    {:class ["fixed" "bottom-4" "left-1/2" "transform" "-translate-x-1/2" "max-w-4xl"
+             "w-full" "backdrop-blur-sm" "border-t" "border-gray-200/50" "px-4" "py-4"]}
     [:div {:class ["flex" "justify-between" "items-center" "mb-2"]}
      (help-modal)
      (modal
-       {:open-btn-text (button {:content [:div {:class ["flex" "items-center" "gap-1"]}
-                                          icons/plus-circle "Add link"]})
+       {:open-btn-text [:div
+                        {:class ["inline-flex" "items-center" "px-4" "py-3" "bg-primary-600" "text-white" "text-lg"
+                                 "rounded-lg" "hover:bg-primary-700" "transition-colors" "cursor-pointer"]
+                         :type "button"}
+                        [:div {:class ["flex" "items-center" "gap-2"]}
+                         icons/plus-circle "Add link"]]
         :title "Add link"
         :id-prefix "add-link"
         :form-attrs {:hx-post (ext/route router ::r/links)
