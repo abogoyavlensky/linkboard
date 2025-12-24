@@ -87,7 +87,8 @@
       (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
                       "border-neutral-200" "max-w-sm" "md:max-w-md" "rounded-lg"]
               :x-trap.inert.noscroll "modalOpen"
-              :x-on:click.stop ""}
+              :x-on:click.stop ""
+              :x-effect "if (modalOpen) { navigator.clipboard.readText().then(text => { if (text && (text.startsWith('http://') || text.startsWith('https://'))) { const input = document.getElementById('url-input'); if (input && !input.value) { input.value = text.trim(); } } }).catch(() => {}); }"}
              form-attrs)
       [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
        [:h3 {:class ["text-lg" "font-semibold"]} title]
@@ -356,6 +357,7 @@
                   :value (get-in request [:parameters :form :url] nil)
                   :text "Link"
                   :attrs {:placeholder "Link title"
+                          :id "url-input"
                           :autofocus true}})
      (if hide-board-input
        ; When board-id is set (board-specific context), use hidden input
