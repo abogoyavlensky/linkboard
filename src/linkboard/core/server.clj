@@ -39,6 +39,7 @@
                 [:port pos-int?]
                 [:session-secret-key string?]
                 [:env [:enum :dev :prod :test]]
+                [:openrouter-api-key {:optional true} string?]
                 [:cookie-attrs-secure? boolean?]
                 [:auto-reload? boolean?]
                 [:cache-assets? {:optional true} boolean?]

@@ -27,6 +27,7 @@ env:
   secret:
     - SESSION_SECRET_KEY
     - SENTRY_DSN
+    - OPENROUTER_API_KEY
 
 volumes:
   - "/root/linkboard-db:/app/db"

@@ -43,6 +43,7 @@ REGISTRY_PASSWORD=personal-github-token
 APP_DOMAIN=app.domain.com
 SESSION_SECRET_KEY=secret-key
 SENTRY_DSN=sentry-dsn
+OPENROUTER_API_KEY=openrouter-api-key
 ```
 
 Install ruby and kamal:

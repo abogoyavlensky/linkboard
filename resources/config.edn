@@ -11,6 +11,7 @@
                                           :env #profile {:default :dev
                                                          :prod :prod
                                                          :test :test}
+                                          :openrouter-api-key #or [#env OPENROUTER_API_KEY nil]
                                           :cookie-attrs-secure? #profile {:default false
                                                                           :prod true}
                                           :auto-reload? #profile {:default false
