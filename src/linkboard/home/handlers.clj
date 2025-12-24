@@ -204,7 +204,7 @@
 
 (defn create-link-handler
   {:malli/schema [:=> [:cat :map] :map]}
-  [{{:keys [db]} :context
+  [{{:keys [db options]} :context
     {:keys [form]} :parameters
     :keys [errors session]
     router :reitit.core/router
@@ -239,22 +239,32 @@
               (response/status 200)
               (response/header "HX-Trigger-After-Swap" "modal-close")
               (response/header "HX-Trigger" "showLinkLimitReachedToast")))
-        (let [board-id (when (and (:board form)
-                                  (not= constants/EMPTY-BOARD (:board form))
-                                  (not= "" (:board form)))
-                         (str (:board form)))
+        (let [user-board-id (when (and (:board form)
+                                       (not= constants/EMPTY-BOARD (:board form))
+                                       (not= "" (:board form)))
+                              (str (:board form)))
               user-title (str/trim (:title form))
               metadata (fetch/fetch-page-metadata (:url form))
               ; Use user-provided title or fallback to metadata title
               final-title (if (and user-title (not (str/blank? user-title)))
                             user-title
-                            (:title metadata))]
+                            (:title metadata))
+              ; Fetch boards for auto-detection and form display
+              boards (queries/get-user-boards-minimal db (:id user))
+              ; Auto-detect board only if user didn't select one and not on board page
+              auto-board-id (when (and (nil? user-board-id)
+                                       (not (hide-board-input? request))
+                                       (seq boards))
+                              (fetch/detect-board-for-link {:metadata metadata
+                                                            :url (:url form)
+                                                            :boards boards
+                                                            :options options}))
+              board-id (or user-board-id auto-board-id)]
           ; Validate that if board_id is provided, the user owns that board
           (if (and board-id (not (queries/user-owns-board? db {:board-id (parse-long board-id)
                                                                :session-id (:session-id session)})))
             (response/status 403)
-            (let [boards (queries/get-user-boards-minimal db (:id user))
-                  board (when board-id (queries/get-board-by-id-and-user-id db (parse-long board-id) (:id user)))
+            (let [board (when board-id (queries/get-board-by-id-and-user-id db (parse-long board-id) (:id user)))
                   link (-> (db/exec-one! db {:insert-into :link
                                              :values [{:url (:url form)
                                                        :title final-title

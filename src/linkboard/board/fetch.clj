@@ -1,5 +1,6 @@
 (ns linkboard.board.fetch
-  (:require [clj-http.client :as http]
+  (:require [cheshire.core :as json]
+            [clj-http.client :as http]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hickory.core :as hickory]
@@ -9,7 +10,15 @@
 
 (def ^:private max-download-bytes
   "Maximum number of bytes to download (32KB)"
-  (* 32 1024))
+  (* 128 1024))
+
+(def ^:private ^:const OPENROUTER-API-URL
+  "OpenRouter API endpoint for chat completions"
+  "https://openrouter.ai/api/v1/chat/completions")
+
+(def ^:private ^:const MODEL
+  "Model to use for link board detection"
+  "xiaomi/mimo-v2-flash:free")
 
 (defn get-domain-from-url
   "Extract domain from URL for fallback metadata."
@@ -76,19 +85,26 @@
   (try
     (let [hickory-doc (-> html hickory/parse hickory/as-hickory)
 
-          ;; Extract title
+          ; Extract title
           title-node (s/select (s/tag :title) hickory-doc)
           title (when (seq title-node)
                   (-> title-node first :content first))
 
-          ;; Define selectors for different favicon types
+          ; Extract description from meta tag
+          description-selector (s/and (s/tag :meta)
+                                      (s/attr :name #(= "description" %)))
+          description-node (s/select description-selector hickory-doc)
+          description (when (seq description-node)
+                        (get-in (first description-node) [:attrs :content]))
+
+          ; Define selectors for different favicon types
           icon-selector (s/or
                           (s/and (s/tag :link)
                                  (s/attr :rel #(re-matches #"(?i)^(shortcut )?icon$" %)))
                           (s/and (s/tag :link)
                                  (s/attr :rel #(re-matches #"(?i)^apple-touch-icon(-precomposed)?$" %))))
 
-          ;; Find all icon nodes
+          ; Find all icon nodes
           icon-nodes (s/select icon-selector hickory-doc)
 
           ;; Extract href from the first icon found
@@ -102,7 +118,8 @@
       {:title (if (str/blank? title)
                 (get-domain-from-url url)
                 title)
-       :icon favicon-url})
+       :icon favicon-url
+       :description description})
     (catch Exception e
       {:error (str "Error parsing HTML: " (.getMessage e))
        :url url})))
@@ -126,3 +143,48 @@
       ;; Parse HTML to extract metadata
       (tracing/with-start-child-span "fetch.parse-html" url
         (parse-html-metadata (:html result) normalized-url)))))
+
+(defn detect-board-for-link
+  "Detect the best matching board for a link using LLM.
+   Returns board ID if a match is found, nil otherwise.
+   `metadata` - map with :title and :description from fetch-page-metadata
+   `url` - the link URL
+   `boards` - list of maps with :id and :title keys"
+  [{:keys [metadata url boards options]}]
+  (let [api-key (:openrouter-api-key options)]
+    (when (and api-key (seq boards))
+      (try
+        (tracing/with-start-child-span "fetch.detect-board" url
+          (let [board-names (str/join ", " (map :title boards))
+                prompt (str "Given these boards: " board-names
+                            "\nWhich board fits this link best? Respond with board name ONLY.\n"
+                            "Title: " (:title metadata) "\n"
+                            "Description: " (or (:description metadata) "N/A") "\n"
+                            "URL: " url)
+                response (http/post OPENROUTER-API-URL
+                                    {:socket-timeout 10000
+                                     :conn-timeout 5000
+                                     :headers {"Authorization" (str "Bearer " api-key)
+                                               "Content-Type" "application/json"}
+                                     :body (json/encode
+                                             {:model MODEL
+                                              :messages [{:role "user"
+                                                          :content prompt}]})
+                                     :throw-exceptions false})
+                detected-name (if (= 200 (:status response))
+                                (-> (json/decode (:body response) true)
+                                    :choices first :message :content
+                                    str/trim)
+                                (log/warn "[FETCH] Not 200 response while detecting board:"
+                                          (:body response)))]
+            ; Find board by matching title (case-insensitive)
+            (when detected-name
+              (->> boards
+                   (filter #(= (str/lower-case (:title %))
+                               (str/lower-case detected-name)))
+                   first
+                   :id
+                   str))))
+        (catch Exception e
+          (log/warn "[FETCH] Error detecting board:" (.getMessage e))
+          nil)))))

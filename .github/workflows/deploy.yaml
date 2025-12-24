@@ -46,6 +46,7 @@ jobs:
           APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: bb kamal deploy --version=${{ github.sha }}
 
       - name: Kamal Release
