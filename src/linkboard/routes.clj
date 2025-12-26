@@ -75,7 +75,7 @@
          :post {:handler home-handlers/create-link-handler
                 :parameters {:form [:map
                                     [:url spec/Link]
-                                    [:title {:optional true} :string]
+                                    ; used in link creation from board page
                                     [:board {:optional true} [:or pos-int? [:enum "" constants/EMPTY-BOARD]]]]}}}]
     ["/:link-id"
      {:parameters {:path {:link-id pos-int?}}}

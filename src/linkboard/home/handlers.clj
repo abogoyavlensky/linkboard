@@ -212,54 +212,42 @@
   (cond
     (seq errors)
     ; Return form validation errors
-    (let [user (queries/get-user-by-session-id db (:session-id session))
-          boards-minimal (queries/get-user-boards-minimal db (:id user))]
-      (-> (c/link-form-fields (assoc request
-                                     :board-id (when (and (:board form)
-                                                          (not= constants/EMPTY-BOARD (:board form))
-                                                          (not= "" (:board form)))
-                                                 (str (:board form)))
-                                     :hide-board-input (hide-board-input? request)
-                                     :boards boards-minimal))
-          (ext/render-html)))
+    (-> (c/link-form-fields (assoc request
+                                   :board-id (when (and (:board form)
+                                                        (not= constants/EMPTY-BOARD (:board form))
+                                                        (not= "" (:board form)))
+                                               (str (:board form)))
+                                   :hide-board-input (hide-board-input? request)))
+        (ext/render-html))
 
     :else
     (let [user (queries/ensure-user-exists! db (:session-id session))
           link-count (queries/get-user-link-count db (:id user))]
       (if (>= link-count DEFAULT-LINK-LIMIT)
         ; Return 200 status with error message
-        (let [boards-minimal (queries/get-user-boards-minimal db (:id user))]
-          (-> (assoc-in request
-                        [:errors :humanized :url]
-                        ["Link limit reached. You can have up to 5000 links."])
-              (assoc :boards boards-minimal
-                     :hide-board-input (hide-board-input? request))
-              (c/link-form-fields)
-              (ext/render-html)
-              (response/status 200)
-              (response/header "HX-Trigger-After-Swap" "modal-close")
-              (response/header "HX-Trigger" "showLinkLimitReachedToast")))
-        (let [user-board-id (when (and (:board form)
-                                       (not= constants/EMPTY-BOARD (:board form))
-                                       (not= "" (:board form)))
-                              (str (:board form)))
-              user-title (str/trim (:title form))
-              metadata (fetch/fetch-page-metadata (:url form))
-              ; Use user-provided title or fallback to metadata title
-              final-title (if (and user-title (not (str/blank? user-title)))
-                            user-title
-                            (:title metadata))
-              ; Fetch boards for auto-detection and form display
+        (-> (assoc-in request
+                      [:errors :humanized :url]
+                      ["Link limit reached. You can have up to 5000 links."])
+            (assoc :hide-board-input (hide-board-input? request))
+            (c/link-form-fields)
+            (ext/render-html)
+            (response/status 200)
+            (response/header "HX-Trigger-After-Swap" "modal-close")
+            (response/header "HX-Trigger" "showLinkLimitReachedToast"))
+        (let [metadata (fetch/fetch-page-metadata (:url form))
+              final-title (:title metadata)
               boards (queries/get-user-boards-minimal db (:id user))
-              ; Auto-detect board only if user didn't select one and not on board page
-              auto-board-id (when (and (nil? user-board-id)
-                                       (not (hide-board-input? request))
-                                       (seq boards))
-                              (fetch/detect-board-for-link {:metadata metadata
-                                                            :url (:url form)
-                                                            :boards boards
-                                                            :options options}))
-              board-id (or user-board-id auto-board-id)]
+              ; If on board page, use hidden form value; otherwise auto-detect
+              board-id (if (hide-board-input? request)
+                         ; On board page: use hidden form value
+                         (when (and (:board form) (not= "" (:board form)))
+                           (str (:board form)))
+                         ; Not on board page: auto-detect
+                         (when (seq boards)
+                           (fetch/detect-board-for-link {:metadata metadata
+                                                         :url (:url form)
+                                                         :boards boards
+                                                         :options options})))]
           ; Validate that if board_id is provided, the user owns that board
           (if (and board-id (not (queries/user-owns-board? db {:board-id (parse-long board-id)
                                                                :session-id (:session-id session)})))
@@ -284,8 +272,7 @@
                     (response/header "HX-Redirect" (ext/route router ::r/links)))
                 ; Board-specific link: stay on current page with OOB updates
                 (-> (ext/render-html (list (c/link-form-fields {:board-id board-id
-                                                                :hide-board-input (hide-board-input? request)
-                                                                :boards boards})
+                                                                :hide-board-input (hide-board-input? request)})
                                            [:div
                                             ; Add item to the top of the link list
                                             {:hx-swap-oob "afterbegin:#link-list"}

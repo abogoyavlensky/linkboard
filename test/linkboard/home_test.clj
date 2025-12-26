@@ -94,7 +94,7 @@
 
 (deftest test-create-boardless-link-from-home-page
   (let [url (ext/get-server-url (utils/->server))]
-    (bond/with-stub [[fetch/fetch-url-limited (constantly {:html "<h1></h1>"})]]
+    (bond/with-stub [[fetch/fetch-url-limited (constantly {:html "<html><head><title>Example Page</title></head><body><h1>Example Page</h1></body></html>"})]]
       (utils/with-chrome
         driver
         (e/go driver url)
@@ -103,8 +103,6 @@
         (e/click driver {:fn/has-text "Add link"})
         ; Wait for modal and fill form
         (e/wait-visible driver {:id "link-form-fields"})
-        (e/wait-visible driver {:fn/has-text "Title (optional)"})
-        (e/fill driver {:css "#link-form-fields input[name='title']"} "Test Link Title")
         (e/fill driver {:tag :input
                         :name :url} "https://example.com")
         ; Submit form
@@ -114,15 +112,15 @@
                          :fn/text "Save"})
         ; Verify redirect to All Links page
         (e/wait-visible driver {:fn/has-text "All Links"})
-        ; Verify link appears in the list
-        (e/wait-visible driver {:fn/has-text "Test Link Title"})
+        ; Verify link appears in the list with auto-fetched title
+        (e/wait-visible driver {:fn/has-text "Example Page"})
         (is (e/visible? driver {:fn/has-text "https://example.com"})))
 
       (testing "boardless link created in db"
         (is (match? [{:created-at string?
                       :favorite 0
                       :id 1
-                      :title "Test Link Title"
+                      :title "Example Page"
                       :url "https://example.com"
                       :icon nil
                       :board-id nil
