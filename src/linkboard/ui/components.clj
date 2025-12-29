@@ -86,8 +86,7 @@
       (merge {:class ["relative" "w-full" "py-6" "bg-white" "border" "shadow-lg" "px-7"
                       "border-neutral-200" "max-w-sm" "md:max-w-md" "rounded-lg"]
               :x-trap.inert.noscroll "modalOpen"
-              :x-on:click.stop ""
-              :x-effect "if (modalOpen) { navigator.clipboard.readText().then(text => { if (text && (text.startsWith('http://') || text.startsWith('https://'))) { const input = document.getElementById('url-input'); if (input && !input.value) { input.value = text.trim(); } } }).catch(() => {}); }"}
+              :x-on:click.stop ""}
              form-attrs)
       [:div {:class ["flex" "items-center" "justify-between" "pb-3"]}
        [:h3 {:class ["text-lg" "font-semibold"]} title]
@@ -352,7 +351,8 @@
                   :text "Link"
                   :attrs {:placeholder "Paste link here"
                           :id "url-input"
-                          :autofocus true}})
+                          :autofocus true
+                          :x-on:focus.once "if (!$el.value) { navigator.clipboard.readText().then(text => { if (text && (text.startsWith('http://') || text.startsWith('https://'))) { $el.value = text.trim(); } }).catch(() => {}); }"}})
      (when hide-board-input
        [:input {:type "hidden"
                 :name "board"
