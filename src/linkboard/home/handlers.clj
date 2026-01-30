@@ -257,6 +257,7 @@
                                              :values [{:url (:url form)
                                                        :title final-title
                                                        :icon (:icon metadata)
+                                                       :description (:description metadata)
                                                        :board-id board-id
                                                        :user-id (:id user)}]
                                              :returning [:*]})
