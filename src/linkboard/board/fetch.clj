@@ -18,7 +18,7 @@
 
 (def ^:private ^:const MODEL
   "Model to use for link board detection"
-  "xiaomi/mimo-v2-flash:free")
+  "google/gemma-3-27b-it:free")
 
 (defn get-domain-from-url
   "Extract domain from URL for fallback metadata."
