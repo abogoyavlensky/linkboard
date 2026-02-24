@@ -351,8 +351,7 @@
                   :text "Link"
                   :attrs {:placeholder "Paste link here"
                           :id "url-input"
-                          :autofocus true
-                          :x-on:focus.once "if (!$el.value) { navigator.clipboard.readText().then(text => { if (text && (text.startsWith('http://') || text.startsWith('https://'))) { $el.value = text.trim(); } }).catch(() => {}); }"}})
+                          :autofocus true}})
      (when hide-board-input
        [:input {:type "hidden"
                 :name "board"
