@@ -118,11 +118,13 @@
       {:title (if (str/blank? title)
                 (get-domain-from-url url)
                 title)
-       :icon favicon-url
+       :icon (or favicon-url "")
        :description description})
     (catch Exception e
-      {:error (str "Error parsing HTML: " (.getMessage e))
-       :url url})))
+      (log/warn "[FETCH] Error parsing HTML:" (.getMessage e))
+      {:title (get-domain-from-url url)
+       :icon ""
+       :description nil})))
 
 (defn fetch-page-metadata
   "Fetch a webpage and extract title and favicon.
