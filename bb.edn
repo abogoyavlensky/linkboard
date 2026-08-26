@@ -63,9 +63,6 @@
                          {:url "https://cdn.jsdelivr.net/npm/htmx-ext-response-targets@2.0.2"
                           :filepath "js/htmx-ext-response-targets.js"}])}
 
-  kamal {:doc "Deploy application using Kamal"
-         :task (apply shell "kamal" (concat *command-line-args* ["--config-file" ".kamal/deploy.yml"]))}
-
   build {:doc "Build application uberjar"
          :requires ([manifest-edn.core :as manifest])
          :task (do
