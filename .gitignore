@@ -30,3 +30,5 @@ resources/public/css/output.*
 resources-hashed/
 .claude/
 screenshots/
+.tmp/
+.clj-pulse
