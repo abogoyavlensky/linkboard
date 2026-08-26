@@ -12,43 +12,32 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: read
     timeout-minutes: 20
     needs: [ checks ]
     steps:
-      - uses: actions/checkout@v6
-      - uses: webfactory/ssh-agent@v0.9.1
+      - uses: actions/checkout@v7
+      - uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
         with:
-          install_args: "babashka"
+          install_args: "uc"
 
+      # The default docker driver can't export cache (type=gha); this sets up
+      # a docker-container builder that can.
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.2.0
 
+      # Exposes ACTIONS_RUNTIME_TOKEN/ACTIONS_CACHE_URL to the `uc` run step
+      # so the gha cache backend can authenticate.
       - name: Expose GitHub Runtime for cache
-        uses: crazy-max/ghaction-github-runtime@v3
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.0
-          bundler-cache: true
-
-      - name: Install kamal
-        run: gem install kamal -v 2.3.0
+        uses: crazy-max/ghaction-github-runtime@v4
 
       - name: Build and deploy
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          REGISTRY_USERNAME: ${{ github.repository_owner }}
-          REGISTRY_PASSWORD: ${{ github.token }}
-          APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
           SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: bb kamal deploy --version=${{ github.sha }}
-
-      - name: Kamal Release
-        if: ${{ cancelled() }}
-        run: bb kamal lock release
+        run: uc --context personal --connect root@${{ vars.SERVER_IP }} deploy -f compose.yaml --yes linkboard-app

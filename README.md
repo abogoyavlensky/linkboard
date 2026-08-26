@@ -33,46 +33,28 @@ Optionally you could initiate `lefthook` tool to perform git-hook before every c
 lefthook install
 ```
 
-## Deploy from local machine
+## Deployment
 
-Create `.env` file with variables: 
-```bash
+Deployed with [Uncloud](https://uncloud.run/docs). Pushing to `master` runs
+`.github/workflows/deploy.yaml`, which builds the image on the runner and
+deploys the service defined in `compose.yaml`. The SQLite database lives on
+the server at `/root/linkboard-db`, bind-mounted into the container at
+`/app/db`.
+
+Setup repository variables for Actions:
+
+```shell
 SERVER_IP=192.168.0.1
-REGISTRY_USERNAME=your-github-username
-REGISTRY_PASSWORD=personal-github-token
 APP_DOMAIN=app.domain.com
+```
+
+And secrets:
+
+```shell
+SSH_PRIVATE_KEY=secret-ssh-key
 SESSION_SECRET_KEY=secret-key
 SENTRY_DSN=sentry-dsn
 OPENROUTER_API_KEY=openrouter-api-key
-```
-
-Install ruby and kamal:
-
-```shell
-mise install ruby
-gem install kamal -v 2.3.0
-```
-
-First deploy to the fresh server:
-
-```shell
-bb kamal setup
-```
-
-### Regular deployment
-
-```shell
-bb kamal deploy
-```
-
-## Deploy from Github Actions
-
-Setup secrets fro Actions:
-
-```shell
-SERVER_IP=192.168.0.1
-APP_DOMAIN=app.domain.com
-SSH_PRIVATE_KEY=secret-ssh-key
 ```
 
 ### Notes

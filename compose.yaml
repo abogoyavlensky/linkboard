@@ -1,0 +1,27 @@
+x-context: personal
+
+services:
+  linkboard-app:
+    build:
+      platforms:
+        - linux/amd64
+      cache_from:
+        - type=gha
+      cache_to:
+        - type=gha,mode=max
+    x-ports:
+      - ${APP_DOMAIN}:80/https
+    volumes:
+      - /root/linkboard-db:/app/db
+    environment:
+      SESSION_SECRET_KEY: secret://session_secret_key
+      SENTRY_DSN: secret://sentry_dsn
+      OPENROUTER_API_KEY: secret://openrouter_api_key
+
+secrets:
+  session_secret_key:
+    x-command: printenv SESSION_SECRET_KEY
+  sentry_dsn:
+    x-command: printenv SENTRY_DSN
+  openrouter_api_key:
+    x-command: printenv OPENROUTER_API_KEY

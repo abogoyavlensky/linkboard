@@ -27,7 +27,7 @@ Linkboard is a self-hosted personal bookmark manager built with Clojure, SQLite,
 - Client-side account number generation using crypto.randomUUID()
 - **Account management page** with export data to CSV, logout, and delete account functionality
 - **Account number display** with password-style dots, show/hide toggle, and clipboard copy functionality
-- Self-hosted deployment with Docker and Kamal
+- Self-hosted deployment with Docker and Uncloud
 
 ## Architecture
 
@@ -223,8 +223,6 @@ bb css-watch               # Watch CSS changes
 bb css-build               # Build minified CSS
 bb fetch-assets            # Download external JS assets
 bb build                   # Build production uberjar
-bb kamal setup             # Initial deployment
-bb kamal deploy            # Regular deployment
 ```
 
 ### Project Structure
@@ -427,7 +425,7 @@ bb clj-repl              # Start REPL with dev profile
 ```
 
 ### Production Deployment
-- Kamal for container orchestration
+- Uncloud for container orchestration (deploys `compose.yaml` from CI)
 - GitHub Actions for CI/CD
 - Environment variables for secrets
 - Docker containerization
